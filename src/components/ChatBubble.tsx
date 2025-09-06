@@ -27,15 +27,19 @@ const ChatBubble = ({ message, isOwn, timestamp }: ChatBubbleProps) => {
           : "bg-card/80 backdrop-blur-sm text-foreground rounded-bl-sm border border-border/50"
       )}>
         <p className="text-sm break-words leading-relaxed">{message}</p>
-        {isOwn && (
-          <span className="text-xs opacity-70 mt-2 block text-right text-white/70">Вы</span>
+        {!isOwn && (
+          <span className={cn(
+            "text-xs opacity-70 mt-2 block text-left text-muted-foreground",
+          )}>
+            {formatTime(timestamp)}
+          </span>
         )}
-        <span className={cn(
-          "text-xs opacity-70 mt-1 block",
-          isOwn ? "text-right text-white/70" : "text-left text-muted-foreground"
-        )}>
-          {formatTime(timestamp)}
-        </span>
+        {isOwn && (
+          <div className="mt-2 flex items-center justify-end gap-2">
+            <span className="text-xs text-white/70">{formatTime(timestamp)}</span>
+            <span className="text-[10px] leading-none px-2 py-1 rounded-full border border-white/40 text-white/80 bg-white/5">Вы</span>
+          </div>
+        )}
       </div>
     </div>
   );

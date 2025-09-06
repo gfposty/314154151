@@ -126,7 +126,7 @@ const Chat = () => {
     setIsSearching(true);
     toast({
       title: "Поиск нового собеседника...",
-      description: "Подождите, мы ищем вам нового собеседника",
+      description: "��одождите, мы ищем вам нового собеседника",
     });
     // Симуляция поиска нового собеседника
     setTimeout(() => {
@@ -200,16 +200,6 @@ const Chat = () => {
 
   return (
     <div className="fixed inset-0 bg-gradient-bg flex flex-col overflow-hidden overscroll-none">
-      <div
-        className="absolute inset-0 pointer-events-none opacity-[0.06]"
-        style={{
-          backgroundImage:
-            "url(https://cdn.builder.io/api/v1/image/assets%2F15e9054dabd343aebcddaf052239a631%2F76322bc6dfed450795a6e3cc69b0c69a?format=webp&width=400)",
-          backgroundRepeat: "repeat",
-          backgroundSize: "120px 120px",
-          backgroundPosition: "center",
-        }}
-      />
       {/* Header */}
       <div className="relative z-10 bg-transparent border-b-0 p-4 animate-fade-in">
         <div className="max-w-3xl mx-auto"><div className="p-[1.5px] rounded-2xl bg-gradient-primary/70 shadow-glow"><div className="flex items-center justify-between rounded-2xl bg-background/30 backdrop-blur-sm px-3 py-2">
@@ -241,7 +231,7 @@ const Chat = () => {
               <>
                 <ConfirmDialog
                   title="Найти нового собеседника?"
-                  description="Текущий диалог будет завершен, и мы найдем вам нового собеседника."
+                  description="Текущий диалог будет завершен, и мы на��дем вам нового собеседника."
                   onConfirm={handleNextChat}
                 >
                   <Button
@@ -294,7 +284,7 @@ const Chat = () => {
                   <div className="mt-4 space-y-2 text-xs text-muted-foreground">
                     <div className="flex items-center justify-center space-x-1">
                       <Users className="w-3 h-3" />
-                      <span>Возраст: {ageCategory}</span>
+                      <span>Во��раст: {ageCategory}</span>
                     </div>
                     <div className="flex items-center justify-center space-x-1">
                       <Heart className="w-3 h-3" />
@@ -342,7 +332,7 @@ const Chat = () => {
             <div className="text-lg font-semibold text-foreground mb-2">Вы завершили чат:</div>
             <a href="#" className="text-muted-foreground text-sm underline hover:text-primary mb-6 block">Пожаловаться на собеседника</a>
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
-              <Button onClick={handleChangePartner} variant="outline" className="border-primary text-primary hover:bg-primary hover:text-white">Из��енить параметры</Button>
+              <Button onClick={handleChangePartner} variant="outline" className="border-primary text-primary hover:bg-primary hover:text-white">Изменить параметры</Button>
               <Button onClick={handleNextChat} className="bg-green-600 hover:bg-green-700 text-white">Начать новый чат</Button>
             </div>
           </div>

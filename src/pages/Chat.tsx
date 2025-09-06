@@ -328,7 +328,7 @@ const Chat = () => {
         </div>
       )}
       {/* Message Input */}
-      <div className="bg-transparent border-t-0 p-4 pt-2 animate-slide-up mb-16 sm:mb-20">
+      <div className="bg-transparent border-t-0 p-4 pt-2 animate-slide-up mt-auto">
         <div className="flex space-x-3 max-w-3xl mx-auto">
           <Input
             value={newMessage}

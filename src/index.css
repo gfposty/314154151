@@ -114,4 +114,19 @@ All colors MUST be HSL.
   body {
     @apply bg-background text-foreground overflow-x-hidden;
   }
+
+  /* Custom scrollbar for chat */
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 8px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: hsl(var(--primary) / 0.35);
+    border-radius: 9999px;
+  }
+  .custom-scrollbar:hover::-webkit-scrollbar-thumb {
+    background: hsl(var(--primary) / 0.6);
+  }
 }

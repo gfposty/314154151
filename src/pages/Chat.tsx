@@ -274,13 +274,13 @@ const Chat = () => {
         </div>
       </div>
       {/* Messages */}
-      <div className="flex-1 px-4 py-2 min-h-0">
+      <div className="flex-1 px-4 pt-2 pb-20 sm:pb-28 min-h-0">
         <div className="max-w-2xl mx-auto h-full overflow-y-auto overscroll-contain pr-2 space-y-1" style={{ scrollbarGutter: 'stable' }}>
           {isSearching && !isEnded && (
             <div className="text-center py-12 animate-fade-in">
               <div className="animate-pulse">
                 <div className="w-12 h-12 bg-gradient-primary rounded-full mx-auto mb-4 animate-pulse-glow"></div>
-                <p className="text-muted-foreground text-lg">Поиск собеседника...</p>
+                <p className="text-muted-foreground text-lg">Поиск собеседник��...</p>
                 <div className="mt-4 space-y-2 text-xs text-muted-foreground">
                   <div className="flex items-center justify-center space-x-1">
                     <Users className="w-3 h-3" />
@@ -314,7 +314,7 @@ const Chat = () => {
           {isEnded && messages.length > 0 && (
             <div className="text-center py-6 animate-fade-in">
               <div className="text-lg font-semibold text-foreground mb-2">Вы завершили чат:</div>
-              <a href="#" className="text-muted-foreground text-sm underline hover:text-primary mb-6 block">Пожаловаться на собеседника</a>
+              <a href="#" className="text-muted-foreground text-sm underline hover:text-primary mb-6 block">П��жаловаться на собеседника</a>
               <div className="flex flex-col sm:flex-row gap-3 justify-center">
                 <Button
                   onClick={handleChangePartner}
@@ -337,7 +337,7 @@ const Chat = () => {
       </div>
       {/* Message Input */}
       {isConnected && !isEnded && (
-        <div className="bg-card/80 backdrop-blur-sm border-t border-border/50 p-4 animate-slide-up">
+        <div className="bg-card/80 backdrop-blur-sm border-t border-border/50 p-4 animate-slide-up mb-8 sm:mb-12">
           <div className="flex space-x-3 max-w-2xl mx-auto">
             <Input
               value={newMessage}

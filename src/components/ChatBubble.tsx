@@ -33,6 +33,9 @@ const ChatBubble = ({ message, isOwn, timestamp }: ChatBubbleProps) => {
         )}>
           {formatTime(timestamp)}
         </span>
+        {isOwn && (
+          <span className="text-xs opacity-70 mt-1 block text-right text-white/70">Вы</span>
+        )}
       </div>
     </div>
   );

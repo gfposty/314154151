@@ -154,6 +154,15 @@ const Chat = () => {
     }
   };
 
+  // Disable page scroll while in chat; only chat area scrolls
+  useEffect(() => {
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = prevOverflow;
+    };
+  }, []);
+
   const getGenderText = (gender: string) => {
     switch (gender) {
       case 'male': return 'Мужской';

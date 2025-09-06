@@ -80,7 +80,7 @@ const Chat = () => {
   const sendMessage = () => {
     if (!newMessage.trim() || !isConnected) return;
     // Простая модерация
-    const bannedWords = ['спам', 'реклама'];
+    const bannedWords = ['спам', 'ре��лама'];
     const hasBannedWord = bannedWords.some(word => 
       newMessage.toLowerCase().includes(word)
     );
@@ -257,7 +257,7 @@ const Chat = () => {
               onClick={handleChangePartner}
               className="text-xs"
             >
-              Сменить параметры поиска
+              Сменить параметры по��ска
             </Button>
           </div>
         </div></div></div>
@@ -310,40 +310,41 @@ const Chat = () => {
             <div className="text-lg font-semibold text-foreground mb-2">Вы завершили чат:</div>
             <a href="#" className="text-muted-foreground text-sm underline hover:text-primary mb-6 block">Пожаловаться на собеседника</a>
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
-              <Button onClick={handleChangePartner} variant="outline" className="border-primary text-primary hover:bg-primary hover:text-white">Изменить параметры</Button>
+              <Button onClick={handleChangePartner} variant="outline" className="border-primary text-primary hover:bg-primary hover:text-white">Изменить пар��метры</Button>
               <Button onClick={handleNextChat} className="bg-green-600 hover:bg-green-700 text-white">Начать новый чат</Button>
             </div>
           </div>
         </div>
       )}
-      {/* Message Input */}
-      <div className="bg-transparent border-t-0 p-4 pt-2 animate-slide-up mt-auto">
-        <div className="flex space-x-3 max-w-3xl mx-auto">
-          <div className="flex-1">
-            <div className="p-[1.5px] rounded-2xl bg-gradient-primary transition-all duration-200 hover:brightness-110 hover:shadow-glow focus-within:shadow-glow hover:scale-[1.01]">
-              <Input
-                value={newMessage}
-                onChange={(e) => setNewMessage(e.target.value)}
-                onKeyPress={handleKeyPress}
-                placeholder="Напишите сообщение..."
-                disabled={!isConnected || isEnded}
-                className="w-full bg-background/80 border-transparent text-foreground placeholder:text-muted-foreground focus:bg-background transition-all rounded-2xl"
-                maxLength={500}
-              />
+      {/* Message Input (hidden during search) */}
+      {!isSearching && isConnected && !isEnded && (
+        <div className="bg-transparent border-t-0 p-4 pt-2 animate-slide-up mt-auto">
+          <div className="flex space-x-3 max-w-3xl mx-auto">
+            <div className="flex-1">
+              <div className="p-[1.5px] rounded-2xl bg-gradient-primary transition-all duration-200 hover:brightness-110 hover:shadow-glow focus-within:shadow-glow hover:scale-[1.01]">
+                <Input
+                  value={newMessage}
+                  onChange={(e) => setNewMessage(e.target.value)}
+                  onKeyPress={handleKeyPress}
+                  placeholder="Напишите сообщение..."
+                  className="w-full bg-background/80 border-transparent text-foreground placeholder:text-muted-foreground focus:bg-background transition-all rounded-2xl"
+                  maxLength={500}
+                />
+              </div>
             </div>
+            <Button
+              onClick={sendMessage}
+              disabled={!newMessage.trim()}
+              className="bg-gradient-primary hover:shadow-glow hover:scale-105 active:scale-95 transition-all duration-200"
+            >
+              <Send className="w-4 h-4" />
+            </Button>
           </div>
-          <Button
-            onClick={sendMessage}
-            disabled={!newMessage.trim() || !isConnected || isEnded}
-            className="bg-gradient-primary hover:shadow-glow hover:scale-105 active:scale-95 transition-all duration-200"
-          >
-            <Send className="w-4 h-4" />
-          </Button>
+          <div className="text-xs text-muted-foreground text-center mt-2">
+            {newMessage.length}/500 символов
+          </div>
         </div>
-        <div className="text-xs text-muted-foreground text-center mt-2">
-          {newMessage.length}/500 символов
-        </div>
-      </div>
+      )}
     </div>
   );
 };

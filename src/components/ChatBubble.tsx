@@ -17,18 +17,18 @@ const ChatBubble = ({ message, isOwn, timestamp }: ChatBubbleProps) => {
 
   return (
     <div className={cn(
-      "flex w-full mb-3",
+      "flex w-full mb-4",
       isOwn ? "justify-end" : "justify-start"
     )}>
       <div className={cn(
-        "max-w-xs lg:max-w-md px-4 py-2 rounded-2xl relative group",
+        "max-w-xs lg:max-w-md px-4 py-3 rounded-2xl relative group transition-all duration-200 hover:scale-105",
         isOwn 
-          ? "bg-chat-own text-white rounded-br-sm" 
-          : "bg-chat-other text-foreground rounded-bl-sm"
+          ? "bg-gradient-primary text-white rounded-br-sm shadow-glow" 
+          : "bg-card/80 backdrop-blur-sm text-foreground rounded-bl-sm border border-border/50"
       )}>
-        <p className="text-sm break-words">{message}</p>
+        <p className="text-sm break-words leading-relaxed">{message}</p>
         <span className={cn(
-          "text-xs opacity-70 mt-1 block",
+          "text-xs opacity-70 mt-2 block",
           isOwn ? "text-right text-white/70" : "text-left text-muted-foreground"
         )}>
           {formatTime(timestamp)}

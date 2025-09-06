@@ -316,7 +316,7 @@ const Chat = () => {
       </div>
       {/* Chat Ended Footer */}
       {isEnded && (
-        <div className="bg-card/80 backdrop-blur-sm border-t border-border/50 p-4">
+        <div className="bg-card/80 backdrop-blur-sm border-t border-border/50 p-4 mb-2">
           <div className="max-w-3xl mx-auto text-center">
             <div className="text-lg font-semibold text-foreground mb-2">Вы завершили чат:</div>
             <a href="#" className="text-muted-foreground text-sm underline hover:text-primary mb-6 block">Пожаловаться на собеседника</a>
@@ -328,30 +328,29 @@ const Chat = () => {
         </div>
       )}
       {/* Message Input */}
-      {isConnected && !isEnded && (
-        <div className="bg-card/80 backdrop-blur-sm border-t border-border/50 p-4 animate-slide-up mb-16 sm:mb-20">
-          <div className="flex space-x-3 max-w-3xl mx-auto">
-            <Input
-              value={newMessage}
-              onChange={(e) => setNewMessage(e.target.value)}
-              onKeyPress={handleKeyPress}
-              placeholder="Напишите сообщение..."
-              className="flex-1 bg-background/80 border-border/50 text-foreground placeholder:text-muted-foreground focus:bg-background transition-all"
-              maxLength={500}
-            />
-            <Button
-              onClick={sendMessage}
-              disabled={!newMessage.trim()}
-              className="bg-gradient-primary hover:shadow-glow hover:scale-105 active:scale-95 transition-all duration-200"
-            >
-              <Send className="w-4 h-4" />
-            </Button>
-          </div>
-          <div className="text-xs text-muted-foreground text-center mt-2">
-            {newMessage.length}/500 символов
-          </div>
+      <div className="bg-card/80 backdrop-blur-sm border-t border-border/50 p-4 animate-slide-up mb-16 sm:mb-20">
+        <div className="flex space-x-3 max-w-3xl mx-auto">
+          <Input
+            value={newMessage}
+            onChange={(e) => setNewMessage(e.target.value)}
+            onKeyPress={handleKeyPress}
+            placeholder="Напишите сообщение..."
+            disabled={!isConnected || isEnded}
+            className="flex-1 bg-background/80 border-border/50 text-foreground placeholder:text-muted-foreground focus:bg-background transition-all"
+            maxLength={500}
+          />
+          <Button
+            onClick={sendMessage}
+            disabled={!newMessage.trim() || !isConnected || isEnded}
+            className="bg-gradient-primary hover:shadow-glow hover:scale-105 active:scale-95 transition-all duration-200"
+          >
+            <Send className="w-4 h-4" />
+          </Button>
         </div>
-      )}
+        <div className="text-xs text-muted-foreground text-center mt-2">
+          {newMessage.length}/500 символов
+        </div>
+      </div>
     </div>
   );
 };

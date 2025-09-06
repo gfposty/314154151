@@ -230,7 +230,7 @@ const Chat = () => {
             {isConnected && (
               <>
                 <ConfirmDialog
-                  title="Найти нового собеседника?"
+                  title="Н��йти нового собеседника?"
                   description="Текущий диалог будет завершен, и мы найдем вам нового собеседника."
                   onConfirm={handleNextChat}
                 >
@@ -281,7 +281,7 @@ const Chat = () => {
               <div className="text-center py-12 animate-fade-in">
                 <div className="animate-pulse">
                   <div className="w-12 h-12 bg-gradient-primary rounded-full mx-auto mb-4 animate-pulse-glow"></div>
-                  <p className="text-muted-foreground text-lg">Поиск собеседник��...</p>
+                  <p className="text-muted-foreground text-lg">Поиск ��обеседник��...</p>
                   <div className="mt-4 space-y-2 text-xs text-muted-foreground">
                     <div className="flex items-center justify-center space-x-1">
                       <Users className="w-3 h-3" />
@@ -342,19 +342,27 @@ const Chat = () => {
       {/* Message Input (hidden during search) */}
       {!isSearching && isConnected && !isEnded && (
         <div className="bg-transparent border-t-0 p-4 pt-2 animate-slide-up mt-auto">
-          <div className="flex space-x-3 max-w-3xl mx-auto">
+          <div className="flex items-end gap-3 max-w-3xl mx-auto">
+            <Button variant="outline" size="icon" className="shrink-0 h-10 w-10 bg-background/60 border-border/50 hover:shadow-glow">
+              <Paperclip className="h-4 w-4" />
+            </Button>
             <div className="flex-1">
               <div className="p-[1.5px] rounded-2xl bg-gradient-primary transition-all duration-200 hover:brightness-110 hover:shadow-glow focus-within:shadow-glow hover:scale-[1.01]">
-                <Input
+                <Textarea
+                  ref={textareaRef}
                   value={newMessage}
-                  onChange={(e) => setNewMessage(e.target.value)}
-                  onKeyPress={handleKeyPress}
-                  placeholder="Напишите сообщение..."
-                  className="w-full bg-background/80 border-transparent text-foreground placeholder:text-muted-foreground focus:bg-background transition-all rounded-2xl"
+                  onChange={(e) => { setNewMessage(e.target.value); autoResize(); }}
+                  onKeyDown={handleKeyPress}
+                  placeholder="Напиши��е сообщение..."
+                  className="w-full max-h-40 min-h-[44px] bg-background/80 border-transparent text-foreground placeholder:text-muted-foreground focus:bg-background transition-all rounded-2xl resize-none"
                   maxLength={500}
+                  rows={1}
                 />
               </div>
             </div>
+            <Button variant="outline" size="icon" className="shrink-0 h-10 w-10 bg-background/60 border-border/50 hover:shadow-glow">
+              <Smile className="h-4 w-4" />
+            </Button>
             <Button
               onClick={sendMessage}
               disabled={!newMessage.trim()}

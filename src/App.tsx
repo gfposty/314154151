@@ -14,6 +14,9 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
+      {/* Градиентные пятна по бокам */}
+      <div className="bg-blob bg-blob-left" />
+      <div className="bg-blob bg-blob-right" />
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Index />} />

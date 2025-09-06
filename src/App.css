@@ -40,3 +40,51 @@
 .read-the-docs {
   color: #888;
 }
+
+.bg-blob {
+  position: fixed;
+  width: 700px;
+  height: 700px;
+  border-radius: 50%;
+  filter: blur(120px);
+  opacity: 0.35;
+  z-index: 0;
+  pointer-events: none;
+}
+.bg-blob-left {
+  background: radial-gradient(circle at 30% 30%, #a78bfa 0%, #6366f1 100%);
+  left: -200px;
+  top: -150px;
+}
+.bg-blob-right {
+  background: radial-gradient(circle at 70% 70%, #f472b6 0%, #6366f1 100%);
+  right: -200px;
+  bottom: -150px;
+}
+
+.bg-animated-gradient {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: linear-gradient(120deg, #6366f1 0%, #a78bfa 50%, #f472b6 100%);
+  background-size: 200% 200%;
+  animation: gradientMove 12s ease-in-out infinite;
+  opacity: 0.35;
+}
+@keyframes gradientMove {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.bg-pattern {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.25;
+  background-color: #20232a;
+  background-image: url("data:image/svg+xml;utf8,<svg width='80' height='80' viewBox='0 0 80 80' fill='none' xmlns='http://www.w3.org/2000/svg'><rect x='1' y='1' width='78' height='78' rx='16' stroke='%234f5b6b' stroke-width='2'/><circle cx='40' cy='40' r='10' stroke='%234f5b6b' stroke-width='2' fill='none'/></svg>");
+  background-size: 80px 80px;
+}

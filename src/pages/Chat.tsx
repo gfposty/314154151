@@ -165,7 +165,7 @@ const Chat = () => {
 
   const getGenderText = (gender: string) => {
     switch (gender) {
-      case 'male': return 'Мужской';
+      case 'male': return 'Мужс��ой';
       case 'female': return 'Женский';
       case 'any': return 'Любой';
       default: return gender;
@@ -177,7 +177,7 @@ const Chat = () => {
   }, [messages]);
 
   return (
-    <div className="h-screen bg-gradient-bg flex flex-col overflow-hidden">
+    <div className="h-screen bg-gradient-bg flex flex-col overflow-hidden overscroll-none">
       {/* Header */}
       <div className="bg-card/80 backdrop-blur-sm border-b border-border/50 p-4 animate-fade-in">
         <div className="flex items-center justify-between max-w-4xl mx-auto">

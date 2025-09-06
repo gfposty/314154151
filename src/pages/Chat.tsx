@@ -330,15 +330,19 @@ const Chat = () => {
       {/* Message Input */}
       <div className="bg-transparent border-t-0 p-4 pt-2 animate-slide-up mt-auto">
         <div className="flex space-x-3 max-w-3xl mx-auto">
-          <Input
-            value={newMessage}
-            onChange={(e) => setNewMessage(e.target.value)}
-            onKeyPress={handleKeyPress}
-            placeholder="Напишите сообщение..."
-            disabled={!isConnected || isEnded}
-            className="flex-1 bg-background/80 border-border/50 text-foreground placeholder:text-muted-foreground focus:bg-background transition-all"
-            maxLength={500}
-          />
+          <div className="flex-1">
+            <div className="p-[1.5px] rounded-2xl bg-gradient-primary shadow-glow">
+              <Input
+                value={newMessage}
+                onChange={(e) => setNewMessage(e.target.value)}
+                onKeyPress={handleKeyPress}
+                placeholder="Напишите сообщение..."
+                disabled={!isConnected || isEnded}
+                className="w-full bg-background/80 border-transparent text-foreground placeholder:text-muted-foreground focus:bg-background transition-all rounded-2xl"
+                maxLength={500}
+              />
+            </div>
+          </div>
           <Button
             onClick={sendMessage}
             disabled={!newMessage.trim() || !isConnected || isEnded}

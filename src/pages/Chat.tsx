@@ -1,8 +1,9 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { ArrowLeft, Send, SkipForward, X, Users, Heart } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
+import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
+import { ArrowLeft, Send, SkipForward, X, Users, Heart, Paperclip, Smile } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import ChatBubble from "@/components/ChatBubble";
 import ConfirmDialog from "@/components/ConfirmDialog";
@@ -35,6 +36,9 @@ const Chat = () => {
   const genderPreference = searchParams.get('gender') || '';
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState('');
+  const textareaRef = useRef<HTMLTextAreaElement | null>(null);
+  const [emojiOpen, setEmojiOpen] = useState(false);
+  const emojis = ["😀","😁","😂","🤣","😊","😍","😘","😜","🤔","😎","😇","😅","🙃","😉","👍","👎","🙏","👏","🔥","💯","🎉","❤️","💜","✨","🤝","🤷","🤗","😴"];
   const [isConnected, setIsConnected] = useState(false);
   const [isSearching, setIsSearching] = useState(true);
   const [partnerFound, setPartnerFound] = useState(false);
@@ -149,10 +153,55 @@ const Chat = () => {
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
       sendMessage();
     }
   };
+
+  const autoResize = () => {
+    const el = textareaRef.current;
+    if (!el) return;
+    el.style.height = '0px';
+    el.style.height = Math.min(el.scrollHeight, 6 * 24 + 24) + 'px';
+  };
+
+  const insertAtCursor = (text: string) => {
+    const el = textareaRef.current;
+    if (!el) return;
+    const start = el.selectionStart ?? newMessage.length;
+    const end = el.selectionEnd ?? newMessage.length;
+    const updated = newMessage.slice(0, start) + text + newMessage.slice(end);
+    setNewMessage(updated);
+    requestAnimationFrame(() => {
+      if (!el) return;
+      el.selectionStart = el.selectionEnd = start + text.length;
+      autoResize();
+      el.focus();
+    });
+  };
+
+  // Disable page scroll while in chat; only chat area scrolls
+  useEffect(() => {
+    const htmlEl = document.documentElement;
+    const bodyEl = document.body;
+
+    const prevHtmlOverflow = htmlEl.style.overflow;
+    const prevBodyOverflow = bodyEl.style.overflow;
+    const prevRootHeight = (document.getElementById('root')?.style.height) || '';
+
+    htmlEl.style.overflow = 'hidden';
+    bodyEl.style.overflow = 'hidden';
+    const root = document.getElementById('root');
+    if (root) root.style.height = '100vh';
+
+    return () => {
+      htmlEl.style.overflow = prevHtmlOverflow;
+      bodyEl.style.overflow = prevBodyOverflow;
+      const r = document.getElementById('root');
+      if (r) r.style.height = prevRootHeight;
+    };
+  }, []);
 
   const getGenderText = (gender: string) => {
     switch (gender) {
@@ -168,42 +217,31 @@ const Chat = () => {
   }, [messages]);
 
   return (
-    <div className="h-screen bg-gradient-bg flex flex-col overflow-hidden">
+    <div className="fixed inset-0 bg-gradient-bg flex flex-col overflow-hidden overscroll-none">
       {/* Header */}
-      <div className="bg-card/80 backdrop-blur-sm border-b border-border/50 p-4 animate-fade-in">
-        <div className="flex items-center justify-between max-w-4xl mx-auto">
-          <div className="flex items-center space-x-4">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => navigate('/')}
-              className="text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-all"
-            >
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Назад
-            </Button>
-            <div>
-              <h2 className="font-semibold text-foreground">Bezlico</h2>
-              <div className="flex items-center space-x-4 text-xs text-muted-foreground">
-                {isEnded ? (
-                  <span>Чат завершён</span>
-                ) : isSearching ? (
-                  <span className="animate-pulse">Поиск собеседника...</span>
-                ) : partnerFound ? (
-                  <>
-                    <div className="flex items-center space-x-1">
-                      <Users className="w-3 h-3" />
-                      <span>{ageCategory}</span>
-                    </div>
-                    <div className="flex items-center space-x-1">
-                      <Heart className="w-3 h-3" />
-                      <span>{getGenderText(genderPreference)}</span>
-                    </div>
-                  </>
-                ) : (
-                  'Не подключен'
-                )}
-              </div>
+      <div className="bg-transparent border-b-0 p-4 animate-fade-in">
+        <div className="max-w-3xl mx-auto"><div className="p-[1.5px] rounded-2xl bg-gradient-primary/70 shadow-glow"><div className="flex items-center justify-between rounded-2xl bg-background/30 backdrop-blur-sm px-3 py-2">
+          <div className="flex items-center space-x-3">
+            <h2 className="font-semibold text-foreground">Bezlico</h2>
+            <div className="flex items-center space-x-4 text-xs text-muted-foreground">
+              {isEnded ? (
+                <span>Чат завершён</span>
+              ) : isSearching ? (
+                <span className="animate-pulse">Поиск собеседника...</span>
+              ) : partnerFound ? (
+                <>
+                  <div className="flex items-center space-x-1">
+                    <Users className="w-3 h-3" />
+                    <span>{ageCategory}</span>
+                  </div>
+                  <div className="flex items-center space-x-1">
+                    <Heart className="w-3 h-3" />
+                    <span>{getGenderText(genderPreference)}</span>
+                  </div>
+                </>
+              ) : (
+                'Не подключен'
+              )}
             </div>
           </div>
           <div className="flex items-center space-x-2">
@@ -249,85 +287,122 @@ const Chat = () => {
               Сменить параметры поиска
             </Button>
           </div>
-        </div>
+        </div></div></div>
       </div>
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto px-4 py-2 min-h-0">
-        <div className="max-w-4xl mx-auto space-y-1">
-          {isSearching && !isEnded && (
-            <div className="text-center py-12 animate-fade-in">
-              <div className="animate-pulse">
-                <div className="w-12 h-12 bg-gradient-primary rounded-full mx-auto mb-4 animate-pulse-glow"></div>
-                <p className="text-muted-foreground text-lg">Поиск собеседника...</p>
-                <div className="mt-4 space-y-2 text-xs text-muted-foreground">
-                  <div className="flex items-center justify-center space-x-1">
-                    <Users className="w-3 h-3" />
-                    <span>Возраст: {ageCategory}</span>
-                  </div>
-                  <div className="flex items-center justify-center space-x-1">
-                    <Heart className="w-3 h-3" />
-                    <span>Пол: {getGenderText(genderPreference)}</span>
+      <div className="flex-1 px-4 pt-2 pb-12 sm:pb-16 min-h-0">
+        <div className="relative max-w-3xl mx-auto h-full">
+          <div className="pointer-events-none absolute top-0 left-0 right-0 h-6 bg-gradient-to-b from-background/80 to-transparent z-10" />
+          <div className="h-full overflow-y-auto overscroll-contain pr-2 space-y-1 custom-scrollbar" style={{ scrollbarGutter: 'stable' }}>
+            {isSearching && !isEnded && (
+              <div className="text-center py-12 animate-fade-in">
+                <div className="animate-pulse">
+                  <div className="w-12 h-12 bg-gradient-primary rounded-full mx-auto mb-4 animate-pulse-glow"></div>
+                  <p className="text-muted-foreground text-lg">Поиск собеседника...</p>
+                  <div className="mt-4 space-y-2 text-xs text-muted-foreground">
+                    <div className="flex items-center justify-center space-x-1">
+                      <Users className="w-3 h-3" />
+                      <span>Возраст: {ageCategory}</span>
+                    </div>
+                    <div className="flex items-center justify-center space-x-1">
+                      <Heart className="w-3 h-3" />
+                      <span>Пол: {getGenderText(genderPreference)}</span>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          )}
-          {messages.length > 0 && !isSearching && (
-            <>
-              {messages.map((message, index) => (
-                <div
-                  key={message.id}
-                  className="animate-slide-up"
-                  style={{ animationDelay: `${index * 0.1}s` }}
-                >
-                  <ChatBubble
-                    message={message.text}
-                    isOwn={message.isOwn}
-                    timestamp={message.timestamp}
-                  />
-                </div>
-              ))}
-            </>
-          )}
-          {isEnded && messages.length > 0 && (
-            <div className="text-center py-6 animate-fade-in">
-              <div className="text-lg font-semibold text-foreground mb-2">Вы завершили чат:</div>
-              <a href="#" className="text-muted-foreground text-sm underline hover:text-primary mb-6 block">Пожаловаться на собеседника</a>
-              <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                <Button
-                  onClick={handleChangePartner}
-                  variant="outline"
-                  className="border-primary text-primary hover:bg-primary hover:text-white"
-                >
-                  Изменить параметры
-                </Button>
-                <Button
-                  onClick={handleNextChat}
-                  className="bg-green-600 hover:bg-green-700 text-white"
-                >
-                  Начать новый чат
-                </Button>
-              </div>
-            </div>
-          )}
-          <div ref={messagesEndRef} />
+            )}
+            {messages.length > 0 && !isSearching && (
+              <>
+                {messages.map((message, index) => {
+                  const prev = messages[index - 1];
+                  const isNewDay = !prev || new Date(prev.timestamp).toDateString() !== new Date(message.timestamp).toDateString();
+                  const dateLabel = (() => {
+                    const d = new Date(message.timestamp);
+                    const today = new Date();
+                    const yesterday = new Date();
+                    yesterday.setDate(today.getDate() - 1);
+                    if (d.toDateString() === today.toDateString()) return 'Сегодня';
+                    if (d.toDateString() === yesterday.toDateString()) return 'Вчера';
+                    return d.toLocaleDateString('ru-RU');
+                  })();
+                  return (
+                    <div key={message.id} className="animate-slide-up" style={{ animationDelay: `${index * 0.06}s` }}>
+                      {isNewDay && (
+                        <div className="py-2 text-center text-xs text-muted-foreground">
+                          <span className="px-3 py-1 rounded-full bg-background/60 border border-border/50">{dateLabel}</span>
+                        </div>
+                      )}
+                      <ChatBubble message={message.text} isOwn={message.isOwn} timestamp={message.timestamp} />
+                    </div>
+                  );
+                })}
+              </>
+            )}
+            <div ref={messagesEndRef} />
+          </div>
         </div>
       </div>
-      {/* Message Input */}
-      {isConnected && !isEnded && (
-        <div className="bg-card/80 backdrop-blur-sm border-t border-border/50 p-4 animate-slide-up">
-          <div className="flex space-x-3 max-w-4xl mx-auto">
-            <Input
-              value={newMessage}
-              onChange={(e) => setNewMessage(e.target.value)}
-              onKeyPress={handleKeyPress}
-              placeholder="Напишите сообщение..."
-              className="flex-1 bg-background/80 border-border/50 text-foreground placeholder:text-muted-foreground focus:bg-background transition-all"
-              maxLength={500}
-            />
+      {/* Chat Ended Footer */}
+      {isEnded && (
+        <div className="bg-transparent border-t-0 p-4 mb-6 sm:mb-8">
+          <div className="max-w-3xl mx-auto">
+            <div className="p-[1.5px] rounded-2xl bg-gradient-primary/60 shadow-glow">
+              <div className="rounded-2xl bg-background/40 backdrop-blur-sm px-4 py-5 text-center">
+                <div className="text-lg font-semibold text-foreground mb-1">Вы завершили чат</div>
+                <a href="#" className="text-muted-foreground text-sm underline hover:text-primary mb-5 inline-block">Пожаловаться на собеседника</a>
+                <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                  <Button onClick={handleChangePartner} variant="outline" className="border-primary text-primary hover:bg-primary hover:text-white">Из��енить параметры</Button>
+                  <Button onClick={handleNextChat} className="bg-green-600 hover:bg-green-700 text-white">Начать новый чат</Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* Message Input (hidden during search) */}
+      {!isSearching && isConnected && (
+        <div className="bg-transparent border-t-0 p-4 pt-2 animate-slide-up mt-auto">
+          <div className="flex items-end gap-3 max-w-3xl mx-auto">
+            <div className="flex-1">
+              <div className={`p-[1.5px] rounded-2xl bg-gradient-primary transition-all duration-200 ${isEnded ? 'opacity-60' : 'hover:brightness-110 hover:shadow-glow focus-within:shadow-glow hover:scale-[1.01]'}`}>
+                <Textarea
+                  ref={textareaRef}
+                  value={newMessage}
+                  onChange={(e) => { setNewMessage(e.target.value); autoResize(); }}
+                  onKeyDown={handleKeyPress}
+                  placeholder="Напишите сообщение..."
+                  disabled={isEnded || !isConnected}
+                  className="w-full max-h-64 min-h-[120px] bg-background/80 border-transparent text-foreground placeholder:text-muted-foreground focus:bg-background transition-all rounded-2xl resize-none disabled:opacity-70 disabled:cursor-not-allowed"
+                  maxLength={500}
+                  rows={3}
+                />
+              </div>
+            </div>
+            <Popover open={emojiOpen} onOpenChange={setEmojiOpen}>
+              <PopoverTrigger asChild>
+                <Button variant="outline" size="icon" className="shrink-0 h-10 w-10 bg-background/60 border-border/50 hover:shadow-glow" disabled={isEnded || !isConnected}>
+                  <Smile className="h-4 w-4" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent align="end" className="w-60 p-2">
+                <div className="grid grid-cols-8 gap-1">
+                  {emojis.map((e) => (
+                    <button
+                      key={e}
+                      type="button"
+                      className="h-7 w-7 rounded-md hover:bg-accent"
+                      onClick={() => { insertAtCursor(e); setEmojiOpen(false); }}
+                    >
+                      {e}
+                    </button>
+                  ))}
+                </div>
+              </PopoverContent>
+            </Popover>
             <Button
               onClick={sendMessage}
-              disabled={!newMessage.trim()}
+              disabled={!newMessage.trim() || isEnded || !isConnected}
               className="bg-gradient-primary hover:shadow-glow hover:scale-105 active:scale-95 transition-all duration-200"
             >
               <Send className="w-4 h-4" />

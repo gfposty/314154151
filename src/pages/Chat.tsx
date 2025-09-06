@@ -88,7 +88,7 @@ const Chat = () => {
       toast({
         variant: "destructive",
         title: "Сообщение заблокировано",
-        description: "Ваше сообщение содержит запрещенные слова",
+        description: "Ваше сообщение содержит запрещенные сл��ва",
       });
       return;
     }
@@ -194,38 +194,27 @@ const Chat = () => {
       {/* Header */}
       <div className="bg-transparent border-b-0 p-4 animate-fade-in">
         <div className="flex items-center justify-between max-w-3xl mx-auto">
-          <div className="flex items-center space-x-4">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => navigate('/')}
-              className="text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-all"
-            >
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Назад
-            </Button>
-            <div>
-              <h2 className="font-semibold text-foreground">Bezlico</h2>
-              <div className="flex items-center space-x-4 text-xs text-muted-foreground">
-                {isEnded ? (
-                  <span>Чат завершён</span>
-                ) : isSearching ? (
-                  <span className="animate-pulse">Поиск собеседника...</span>
-                ) : partnerFound ? (
-                  <>
-                    <div className="flex items-center space-x-1">
-                      <Users className="w-3 h-3" />
-                      <span>{ageCategory}</span>
-                    </div>
-                    <div className="flex items-center space-x-1">
-                      <Heart className="w-3 h-3" />
-                      <span>{getGenderText(genderPreference)}</span>
-                    </div>
-                  </>
-                ) : (
-                  'Не подключен'
-                )}
-              </div>
+          <div className="flex items-center space-x-3">
+            <h2 className="font-semibold text-foreground">Bezlico</h2>
+            <div className="flex items-center space-x-4 text-xs text-muted-foreground">
+              {isEnded ? (
+                <span>Чат завершён</span>
+              ) : isSearching ? (
+                <span className="animate-pulse">Поиск собеседника...</span>
+              ) : partnerFound ? (
+                <>
+                  <div className="flex items-center space-x-1">
+                    <Users className="w-3 h-3" />
+                    <span>{ageCategory}</span>
+                  </div>
+                  <div className="flex items-center space-x-1">
+                    <Heart className="w-3 h-3" />
+                    <span>{getGenderText(genderPreference)}</span>
+                  </div>
+                </>
+              ) : (
+                'Не подключен'
+              )}
             </div>
           </div>
           <div className="flex items-center space-x-2">
@@ -247,7 +236,7 @@ const Chat = () => {
                 </ConfirmDialog>
                 <ConfirmDialog
                   title="Завершить чат?"
-                  description="Вы уверены, что хотите покинуть чат и вернуться на главную страницу?"
+                  description="Вы увер��ны, что хотите покинуть чат и вернуться на главную страницу?"
                   onConfirm={handleEndChat}
                   destructive
                 >

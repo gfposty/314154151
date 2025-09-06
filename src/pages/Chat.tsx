@@ -88,7 +88,7 @@ const Chat = () => {
       toast({
         variant: "destructive",
         title: "Сообщение заблокировано",
-        description: "Ваше сообщение содержит запрещенные сл��ва",
+        description: "Ваше сообщение содержит запрещенные слова",
       });
       return;
     }
@@ -193,7 +193,7 @@ const Chat = () => {
     <div className="fixed inset-0 bg-gradient-bg flex flex-col overflow-hidden overscroll-none">
       {/* Header */}
       <div className="bg-transparent border-b-0 p-4 animate-fade-in">
-        <div className="flex items-center justify-between max-w-3xl mx-auto">
+        <div className="max-w-3xl mx-auto"><div className="p-[1.5px] rounded-2xl bg-gradient-primary/70 shadow-glow"><div className="flex items-center justify-between rounded-2xl bg-background/30 backdrop-blur-sm px-3 py-2">
           <div className="flex items-center space-x-3">
             <h2 className="font-semibold text-foreground">Bezlico</h2>
             <div className="flex items-center space-x-4 text-xs text-muted-foreground">
@@ -236,7 +236,7 @@ const Chat = () => {
                 </ConfirmDialog>
                 <ConfirmDialog
                   title="Завершить чат?"
-                  description="Вы увер��ны, что хотите покинуть чат и вернуться на главную страницу?"
+                  description="Вы уверены, что хотите покинуть чат и вернуться на главную страницу?"
                   onConfirm={handleEndChat}
                   destructive
                 >
@@ -260,7 +260,7 @@ const Chat = () => {
               Сменить параметры поиска
             </Button>
           </div>
-        </div>
+        </div></div></div>
       </div>
       {/* Messages */}
       <div className="flex-1 px-4 pt-2 pb-12 sm:pb-16 min-h-0">

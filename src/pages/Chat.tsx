@@ -81,7 +81,7 @@ const Chat = () => {
   const sendMessage = () => {
     if (!newMessage.trim() || !isConnected) return;
     // Простая модерация
-    const bannedWords = ['спам', 'ре��лама'];
+    const bannedWords = ['спам', 'реклама'];
     const hasBannedWord = bannedWords.some(word => 
       newMessage.toLowerCase().includes(word)
     );
@@ -230,7 +230,7 @@ const Chat = () => {
             {isConnected && (
               <>
                 <ConfirmDialog
-                  title="Н��йти нового собеседника?"
+                  title="Найти нового собеседника?"
                   description="Текущий диалог будет завершен, и мы найдем вам нового собеседника."
                   onConfirm={handleNextChat}
                 >
@@ -244,7 +244,7 @@ const Chat = () => {
                   </Button>
                 </ConfirmDialog>
                 <ConfirmDialog
-                  title="Завершить чат?"
+                  title="Завер��ить чат?"
                   description="Вы уверены, что хотите покинуть чат и вернуться на главную страницу?"
                   onConfirm={handleEndChat}
                   destructive
@@ -266,7 +266,7 @@ const Chat = () => {
               onClick={handleChangePartner}
               className="text-xs"
             >
-              Сменить параметры по��ска
+              Сменить параметры поиска
             </Button>
           </div>
         </div></div></div>
@@ -280,7 +280,7 @@ const Chat = () => {
               <div className="text-center py-12 animate-fade-in">
                 <div className="animate-pulse">
                   <div className="w-12 h-12 bg-gradient-primary rounded-full mx-auto mb-4 animate-pulse-glow"></div>
-                  <p className="text-muted-foreground text-lg">Поиск ��обеседник��...</p>
+                  <p className="text-muted-foreground text-lg">Поиск собеседника...</p>
                   <div className="mt-4 space-y-2 text-xs text-muted-foreground">
                     <div className="flex items-center justify-center space-x-1">
                       <Users className="w-3 h-3" />
@@ -332,7 +332,7 @@ const Chat = () => {
             <div className="text-lg font-semibold text-foreground mb-2">Вы завершили чат:</div>
             <a href="#" className="text-muted-foreground text-sm underline hover:text-primary mb-6 block">Пожаловаться на собеседника</a>
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
-              <Button onClick={handleChangePartner} variant="outline" className="border-primary text-primary hover:bg-primary hover:text-white">Изменить пар��метры</Button>
+              <Button onClick={handleChangePartner} variant="outline" className="border-primary text-primary hover:bg-primary hover:text-white">Изменить параметры</Button>
               <Button onClick={handleNextChat} className="bg-green-600 hover:bg-green-700 text-white">Начать новый чат</Button>
             </div>
           </div>
@@ -349,7 +349,7 @@ const Chat = () => {
                   value={newMessage}
                   onChange={(e) => { setNewMessage(e.target.value); autoResize(); }}
                   onKeyDown={handleKeyPress}
-                  placeholder="Напиши��е сообщение..."
+                  placeholder="Напишите сообщение..."
                   className="w-full max-h-40 min-h-[44px] bg-background/80 border-transparent text-foreground placeholder:text-muted-foreground focus:bg-background transition-all rounded-2xl resize-none"
                   maxLength={500}
                   rows={1}

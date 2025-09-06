@@ -99,7 +99,7 @@ const Chat = () => {
       const responses = [
         "Интересно!",
         "А что думаешь об этом?", 
-        "Соглас��н",
+        "Согласен",
         "Расскажи подробнее",
         "Понятно",
         "А у тебя как?"
@@ -331,7 +331,7 @@ const Chat = () => {
       <div className="bg-transparent border-t-0 p-4 pt-2 animate-slide-up mt-auto">
         <div className="flex space-x-3 max-w-3xl mx-auto">
           <div className="flex-1">
-            <div className="p-[1.5px] rounded-2xl bg-gradient-primary shadow-glow">
+            <div className="p-[1.5px] rounded-2xl bg-gradient-primary transition-all duration-200 hover:brightness-110 hover:shadow-glow focus-within:shadow-glow hover:scale-[1.01]">
               <Input
                 value={newMessage}
                 onChange={(e) => setNewMessage(e.target.value)}

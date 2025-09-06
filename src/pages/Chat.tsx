@@ -352,7 +352,7 @@ const Chat = () => {
                 <div className="text-lg font-semibold text-foreground mb-1">Вы завершили чат</div>
                 <a href="#" className="text-muted-foreground text-sm underline hover:text-primary mb-5 inline-block">Пожаловаться на собеседника</a>
                 <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                  <Button onClick={handleChangePartner} variant="outline" className="border-primary text-primary hover:bg-primary hover:text-white">Изменить параметры</Button>
+                  <Button onClick={handleChangePartner} variant="outline" className="border-primary text-primary hover:bg-primary hover:text-white">Из��енить параметры</Button>
                   <Button onClick={handleNextChat} className="bg-green-600 hover:bg-green-700 text-white">Начать новый чат</Button>
                 </div>
               </div>
@@ -361,18 +361,19 @@ const Chat = () => {
         </div>
       )}
       {/* Message Input (hidden during search) */}
-      {!isSearching && isConnected && !isEnded && (
+      {!isSearching && isConnected && (
         <div className="bg-transparent border-t-0 p-4 pt-2 animate-slide-up mt-auto">
           <div className="flex items-end gap-3 max-w-3xl mx-auto">
             <div className="flex-1">
-              <div className="p-[1.5px] rounded-2xl bg-gradient-primary transition-all duration-200 hover:brightness-110 hover:shadow-glow focus-within:shadow-glow hover:scale-[1.01]">
+              <div className={`p-[1.5px] rounded-2xl bg-gradient-primary transition-all duration-200 ${isEnded ? 'opacity-60' : 'hover:brightness-110 hover:shadow-glow focus-within:shadow-glow hover:scale-[1.01]'}`}>
                 <Textarea
                   ref={textareaRef}
                   value={newMessage}
                   onChange={(e) => { setNewMessage(e.target.value); autoResize(); }}
                   onKeyDown={handleKeyPress}
                   placeholder="Напишите сообщение..."
-                  className="w-full max-h-64 min-h-[120px] bg-background/80 border-transparent text-foreground placeholder:text-muted-foreground focus:bg-background transition-all rounded-2xl resize-none"
+                  disabled={isEnded || !isConnected}
+                  className="w-full max-h-64 min-h-[120px] bg-background/80 border-transparent text-foreground placeholder:text-muted-foreground focus:bg-background transition-all rounded-2xl resize-none disabled:opacity-70 disabled:cursor-not-allowed"
                   maxLength={500}
                   rows={3}
                 />
@@ -380,7 +381,7 @@ const Chat = () => {
             </div>
             <Popover open={emojiOpen} onOpenChange={setEmojiOpen}>
               <PopoverTrigger asChild>
-                <Button variant="outline" size="icon" className="shrink-0 h-10 w-10 bg-background/60 border-border/50 hover:shadow-glow">
+                <Button variant="outline" size="icon" className="shrink-0 h-10 w-10 bg-background/60 border-border/50 hover:shadow-glow" disabled={isEnded || !isConnected}>
                   <Smile className="h-4 w-4" />
                 </Button>
               </PopoverTrigger>
@@ -401,7 +402,7 @@ const Chat = () => {
             </Popover>
             <Button
               onClick={sendMessage}
-              disabled={!newMessage.trim()}
+              disabled={!newMessage.trim() || isEnded || !isConnected}
               className="bg-gradient-primary hover:shadow-glow hover:scale-105 active:scale-95 transition-all duration-200"
             >
               <Send className="w-4 h-4" />

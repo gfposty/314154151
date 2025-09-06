@@ -42,7 +42,7 @@ const Chat = () => {
   const [isEnded, setIsEnded] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // Симул��ция подключения к собеседнику
+  // Симуляция подключения к собеседнику
   useEffect(() => {
     if (!ageCategory || !genderPreference) {
       navigate('/');
@@ -81,7 +81,7 @@ const Chat = () => {
   const sendMessage = () => {
     if (!newMessage.trim() || !isConnected) return;
     // Простая модерация
-    const bannedWords = ['спам', 'ре���лама'];
+    const bannedWords = ['спам', 'ре��лама'];
     const hasBannedWord = bannedWords.some(word => 
       newMessage.toLowerCase().includes(word)
     );
@@ -150,9 +150,17 @@ const Chat = () => {
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
       sendMessage();
     }
+  };
+
+  const autoResize = () => {
+    const el = textareaRef.current;
+    if (!el) return;
+    el.style.height = '0px';
+    el.style.height = Math.min(el.scrollHeight, 4 * 24 + 16) + 'px';
   };
 
   // Disable page scroll while in chat; only chat area scrolls

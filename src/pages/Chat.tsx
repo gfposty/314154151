@@ -275,7 +275,6 @@ const Chat = () => {
       <div className="flex-1 px-4 pt-2 pb-12 sm:pb-16 min-h-0">
         <div className="relative max-w-3xl mx-auto h-full">
           <div className="pointer-events-none absolute top-0 left-0 right-0 h-6 bg-gradient-to-b from-background/80 to-transparent z-10" />
-          <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-6 bg-gradient-to-t from-background/80 to-transparent z-10" />
           <div className="h-full overflow-y-auto overscroll-contain pr-2 space-y-1 custom-scrollbar" style={{ scrollbarGutter: 'stable' }}>
             {isSearching && !isEnded && (
               <div className="text-center py-12 animate-fade-in">
@@ -343,9 +342,6 @@ const Chat = () => {
       {!isSearching && isConnected && !isEnded && (
         <div className="bg-transparent border-t-0 p-4 pt-2 animate-slide-up mt-auto">
           <div className="flex items-end gap-3 max-w-3xl mx-auto">
-            <Button variant="outline" size="icon" className="shrink-0 h-10 w-10 bg-background/60 border-border/50 hover:shadow-glow">
-              <Paperclip className="h-4 w-4" />
-            </Button>
             <div className="flex-1">
               <div className="p-[1.5px] rounded-2xl bg-gradient-primary transition-all duration-200 hover:brightness-110 hover:shadow-glow focus-within:shadow-glow hover:scale-[1.01]">
                 <Textarea

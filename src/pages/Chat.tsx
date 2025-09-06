@@ -126,7 +126,7 @@ const Chat = () => {
     setIsSearching(true);
     toast({
       title: "Поиск нового собеседника...",
-      description: "��одождите, мы ищем вам нового собеседника",
+      description: "Подождите, мы ищем вам нового собеседника",
     });
     // Симуляция поиска нового собеседника
     setTimeout(() => {
@@ -201,7 +201,7 @@ const Chat = () => {
   return (
     <div className="fixed inset-0 bg-gradient-bg flex flex-col overflow-hidden overscroll-none">
       {/* Header */}
-      <div className="relative z-10 bg-transparent border-b-0 p-4 animate-fade-in">
+      <div className="bg-transparent border-b-0 p-4 animate-fade-in">
         <div className="max-w-3xl mx-auto"><div className="p-[1.5px] rounded-2xl bg-gradient-primary/70 shadow-glow"><div className="flex items-center justify-between rounded-2xl bg-background/30 backdrop-blur-sm px-3 py-2">
           <div className="flex items-center space-x-3">
             <h2 className="font-semibold text-foreground">Bezlico</h2>
@@ -231,7 +231,7 @@ const Chat = () => {
               <>
                 <ConfirmDialog
                   title="Найти нового собеседника?"
-                  description="Текущий диалог будет завершен, и мы на��дем вам нового собеседника."
+                  description="Текущий диалог будет завершен, и мы найдем вам нового собеседника."
                   onConfirm={handleNextChat}
                 >
                   <Button
@@ -272,7 +272,7 @@ const Chat = () => {
         </div></div></div>
       </div>
       {/* Messages */}
-      <div className="relative z-10 flex-1 px-4 pt-2 pb-12 sm:pb-16 min-h-0">
+      <div className="flex-1 px-4 pt-2 pb-12 sm:pb-16 min-h-0">
         <div className="relative max-w-3xl mx-auto h-full">
           <div className="pointer-events-none absolute top-0 left-0 right-0 h-6 bg-gradient-to-b from-background/80 to-transparent z-10" />
           <div className="h-full overflow-y-auto overscroll-contain pr-2 space-y-1 custom-scrollbar" style={{ scrollbarGutter: 'stable' }}>
@@ -284,7 +284,7 @@ const Chat = () => {
                   <div className="mt-4 space-y-2 text-xs text-muted-foreground">
                     <div className="flex items-center justify-center space-x-1">
                       <Users className="w-3 h-3" />
-                      <span>Во��раст: {ageCategory}</span>
+                      <span>Возраст: {ageCategory}</span>
                     </div>
                     <div className="flex items-center justify-center space-x-1">
                       <Heart className="w-3 h-3" />
@@ -340,7 +340,7 @@ const Chat = () => {
       )}
       {/* Message Input (hidden during search) */}
       {!isSearching && isConnected && !isEnded && (
-        <div className="relative z-10 bg-transparent border-t-0 p-4 pt-2 animate-slide-up mt-auto">
+        <div className="bg-transparent border-t-0 p-4 pt-2 animate-slide-up mt-auto">
           <div className="flex items-end gap-3 max-w-3xl mx-auto">
             <div className="flex-1">
               <div className="p-[1.5px] rounded-2xl bg-gradient-primary transition-all duration-200 hover:brightness-110 hover:shadow-glow focus-within:shadow-glow hover:scale-[1.01]">

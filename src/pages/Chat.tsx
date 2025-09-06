@@ -273,43 +273,57 @@ const Chat = () => {
       </div>
       {/* Messages */}
       <div className="flex-1 px-4 pt-2 pb-12 sm:pb-16 min-h-0">
-        <div className="max-w-3xl mx-auto h-full overflow-y-auto overscroll-contain pr-2 space-y-1" style={{ scrollbarGutter: 'stable' }}>
-          {isSearching && !isEnded && (
-            <div className="text-center py-12 animate-fade-in">
-              <div className="animate-pulse">
-                <div className="w-12 h-12 bg-gradient-primary rounded-full mx-auto mb-4 animate-pulse-glow"></div>
-                <p className="text-muted-foreground text-lg">Поиск собеседник��...</p>
-                <div className="mt-4 space-y-2 text-xs text-muted-foreground">
-                  <div className="flex items-center justify-center space-x-1">
-                    <Users className="w-3 h-3" />
-                    <span>Возраст: {ageCategory}</span>
-                  </div>
-                  <div className="flex items-center justify-center space-x-1">
-                    <Heart className="w-3 h-3" />
-                    <span>Пол: {getGenderText(genderPreference)}</span>
+        <div className="relative max-w-3xl mx-auto h-full">
+          <div className="pointer-events-none absolute top-0 left-0 right-0 h-6 bg-gradient-to-b from-background/80 to-transparent z-10" />
+          <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-6 bg-gradient-to-t from-background/80 to-transparent z-10" />
+          <div className="h-full overflow-y-auto overscroll-contain pr-2 space-y-1 custom-scrollbar" style={{ scrollbarGutter: 'stable' }}>
+            {isSearching && !isEnded && (
+              <div className="text-center py-12 animate-fade-in">
+                <div className="animate-pulse">
+                  <div className="w-12 h-12 bg-gradient-primary rounded-full mx-auto mb-4 animate-pulse-glow"></div>
+                  <p className="text-muted-foreground text-lg">Поиск собеседник��...</p>
+                  <div className="mt-4 space-y-2 text-xs text-muted-foreground">
+                    <div className="flex items-center justify-center space-x-1">
+                      <Users className="w-3 h-3" />
+                      <span>Возраст: {ageCategory}</span>
+                    </div>
+                    <div className="flex items-center justify-center space-x-1">
+                      <Heart className="w-3 h-3" />
+                      <span>Пол: {getGenderText(genderPreference)}</span>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          )}
-          {messages.length > 0 && !isSearching && (
-            <>
-              {messages.map((message, index) => (
-                <div
-                  key={message.id}
-                  className="animate-slide-up"
-                  style={{ animationDelay: `${index * 0.1}s` }}
-                >
-                  <ChatBubble
-                    message={message.text}
-                    isOwn={message.isOwn}
-                    timestamp={message.timestamp}
-                  />
-                </div>
-              ))}
-            </>
-          )}
-          <div ref={messagesEndRef} />
+            )}
+            {messages.length > 0 && !isSearching && (
+              <>
+                {messages.map((message, index) => {
+                  const prev = messages[index - 1];
+                  const isNewDay = !prev || new Date(prev.timestamp).toDateString() !== new Date(message.timestamp).toDateString();
+                  const dateLabel = (() => {
+                    const d = new Date(message.timestamp);
+                    const today = new Date();
+                    const yesterday = new Date();
+                    yesterday.setDate(today.getDate() - 1);
+                    if (d.toDateString() === today.toDateString()) return 'Сегодня';
+                    if (d.toDateString() === yesterday.toDateString()) return 'Вчера';
+                    return d.toLocaleDateString('ru-RU');
+                  })();
+                  return (
+                    <div key={message.id} className="animate-slide-up" style={{ animationDelay: `${index * 0.06}s` }}>
+                      {isNewDay && (
+                        <div className="py-2 text-center text-xs text-muted-foreground">
+                          <span className="px-3 py-1 rounded-full bg-background/60 border border-border/50">{dateLabel}</span>
+                        </div>
+                      )}
+                      <ChatBubble message={message.text} isOwn={message.isOwn} timestamp={message.timestamp} />
+                    </div>
+                  );
+                })}
+              </>
+            )}
+            <div ref={messagesEndRef} />
+          </div>
         </div>
       </div>
       {/* Chat Ended Footer */}

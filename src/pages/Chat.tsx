@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 import { ArrowLeft, Send, SkipForward, X, Users, Heart, Paperclip, Smile } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import ChatBubble from "@/components/ChatBubble";
@@ -36,6 +37,8 @@ const Chat = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
+  const [emojiOpen, setEmojiOpen] = useState(false);
+  const emojis = ["😀","😁","😂","🤣","😊","😍","😘","😜","🤔","😎","😇","😅","🙃","😉","👍","👎","🙏","👏","🔥","💯","🎉","❤️","💜","✨","🤝","🤷","🤗","😴"];
   const [isConnected, setIsConnected] = useState(false);
   const [isSearching, setIsSearching] = useState(true);
   const [partnerFound, setPartnerFound] = useState(false);
@@ -160,7 +163,22 @@ const Chat = () => {
     const el = textareaRef.current;
     if (!el) return;
     el.style.height = '0px';
-    el.style.height = Math.min(el.scrollHeight, 4 * 24 + 16) + 'px';
+    el.style.height = Math.min(el.scrollHeight, 6 * 24 + 24) + 'px';
+  };
+
+  const insertAtCursor = (text: string) => {
+    const el = textareaRef.current;
+    if (!el) return;
+    const start = el.selectionStart ?? newMessage.length;
+    const end = el.selectionEnd ?? newMessage.length;
+    const updated = newMessage.slice(0, start) + text + newMessage.slice(end);
+    setNewMessage(updated);
+    requestAnimationFrame(() => {
+      if (!el) return;
+      el.selectionStart = el.selectionEnd = start + text.length;
+      autoResize();
+      el.focus();
+    });
   };
 
   // Disable page scroll while in chat; only chat area scrolls
@@ -350,15 +368,33 @@ const Chat = () => {
                   onChange={(e) => { setNewMessage(e.target.value); autoResize(); }}
                   onKeyDown={handleKeyPress}
                   placeholder="Напишите сообщение..."
-                  className="w-full max-h-40 min-h-[44px] bg-background/80 border-transparent text-foreground placeholder:text-muted-foreground focus:bg-background transition-all rounded-2xl resize-none"
+                  className="w-full max-h-64 min-h-[120px] bg-background/80 border-transparent text-foreground placeholder:text-muted-foreground focus:bg-background transition-all rounded-2xl resize-none"
                   maxLength={500}
-                  rows={1}
+                  rows={3}
                 />
               </div>
             </div>
-            <Button variant="outline" size="icon" className="shrink-0 h-10 w-10 bg-background/60 border-border/50 hover:shadow-glow">
-              <Smile className="h-4 w-4" />
-            </Button>
+            <Popover open={emojiOpen} onOpenChange={setEmojiOpen}>
+              <PopoverTrigger asChild>
+                <Button variant="outline" size="icon" className="shrink-0 h-10 w-10 bg-background/60 border-border/50 hover:shadow-glow">
+                  <Smile className="h-4 w-4" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent align="end" className="w-60 p-2">
+                <div className="grid grid-cols-8 gap-1">
+                  {emojis.map((e) => (
+                    <button
+                      key={e}
+                      type="button"
+                      className="h-7 w-7 rounded-md hover:bg-accent"
+                      onClick={() => { insertAtCursor(e); setEmojiOpen(false); }}
+                    >
+                      {e}
+                    </button>
+                  ))}
+                </div>
+              </PopoverContent>
+            </Popover>
             <Button
               onClick={sendMessage}
               disabled={!newMessage.trim()}

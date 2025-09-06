@@ -311,30 +311,22 @@ const Chat = () => {
               ))}
             </>
           )}
-          {isEnded && messages.length > 0 && (
-            <div className="text-center py-6 animate-fade-in">
-              <div className="text-lg font-semibold text-foreground mb-2">Вы завершили чат:</div>
-              <a href="#" className="text-muted-foreground text-sm underline hover:text-primary mb-6 block">П��жаловаться на собеседника</a>
-              <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                <Button
-                  onClick={handleChangePartner}
-                  variant="outline"
-                  className="border-primary text-primary hover:bg-primary hover:text-white"
-                >
-                  Изменить параметры
-                </Button>
-                <Button
-                  onClick={handleNextChat}
-                  className="bg-green-600 hover:bg-green-700 text-white"
-                >
-                  Начать новый чат
-                </Button>
-              </div>
-            </div>
-          )}
           <div ref={messagesEndRef} />
         </div>
       </div>
+      {/* Chat Ended Footer */}
+      {isEnded && (
+        <div className="bg-card/80 backdrop-blur-sm border-t border-border/50 p-4">
+          <div className="max-w-3xl mx-auto text-center">
+            <div className="text-lg font-semibold text-foreground mb-2">Вы завершили чат:</div>
+            <a href="#" className="text-muted-foreground text-sm underline hover:text-primary mb-6 block">Пожаловаться на собеседника</a>
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              <Button onClick={handleChangePartner} variant="outline" className="border-primary text-primary hover:bg-primary hover:text-white">Изменить параметры</Button>
+              <Button onClick={handleNextChat} className="bg-green-600 hover:bg-green-700 text-white">Начать новый чат</Button>
+            </div>
+          </div>
+        </div>
+      )}
       {/* Message Input */}
       {isConnected && !isEnded && (
         <div className="bg-card/80 backdrop-blur-sm border-t border-border/50 p-4 animate-slide-up mb-16 sm:mb-20">

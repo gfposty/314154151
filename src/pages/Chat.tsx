@@ -99,7 +99,7 @@ const Chat = () => {
       const responses = [
         "Интересно!",
         "А что думаешь об этом?", 
-        "Согласен",
+        "Соглас��н",
         "Расскажи подробнее",
         "Понятно",
         "А у тебя как?"
@@ -274,7 +274,7 @@ const Chat = () => {
         </div>
       </div>
       {/* Messages */}
-      <div className="flex-1 px-4 pt-2 pb-32 sm:pb-40 min-h-0">
+      <div className="flex-1 px-4 pt-2 pb-12 sm:pb-16 min-h-0">
         <div className="max-w-3xl mx-auto h-full overflow-y-auto overscroll-contain pr-2 space-y-1" style={{ scrollbarGutter: 'stable' }}>
           {isSearching && !isEnded && (
             <div className="text-center py-12 animate-fade-in">

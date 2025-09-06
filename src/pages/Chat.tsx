@@ -192,7 +192,7 @@ const Chat = () => {
   return (
     <div className="fixed inset-0 bg-gradient-bg flex flex-col overflow-hidden overscroll-none">
       {/* Header */}
-      <div className="bg-card/80 backdrop-blur-sm border-b border-border/50 p-4 animate-fade-in">
+      <div className="bg-transparent border-b-0 p-4 animate-fade-in">
         <div className="flex items-center justify-between max-w-3xl mx-auto">
           <div className="flex items-center space-x-4">
             <Button
@@ -316,7 +316,7 @@ const Chat = () => {
       </div>
       {/* Chat Ended Footer */}
       {isEnded && (
-        <div className="bg-card/80 backdrop-blur-sm border-t border-border/50 p-4 mb-2">
+        <div className="bg-transparent border-t-0 p-2 mb-2">
           <div className="max-w-3xl mx-auto text-center">
             <div className="text-lg font-semibold text-foreground mb-2">Вы завершили чат:</div>
             <a href="#" className="text-muted-foreground text-sm underline hover:text-primary mb-6 block">Пожаловаться на собеседника</a>
@@ -328,7 +328,7 @@ const Chat = () => {
         </div>
       )}
       {/* Message Input */}
-      <div className="bg-card/80 backdrop-blur-sm border-t border-border/50 p-4 animate-slide-up mb-16 sm:mb-20">
+      <div className="bg-transparent border-t-0 p-4 pt-2 animate-slide-up mb-16 sm:mb-20">
         <div className="flex space-x-3 max-w-3xl mx-auto">
           <Input
             value={newMessage}

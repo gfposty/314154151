@@ -35,13 +35,14 @@ const Chat = () => {
   const genderPreference = searchParams.get('gender') || '';
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState('');
+  const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const [isConnected, setIsConnected] = useState(false);
   const [isSearching, setIsSearching] = useState(true);
   const [partnerFound, setPartnerFound] = useState(false);
   const [isEnded, setIsEnded] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // Симуляция подключения к собеседнику
+  // Симул��ция подключения к собеседнику
   useEffect(() => {
     if (!ageCategory || !genderPreference) {
       navigate('/');
@@ -80,7 +81,7 @@ const Chat = () => {
   const sendMessage = () => {
     if (!newMessage.trim() || !isConnected) return;
     // Простая модерация
-    const bannedWords = ['спам', 'ре��лама'];
+    const bannedWords = ['спам', 'ре���лама'];
     const hasBannedWord = bannedWords.some(word => 
       newMessage.toLowerCase().includes(word)
     );

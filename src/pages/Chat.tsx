@@ -200,8 +200,18 @@ const Chat = () => {
 
   return (
     <div className="fixed inset-0 bg-gradient-bg flex flex-col overflow-hidden overscroll-none">
+      <div
+        className="absolute inset-0 pointer-events-none opacity-[0.06]"
+        style={{
+          backgroundImage:
+            "url(https://cdn.builder.io/api/v1/image/assets%2F15e9054dabd343aebcddaf052239a631%2F76322bc6dfed450795a6e3cc69b0c69a?format=webp&width=400)",
+          backgroundRepeat: "repeat",
+          backgroundSize: "120px 120px",
+          backgroundPosition: "center",
+        }}
+      />
       {/* Header */}
-      <div className="bg-transparent border-b-0 p-4 animate-fade-in">
+      <div className="relative z-10 bg-transparent border-b-0 p-4 animate-fade-in">
         <div className="max-w-3xl mx-auto"><div className="p-[1.5px] rounded-2xl bg-gradient-primary/70 shadow-glow"><div className="flex items-center justify-between rounded-2xl bg-background/30 backdrop-blur-sm px-3 py-2">
           <div className="flex items-center space-x-3">
             <h2 className="font-semibold text-foreground">Bezlico</h2>
@@ -244,7 +254,7 @@ const Chat = () => {
                   </Button>
                 </ConfirmDialog>
                 <ConfirmDialog
-                  title="Завер��ить чат?"
+                  title="Завершить чат?"
                   description="Вы уверены, что хотите покинуть чат и вернуться на главную страницу?"
                   onConfirm={handleEndChat}
                   destructive
@@ -272,7 +282,7 @@ const Chat = () => {
         </div></div></div>
       </div>
       {/* Messages */}
-      <div className="flex-1 px-4 pt-2 pb-12 sm:pb-16 min-h-0">
+      <div className="relative z-10 flex-1 px-4 pt-2 pb-12 sm:pb-16 min-h-0">
         <div className="relative max-w-3xl mx-auto h-full">
           <div className="pointer-events-none absolute top-0 left-0 right-0 h-6 bg-gradient-to-b from-background/80 to-transparent z-10" />
           <div className="h-full overflow-y-auto overscroll-contain pr-2 space-y-1 custom-scrollbar" style={{ scrollbarGutter: 'stable' }}>
@@ -332,7 +342,7 @@ const Chat = () => {
             <div className="text-lg font-semibold text-foreground mb-2">Вы завершили чат:</div>
             <a href="#" className="text-muted-foreground text-sm underline hover:text-primary mb-6 block">Пожаловаться на собеседника</a>
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
-              <Button onClick={handleChangePartner} variant="outline" className="border-primary text-primary hover:bg-primary hover:text-white">Изменить параметры</Button>
+              <Button onClick={handleChangePartner} variant="outline" className="border-primary text-primary hover:bg-primary hover:text-white">Из��енить параметры</Button>
               <Button onClick={handleNextChat} className="bg-green-600 hover:bg-green-700 text-white">Начать новый чат</Button>
             </div>
           </div>
@@ -340,7 +350,7 @@ const Chat = () => {
       )}
       {/* Message Input (hidden during search) */}
       {!isSearching && isConnected && !isEnded && (
-        <div className="bg-transparent border-t-0 p-4 pt-2 animate-slide-up mt-auto">
+        <div className="relative z-10 bg-transparent border-t-0 p-4 pt-2 animate-slide-up mt-auto">
           <div className="flex items-end gap-3 max-w-3xl mx-auto">
             <div className="flex-1">
               <div className="p-[1.5px] rounded-2xl bg-gradient-primary transition-all duration-200 hover:brightness-110 hover:shadow-glow focus-within:shadow-glow hover:scale-[1.01]">

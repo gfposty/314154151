@@ -274,8 +274,8 @@ const Chat = () => {
         </div>
       </div>
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto overscroll-contain px-4 py-2 min-h-0">
-        <div className="max-w-4xl mx-auto space-y-1">
+      <div className="flex-1 px-4 py-2 min-h-0">
+        <div className="max-w-4xl mx-auto h-full overflow-y-auto overscroll-contain pr-2 space-y-1" style={{ scrollbarGutter: 'stable' }}>
           {isSearching && !isEnded && (
             <div className="text-center py-12 animate-fade-in">
               <div className="animate-pulse">

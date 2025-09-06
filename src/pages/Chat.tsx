@@ -48,7 +48,7 @@ const Chat = () => {
       return;
     }
 
-    // Симуляция поиска собеседника
+    // Симуляция ��оиска собеседника
     const searchTimer = setTimeout(() => {
       setIsSearching(false);
       setPartnerFound(true);
@@ -156,10 +156,23 @@ const Chat = () => {
 
   // Disable page scroll while in chat; only chat area scrolls
   useEffect(() => {
-    const prevOverflow = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
+    const htmlEl = document.documentElement;
+    const bodyEl = document.body;
+
+    const prevHtmlOverflow = htmlEl.style.overflow;
+    const prevBodyOverflow = bodyEl.style.overflow;
+    const prevRootHeight = (document.getElementById('root')?.style.height) || '';
+
+    htmlEl.style.overflow = 'hidden';
+    bodyEl.style.overflow = 'hidden';
+    const root = document.getElementById('root');
+    if (root) root.style.height = '100vh';
+
     return () => {
-      document.body.style.overflow = prevOverflow;
+      htmlEl.style.overflow = prevHtmlOverflow;
+      bodyEl.style.overflow = prevBodyOverflow;
+      const r = document.getElementById('root');
+      if (r) r.style.height = prevRootHeight;
     };
   }, []);
 

@@ -193,7 +193,7 @@ const Chat = () => {
     <div className="fixed inset-0 bg-gradient-bg flex flex-col overflow-hidden overscroll-none">
       {/* Header */}
       <div className="bg-card/80 backdrop-blur-sm border-b border-border/50 p-4 animate-fade-in">
-        <div className="flex items-center justify-between max-w-4xl mx-auto">
+        <div className="flex items-center justify-between max-w-2xl mx-auto">
           <div className="flex items-center space-x-4">
             <Button
               variant="ghost"
@@ -275,7 +275,7 @@ const Chat = () => {
       </div>
       {/* Messages */}
       <div className="flex-1 px-4 py-2 min-h-0">
-        <div className="max-w-4xl mx-auto h-full overflow-y-auto overscroll-contain pr-2 space-y-1" style={{ scrollbarGutter: 'stable' }}>
+        <div className="max-w-2xl mx-auto h-full overflow-y-auto overscroll-contain pr-2 space-y-1" style={{ scrollbarGutter: 'stable' }}>
           {isSearching && !isEnded && (
             <div className="text-center py-12 animate-fade-in">
               <div className="animate-pulse">
@@ -338,7 +338,7 @@ const Chat = () => {
       {/* Message Input */}
       {isConnected && !isEnded && (
         <div className="bg-card/80 backdrop-blur-sm border-t border-border/50 p-4 animate-slide-up">
-          <div className="flex space-x-3 max-w-4xl mx-auto">
+          <div className="flex space-x-3 max-w-2xl mx-auto">
             <Input
               value={newMessage}
               onChange={(e) => setNewMessage(e.target.value)}

@@ -14,9 +14,17 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
-      {/* Градиентные пятна по бокам */}
-      <div className="bg-blob bg-blob-left" />
-      <div className="bg-blob bg-blob-right" />
+      {/* Romantic Tech Animated Background */}
+      <div className="bg-romantic-tech">
+        <div className="particle particle-1" />
+        <div className="particle particle-2" />
+        <div className="particle particle-3" />
+        <div className="particle particle-4" />
+        <div className="particle particle-5" />
+        <div className="light-wave light-wave-1" />
+        <div className="light-wave light-wave-2" />
+        <div className="light-wave light-wave-3" />
+      </div>
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Index />} />

@@ -66,9 +66,13 @@ export default {
       backgroundImage: {
         'gradient-bg': 'var(--gradient-bg)',
         'gradient-primary': 'var(--gradient-primary)',
+        'gradient-romantic': 'var(--gradient-romantic)',
+        'gradient-wave': 'var(--gradient-wave)',
       },
       boxShadow: {
         'glow': 'var(--shadow-glow)',
+        'soft': 'var(--shadow-soft)',
+        'particle': 'var(--shadow-particle)',
       },
       borderRadius: {
         lg: "var(--radius)",
@@ -131,7 +135,51 @@ export default {
             boxShadow: "var(--shadow-glow)"
           },
           "50%": {
-            boxShadow: "0 0 60px hsl(263 70% 50% / 0.5)"
+            boxShadow: "0 0 100px hsl(263 85% 65% / 0.6)"
+          }
+        },
+        "float": {
+          "0%, 100%": {
+            transform: "translateY(0px) rotate(0deg)"
+          },
+          "33%": {
+            transform: "translateY(-30px) rotate(120deg)"
+          },
+          "66%": {
+            transform: "translateY(20px) rotate(240deg)"
+          }
+        },
+        "drift": {
+          "0%": {
+            transform: "translateX(-100px) translateY(50px)"
+          },
+          "50%": {
+            transform: "translateX(100px) translateY(-30px)"
+          },
+          "100%": {
+            transform: "translateX(-100px) translateY(50px)"
+          }
+        },
+        "wave": {
+          "0%": {
+            backgroundPosition: "0% 50%"
+          },
+          "50%": {
+            backgroundPosition: "100% 50%"
+          },
+          "100%": {
+            backgroundPosition: "0% 50%"
+          }
+        },
+        "gradient-shift": {
+          "0%": {
+            backgroundPosition: "0% 50%"
+          },
+          "50%": {
+            backgroundPosition: "100% 50%"
+          },
+          "100%": {
+            backgroundPosition: "0% 50%"
           }
         },
       },
@@ -141,7 +189,11 @@ export default {
         "fade-in": "fade-in 0.3s ease-out",
         "scale-in": "scale-in 0.2s ease-out",
         "slide-up": "slide-up 0.4s ease-out",
-        "pulse-glow": "pulse-glow 2s ease-in-out infinite",
+        "pulse-glow": "pulse-glow 3s ease-in-out infinite",
+        "float": "float 8s ease-in-out infinite",
+        "drift": "drift 15s linear infinite",
+        "wave": "wave 10s ease-in-out infinite",
+        "gradient-shift": "gradient-shift 8s ease-in-out infinite",
       },
     },
   },

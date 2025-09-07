@@ -8,6 +8,7 @@ interface VoiceRecorderProps {
   hasText?: boolean;
   onSendText?: () => void;
   onRecordingState?: (state: { isRecording: boolean; seconds: number; cancelHint: boolean; cancelled: boolean }) => void;
+  onBindApi?: (api: { cancel: () => void; finish: () => void }) => void;
 }
 
 const formatDuration = (seconds: number) => {
@@ -22,7 +23,7 @@ const formatDuration = (seconds: number) => {
 
 const SWIPE_CANCEL_THRESHOLD = 80;
 
-const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onSend, disabled, hasText, onSendText, onRecordingState }) => {
+const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onSend, disabled, hasText, onSendText, onRecordingState, onBindApi }) => {
   const [isRecording, setIsRecording] = useState(false);
   const [hasRecording, setHasRecording] = useState(false);
   const [recordedUrl, setRecordedUrl] = useState<string | null>(null);
@@ -333,6 +334,10 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onSend, disabled, hasText
   useEffect(() => {
     onRecordingState?.({ isRecording, seconds, cancelHint: cancelSwipe.active, cancelled: cancelSwipe.cancelled });
   }, [onRecordingState, isRecording, seconds, cancelSwipe.active, cancelSwipe.cancelled]);
+
+  useEffect(() => {
+    onBindApi?.({ cancel: cancelRecording, finish: finishRecording });
+  }, [onBindApi, cancelRecording, finishRecording]);
 
   return (
     <div className="inline-flex items-center gap-2 shrink-0">

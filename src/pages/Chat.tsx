@@ -393,7 +393,7 @@ const Chat = () => {
                     value={newMessage}
                     onChange={(e) => { setNewMessage(e.target.value); autoResize(); }}
                     onKeyDown={handleKeyPress}
-                    placeholder="Напишите сообщение..."
+                    placeholder="Напишите со��бщение..."
                     disabled={isEnded || !isConnected}
                     className="w-full max-h-64 min-h-[120px] bg-background/80 border-transparent text-foreground placeholder:text-muted-foreground focus:bg-background transition-all rounded-2xl resize-none disabled:opacity-70 disabled:cursor-not-allowed"
                     maxLength={500}
@@ -424,17 +424,12 @@ const Chat = () => {
               </Popover>
               <VoiceRecorder
                 disabled={isEnded || !isConnected}
+                hasText={!!newMessage.trim()}
+                onSendText={sendMessage}
                 onSend={({ url, duration }) => {
                   addAudioMessage(url, duration, true);
                 }}
               />
-              <Button
-                onClick={sendMessage}
-                disabled={!newMessage.trim() || isEnded || !isConnected}
-                className="bg-gradient-primary hover:shadow-glow hover:scale-105 active:scale-95 transition-all duration-200"
-              >
-                <Send className="w-4 h-4" />
-              </Button>
             </div>
             <div className="text-xs text-muted-foreground text-center mt-2">
               {newMessage.length}/500 символов

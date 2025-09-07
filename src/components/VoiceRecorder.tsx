@@ -5,6 +5,8 @@ import { cn } from "@/lib/utils";
 interface VoiceRecorderProps {
   onSend: (audio: { blob: Blob; url: string; duration: number }) => void;
   disabled?: boolean;
+  hasText?: boolean;
+  onSendText?: () => void;
 }
 
 // Utility to format seconds as mm:ss

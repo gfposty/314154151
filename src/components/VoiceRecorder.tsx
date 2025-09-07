@@ -222,11 +222,11 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onSend, disabled, hasText
       onPointerMove={onPointerMove}
       onPointerUp={onPointerUp}
       className={cn(
-        "relative inline-flex items-center justify-center h-12 w-12 rounded-full bg-gradient-primary text-white shadow-glow transition-transform",
+        "relative inline-flex items-center justify-center h-10 w-10 rounded-full bg-gradient-primary text-white shadow-glow transition-transform",
         "active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
       )}
     >
-      <Mic className="h-5 w-5" />
+      <Mic className="h-4 w-4" />
     </button>
   );
 
@@ -236,11 +236,11 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onSend, disabled, hasText
       aria-label="Отправить голосовое"
       onClick={sendRecording}
       className={cn(
-        "inline-flex items-center justify-center h-12 w-12 rounded-full bg-gradient-primary text-white shadow-glow",
+        "inline-flex items-center justify-center h-10 w-10 rounded-full bg-gradient-primary text-white shadow-glow",
         "hover:scale-105 active:scale-95 transition-transform"
       )}
     >
-      <Send className="h-5 w-5" />
+      <Send className="h-4 w-4" />
     </button>
   );
 
@@ -251,11 +251,11 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onSend, disabled, hasText
       onClick={() => onSendText && onSendText()}
       disabled={disabled}
       className={cn(
-        "inline-flex items-center justify-center h-12 w-12 rounded-full bg-gradient-primary text-white shadow-glow",
+        "inline-flex items-center justify-center h-10 w-10 rounded-full bg-gradient-primary text-white shadow-glow",
         "hover:scale-105 active:scale-95 transition-transform disabled:opacity-50"
       )}
     >
-      <Send className="h-5 w-5" />
+      <Send className="h-4 w-4" />
     </button>
   );
 
@@ -324,7 +324,7 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onSend, disabled, hasText
   }, [hasRecording, isRecording, recordedUrl, seconds, previewPlaying, previewProgress]);
 
   return (
-    <div className="flex items-center gap-3 w-full">
+    <div className="inline-flex items-center gap-2 shrink-0">
       {RecordingUI || ReadyToSendUI}
       {hasRecording ? (
         <>
@@ -333,9 +333,9 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onSend, disabled, hasText
             type="button"
             aria-label="Удалить голосовое"
             onClick={resetState}
-            className="inline-flex items-center justify-center h-12 w-12 rounded-full bg-background/60 border border-border/60 hover:bg-background/80"
+            className="inline-flex items-center justify-center h-10 w-10 rounded-full bg-background/60 border border-border/60 hover:bg-background/80"
           >
-            <Trash2 className="h-5 w-5" />
+            <Trash2 className="h-4 w-4" />
           </button>
         </>
       ) : (

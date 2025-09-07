@@ -151,7 +151,7 @@ const Chat = () => {
       setPartnerFound(true);
       setIsConnected(true);
       toast({
-        title: "Новый собеседник найден!",
+        title: "Новый собе��едник найден!",
         description: "Вы подключены к новому чату",
       });
       playSound(CHAT_START_SOUND);
@@ -195,7 +195,7 @@ const Chat = () => {
     });
   };
 
-  const [recState, setRecState] = useState({ isRecording: false, seconds: 0, cancelHint: false, cancelled: false });
+  const [recState, setRecState] = useState({ isRecording: false, seconds: 0, cancelHint: false, cancelled: false, hasRecording: false });
   const cancelRecRef = useRef<(() => void) | null>(null);
   const formatDur = (seconds: number) => {
     const m = Math.floor(seconds / 60).toString().padStart(2, '0');
@@ -396,19 +396,41 @@ const Chat = () => {
             <div className="flex items-end gap-3 max-w-3xl mx-auto flex-wrap">
               <div className="flex-1 min-w-[220px]">
                 <div className={`relative rounded-2xl transition-all duration-200 shadow-[0_2px_16px_0_rgba(80,80,120,0.10)] border border-[rgba(120,110,255,0.25)] bg-background/80 focus-within:border-[rgba(120,110,255,0.7)] focus-within:shadow-[0_0_0_3px_rgba(120,110,255,0.15)] ${isEnded ? 'opacity-60' : 'hover:brightness-105 hover:shadow-[0_2px_24px_0_rgba(120,110,255,0.10)]'}`}>
-                  {recState.isRecording && (
+                  {(recState.isRecording || recState.hasRecording) && (
                     <div className="pointer-events-none absolute inset-x-3 bottom-3 grid grid-cols-3 items-center">
                       <div className="flex items-center gap-2 justify-self-start">
-                        <span className="h-2 w-2 rounded-full bg-red-500 animate-pulse" />
-                        <span className="tabular-nums text-xs text-muted-foreground">{formatDur(recState.seconds)}</span>
+                        {recState.isRecording ? (
+                          <>
+                            <span className="h-2 w-2 rounded-full bg-red-500 animate-pulse" />
+                            <span className="tabular-nums text-xs text-muted-foreground">{formatDur(recState.seconds)}</span>
+                          </>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => cancelRecRef.current?.()}
+                            className="justify-self-start text-muted-foreground inline-flex items-center justify-center h-6 w-6 rounded-full bg-background/60 border border-border/50 hover:bg-background pointer-events-auto"
+                            aria-label="Удалить запись"
+                          >
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 text-muted-foreground" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0 1 16.138 21H7.862a2 2 0 0 1-1.995-1.858L5 7m5 4v6m4-6v6M1 7h22M10 3h4a1 1 0 0 1 1 1v1H9V4a1 1 0 0 1 1-1z" />
+                            </svg>
+                          </button>
+                        )}
                       </div>
-                      <button
-                        type="button"
-                        onClick={() => cancelRecRef.current?.()}
-                        className={`justify-self-center px-2 py-0.5 rounded-md font-medium text-sm pointer-events-auto transition-colors ${recState.cancelled ? 'text-red-400 bg-red-500/10' : 'text-primary bg-primary/10'} drop-shadow-[0_0_6px_hsl(var(--primary))]`}
-                      >
-                        Отмена
-                      </button>
+                      <div className="justify-self-center">
+                        {recState.isRecording ? (
+                          <button
+                            type="button"
+                            onClick={() => cancelRecRef.current?.()}
+                            className={`justify-self-center px-2 py-0.5 rounded-md font-medium text-sm pointer-events-auto transition-colors ${recState.cancelled ? 'text-red-400 bg-red-500/10' : 'text-primary bg-primary/10'} drop-shadow-[0_0_6px_hsl(var(--primary))]`}
+                          >
+                            Отмена
+                          </button>
+                        ) : null}
+                      </div>
+                      <div className="flex items-center justify-self-end">
+                        {/* right empty when recording; when preview available we show nothing here (preview UI is in recorder) */}
+                      </div>
                     </div>
                   )}
                   <Textarea

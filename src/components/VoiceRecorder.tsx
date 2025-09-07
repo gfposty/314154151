@@ -326,24 +326,31 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onSend, disabled, hasText
     if (!hasRecording || isRecording || !recordedUrl) return null;
     const ui = (
       <div className="w-full flex justify-center">
-        <div className="pointer-events-auto flex items-center gap-3 px-3 py-2 rounded-full bg-[#0B0B0D] border border-[rgba(255,255,255,0.04)] shadow-sm w-full max-w-[720px]">
+        <div className="relative pointer-events-auto flex items-center gap-4 px-4 py-2 rounded-full bg-[#0B0B0D] border border-[rgba(255,255,255,0.04)] shadow-sm w-full max-w-[720px]">
+          {/* Trash icon outside pill on the left, no background */}
+          <button onClick={resetState} aria-label="Удалить запись" className="absolute -left-10 top-1/2 transform -translate-y-1/2 text-white/70 hover:text-white transition-colors">
+            <Trash2 className="h-5 w-5" />
+          </button>
+
+          {/* Play inside circle */}
           <button
             type="button"
             aria-label={previewPlaying ? "Пауза" : "Воспроизвести"}
             onClick={() => setPreviewPlaying((p) => !p)}
-            className="inline-flex items-center justify-center h-9 w-9 rounded-full bg-white/6 text-white/90 hover:bg-white/8 transition-colors"
+            className="inline-flex items-center justify-center h-10 w-10 rounded-full bg-white/6 text-white/90 hover:bg-white/8 transition-colors shadow-sm"
             style={{ flex: '0 0 auto' }}
           >
-            {previewPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+            {previewPlaying ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5" />}
           </button>
 
-          <div className="flex-1 mx-2">
-            <div className="relative h-8 w-full rounded-full bg-[rgba(255,255,255,0.02)] overflow-hidden flex items-end px-3">
-              <div className="flex items-end gap-[3px] w-full">
+          {/* Waveform centered */}
+          <div className="flex-1 mx-2 flex items-center justify-center">
+            <div className="relative h-8 w-full max-w-[560px] rounded-full bg-[rgba(255,255,255,0.02)] overflow-hidden flex items-end px-3">
+              <div className="flex items-end gap-[3px] mx-auto w-full max-w-full justify-center">
                 {previewLevels.map((lvl, i) => (
                   <div
                     key={i}
-                    style={{ height: `${Math.max(3, Math.round(lvl * 18))}px`, width: 2 }}
+                    style={{ height: `${Math.max(3, Math.round(lvl * 18))}px`, width: 3 }}
                     className={`rounded-full bg-white/30 transition-all ${previewPlaying ? 'opacity-100' : 'opacity-60'}`}
                   />
                 ))}
@@ -353,10 +360,6 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onSend, disabled, hasText
           </div>
 
           <div className="tabular-nums text-xs text-white/80 ml-3 w-12 text-right">{formatDuration(seconds)}</div>
-
-          <button onClick={resetState} aria-label="Удалить запись" className="h-9 w-9 rounded-md bg-transparent border border-[rgba(255,255,255,0.04)] flex items-center justify-center text-white/80 hover:bg-white/6 ml-2 transition-colors">
-            <Trash2 className="h-4 w-4" />
-          </button>
 
           <audio ref={previewAudioRef} src={recordedUrl} preload="metadata" className="hidden" />
         </div>

@@ -240,7 +240,7 @@ const Chat = () => {
 
   return (
     <div className="fixed inset-0 w-full h-full overflow-hidden overscroll-none">
-      {/* SVG-паттерн для фона */}
+      {/* SVG-паттерн дл�� фона */}
       <div className="bg-pattern" />
       <div className="relative flex flex-col w-full h-full z-10">
         {/* Header */}
@@ -405,7 +405,7 @@ const Chat = () => {
                       <button
                         type="button"
                         onClick={() => cancelRecRef.current?.()}
-                        className={`justify-self-center text-xs ${recState.cancelled ? 'text-red-400' : 'text-muted-foreground'} pointer-events-auto`}
+                        className={`justify-self-center px-2 py-0.5 rounded-md font-medium text-sm pointer-events-auto transition-colors ${recState.cancelled ? 'text-red-400 bg-red-500/10' : 'text-primary bg-primary/10'} drop-shadow-[0_0_6px_hsl(var(--primary))]`}
                       >
                         Отмена
                       </button>

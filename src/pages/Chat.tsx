@@ -48,7 +48,7 @@ const Chat = () => {
   const [isEnded, setIsEnded] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // Симуляция п��дключения к собеседнику
+  // Симуляция подключения к собеседнику
   useEffect(() => {
     if (!ageCategory || !genderPreference) {
       navigate('/');
@@ -401,7 +401,7 @@ const Chat = () => {
                         <span className="h-2 w-2 rounded-full bg-red-500 animate-pulse" />
                         <span className="tabular-nums text-xs text-muted-foreground">{formatDur(recState.seconds)}</span>
                       </div>
-                      <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+                      <div className="pointer-events-none absolute bottom-3 left-1/2 -translate-x-1/2">
                         <span className={`text-sm ${recState.cancelled ? 'text-red-400' : 'text-muted-foreground'}`}>Отмена</span>
                       </div>
                     </>
@@ -411,7 +411,7 @@ const Chat = () => {
                     value={newMessage}
                     onChange={(e) => { setNewMessage(e.target.value); autoResize(); }}
                     onKeyDown={handleKeyPress}
-                    placeholder="Напишите сообщение..."
+                    placeholder={recState.isRecording ? '' : 'Напишите сообщение...'}
                     disabled={isEnded || !isConnected}
                     className="w-full max-h-64 min-h-[120px] bg-background/80 border-transparent text-foreground placeholder:text-muted-foreground focus:bg-background transition-all rounded-2xl resize-none disabled:opacity-70 disabled:cursor-not-allowed"
                     maxLength={500}

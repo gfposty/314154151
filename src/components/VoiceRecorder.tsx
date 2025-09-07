@@ -318,7 +318,7 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onSend, disabled, hasText
 
   const ReadyToSendUI = useMemo(() => {
     if (!hasRecording || isRecording || !recordedUrl) return null;
-    return (
+    const ui = (
       <div className="flex-1 min-w-[200px]">
         <div className="flex items-center gap-3 px-4 py-3 rounded-2xl bg-card/80 border border-border/50 backdrop-blur-sm">
           <button
@@ -345,6 +345,13 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onSend, disabled, hasText
         </div>
       </div>
     );
+    try {
+      const target = typeof document !== 'undefined' && document.getElementById('voice-preview-root');
+      if (target) return createPortal(ui, target);
+    } catch (e) {
+      // fall back to inline render
+    }
+    return ui;
   }, [hasRecording, isRecording, recordedUrl, seconds, previewPlaying, previewProgress, resetState]);
 
   useEffect(() => {

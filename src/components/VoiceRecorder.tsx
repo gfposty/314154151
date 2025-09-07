@@ -127,6 +127,11 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onSend, disabled, hasText
       chunksRef.current = [];
       recorder.ondataavailable = (e) => { if (e.data && e.data.size > 0) chunksRef.current.push(e.data); };
       recorder.onstop = () => {
+        if (cancelledRef.current) {
+          cancelledRef.current = false;
+          chunksRef.current = [];
+          return;
+        }
         const blob = new Blob(chunksRef.current, { type: "audio/webm" });
         const url = URL.createObjectURL(blob);
         setRecordedBlob(blob);
@@ -136,6 +141,7 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onSend, disabled, hasText
         setPreviewProgress(0);
       };
       recorder.start();
+      cancelledRef.current = false;
       setIsRecording(true);
       setHasRecording(false);
       setSeconds(0);
@@ -154,6 +160,7 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onSend, disabled, hasText
   }, [isRecording, stopAll]);
 
   const cancelRecording = useCallback(() => {
+    cancelledRef.current = true;
     stopAll();
     resetState();
   }, [resetState, stopAll]);
@@ -225,7 +232,7 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onSend, disabled, hasText
   const micBtn = (
     <button
       type="button"
-      aria-label="Записа��ь голосовое"
+      aria-label="Записать голосовое"
       disabled={disabled}
       onPointerDown={onPointerDown}
       onPointerMove={onPointerMove}

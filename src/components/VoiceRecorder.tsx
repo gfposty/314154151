@@ -319,8 +319,8 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onSend, disabled, hasText
   const ReadyToSendUI = useMemo(() => {
     if (!hasRecording || isRecording || !recordedUrl) return null;
     const ui = (
-      <div className="flex-1 min-w-[200px]">
-        <div className="flex items-center gap-3 px-4 py-3 rounded-2xl bg-card/80 border border-border/50 backdrop-blur-sm">
+      <div className="w-full">
+        <div className="pointer-events-auto flex items-center gap-3 px-4 py-3 rounded-2xl bg-card/80 border border-border/50 backdrop-blur-sm w-full">
           <button
             type="button"
             aria-label="Удалить запись"
@@ -337,7 +337,7 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onSend, disabled, hasText
           >
             {previewPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
           </button>
-          <div className="h-[3px] flex-1 rounded-full bg-border overflow-hidden">
+          <div className="h-[3px] flex-1 rounded-full bg-border overflow-hidden mx-2">
             <div className="h-full bg-primary" style={{ width: `${Math.round(previewProgress * 100)}%` }} />
           </div>
           <span className="tabular-nums text-sm text-foreground">{formatDuration(seconds)}</span>

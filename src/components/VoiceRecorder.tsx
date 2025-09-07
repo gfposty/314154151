@@ -48,6 +48,7 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onSend, disabled, hasText
   const dataArrayRef = useRef<Uint8Array | null>(null);
   const rafRef = useRef<number | null>(null);
   const [levels, setLevels] = useState<number[]>(() => new Array(16).fill(0));
+  const cancelledRef = useRef(false);
 
   const resetState = useCallback(() => {
     setIsRecording(false);
@@ -224,7 +225,7 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onSend, disabled, hasText
   const micBtn = (
     <button
       type="button"
-      aria-label="Записать голосовое"
+      aria-label="Записа��ь голосовое"
       disabled={disabled}
       onPointerDown={onPointerDown}
       onPointerMove={onPointerMove}

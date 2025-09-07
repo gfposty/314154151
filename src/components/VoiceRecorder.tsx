@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { Send, Mic, Trash2, Play, Pause } from "lucide-react";
 import { cn } from "@/lib/utils";
 

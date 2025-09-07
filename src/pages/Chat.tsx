@@ -341,7 +341,7 @@ const Chat = () => {
               </div>
             ) : (
               <div className="h-full flex flex-col">
-                <div className={`rounded-3xl border border-[rgba(120,110,255,0.18)] bg-background/70 shadow-[0_4px_32px_0_rgba(80,80,120,0.10)] px-2 sm:px-6 py-4 min-h-[320px] flex flex-col transition-all duration-200 h-full overflow-y-auto overscroll-contain pr-2 space-y-1 custom-scrollbar ${recState.isRecording || recState.hasRecording ? 'pointer-events-none select-none opacity-80 blur-sm' : ''}` } style={{ scrollbarGutter: 'stable' }}>
+                <div className="rounded-3xl border border-[rgba(120,110,255,0.18)] bg-background/70 shadow-[0_4px_32px_0_rgba(80,80,120,0.10)] px-2 sm:px-6 py-4 min-h-[320px] flex flex-col transition-all duration-200 h-full overflow-y-auto overscroll-contain pr-2 space-y-1 custom-scrollbar" style={{ scrollbarGutter: 'stable' }}>
                   {messages.length > 0 && (
                     <>
                       {messages.map((message, index) => {
@@ -395,7 +395,7 @@ const Chat = () => {
           <div className="bg-transparent border-t-0 p-4 pt-2 animate-slide-up mt-auto">
             <div className="flex items-end gap-3 max-w-3xl mx-auto flex-wrap">
               <div className="flex-1 min-w-[220px]">
-                <div className={`relative rounded-2xl transition-all duration-200 shadow-[0_2px_16px_0_rgba(80,80,120,0.10)] border border-[rgba(120,110,255,0.25)] bg-background/80 focus-within:border-[rgba(120,110,255,0.7)] focus-within:shadow-[0_0_0_3px_rgba(120,110,255,0.15)] ${isEnded ? 'opacity-60' : 'hover:brightness-105 hover:shadow-[0_2px_24px_0_rgba(120,110,255,0.10)]'}`}>
+                <div className={`relative rounded-2xl transition-all duration-200 shadow-[0_2px_16px_0_rgba(80,80,120,0.10)] border border-[rgba(120,110,255,0.25)] bg-background/80 focus-within:border-[rgba(120,110,255,0.7)] focus-within:shadow-[0_0_0_3px_rgba(120,110,255,0.15)] ${isEnded ? 'opacity-60' : 'hover:brightness-105 hover:shadow-[0_2px_24px_0_rgba(120,110,255,0.10)]'} ${recState.isRecording || recState.hasRecording ? 'pointer-events-none select-none opacity-80 blur-sm' : ''}`}>
                   {/* root for voice preview portal */}
                   <div id="voice-preview-root" className="absolute left-3 right-3 bottom-3 flex items-center justify-center pointer-events-auto" />
                   {(recState.isRecording || recState.hasRecording) && (
@@ -442,7 +442,7 @@ const Chat = () => {
                     onKeyDown={handleKeyPress}
                     placeholder={recState.isRecording || recState.hasRecording ? '' : 'Напишите сообщение...'}
                     disabled={isEnded || !isConnected || recState.isRecording}
-                    className={`w-full max-h-64 min-h-[120px] bg-background/80 border-transparent text-foreground placeholder:text-muted-foreground focus:bg-background transition-all rounded-2xl resize-none ${recState.isRecording ? 'pointer-events-none' : ''} disabled:opacity-70 disabled:cursor-not-allowed`}
+                    className={`w-full max-h-64 min-h-[120px] bg-background/80 border-transparent text-foreground placeholder:text-muted-foreground focus:bg-background transition-all rounded-2xl resize-none ${recState.isRecording || recState.hasRecording ? 'pointer-events-none' : ''} disabled:opacity-70 disabled:cursor-not-allowed`}
                     maxLength={500}
                     rows={3}
                   />

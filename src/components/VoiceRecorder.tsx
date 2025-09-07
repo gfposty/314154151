@@ -345,7 +345,7 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onSend, disabled, hasText
 
           {/* Waveform centered */}
           <div className="flex-1 mx-2 flex items-center justify-center">
-            <div className="relative h-8 w-full max-w-[560px] rounded-full bg-[rgba(255,255,255,0.02)] overflow-hidden flex items-end px-3">
+            <div className="relative h-8 w-full max-w-[480px] rounded-full bg-[rgba(255,255,255,0.02)] overflow-hidden flex items-end px-3">
               <div className="flex items-end gap-[3px] mx-auto w-full max-w-full justify-center">
                 {previewLevels.map((lvl, i) => (
                   <div

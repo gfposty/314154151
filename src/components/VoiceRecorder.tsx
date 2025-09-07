@@ -143,6 +143,8 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onSend, disabled, hasText
         setHasRecording(true);
         setPreviewPlaying(false);
         setPreviewProgress(0);
+        // mark recording finished so UI can show preview
+        setIsRecording(false);
       };
       recorder.start();
       cancelledRef.current = false;

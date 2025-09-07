@@ -328,8 +328,8 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onSend, disabled, hasText
       <div className="w-full flex justify-start">
         <div className="relative pointer-events-auto flex items-center gap-4 px-4 py-2 rounded-full bg-[#0B0B0D] border border-[rgba(255,255,255,0.04)] shadow-sm w-full max-w-[640px] ml-2">
           {/* Trash icon outside pill on the left, no background */}
-          <button onClick={resetState} aria-label="Удалить запись" className="flex-none p-1 rounded-md bg-background/80 border border-border/30 text-white/90 hover:bg-background/90 mr-2 transition-colors" style={{ pointerEvents: 'auto' }}>
-            <Trash2 className="h-5 w-5" />
+          <button onClick={resetState} aria-label="Удалить запись" className="flex-none p-1 rounded-md bg-transparent text-white/80 hover:text-white mr-2 transition-colors" style={{ pointerEvents: 'auto' }}>
+            <Trash2 className="h-4 w-4" />
           </button>
 
           {/* Play inside circle */}

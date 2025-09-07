@@ -326,7 +326,8 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onSend, disabled, hasText
     if (!hasRecording || isRecording || !recordedUrl) return null;
     const ui = (
       <div className="w-full flex justify-center">
-        <div className="pointer-events-auto flex items-center gap-3 px-3 py-2 rounded-full bg-gradient-to-r from-[#40284a] via-[#512b60] to-[#40284a] border border-[rgba(255,255,255,0.03)] w-full max-w-[720px]">
+        <div className="pointer-events-auto flex items-center gap-4 px-4 py-3 rounded-2xl bg-gradient-to-r from-[rgba(90,45,90,0.55)] to-[rgba(60,25,60,0.45)] shadow-lg border border-[rgba(255,255,255,0.04)] w-full max-w-[760px]">
+          {/* trash inside pill — larger and spaced */}
           <button
             type="button"
             aria-label={previewPlaying ? "Пауза" : "Воспроизвести"}

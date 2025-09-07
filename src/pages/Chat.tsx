@@ -7,10 +7,13 @@ import { ArrowLeft, Send, SkipForward, X, Users, Heart, Paperclip, Smile } from 
 import { toast } from "@/hooks/use-toast";
 import ChatBubble from "@/components/ChatBubble";
 import ConfirmDialog from "@/components/ConfirmDialog";
+import VoiceRecorder from "@/components/VoiceRecorder";
 
 interface Message {
   id: string;
-  text: string;
+  text?: string;
+  audioUrl?: string;
+  audioDuration?: number;
   isOwn: boolean;
   timestamp: number;
 }
@@ -59,7 +62,7 @@ const Chat = () => {
       setIsConnected(true);
       toast({
         title: "Собеседник найден!",
-        description: "Вы подключены к анонимному чату",
+        description: "Вы под��лючены к анонимному чату",
       });
       playSound(CHAT_START_SOUND);
       // Добавляем приветственное сообщение от системы
@@ -79,6 +82,17 @@ const Chat = () => {
       timestamp: Date.now()
     };
     setMessages(prev => [...prev, message]);
+  };
+
+  const addAudioMessage = (url: string, duration: number, isOwn: boolean) => {
+    const message: Message = {
+      id: (Date.now() + Math.random()).toString(),
+      audioUrl: url,
+      audioDuration: duration,
+      isOwn,
+      timestamp: Date.now(),
+    };
+    setMessages((prev) => [...prev, message]);
   };
 
   const sendMessage = () => {
@@ -129,9 +143,9 @@ const Chat = () => {
     setIsSearching(true);
     toast({
       title: "Поиск нового собеседника...",
-      description: "Подождите, мы ищем вам нового собеседника",
+      description: "Подождите, мы ищем вам ново��о собеседника",
     });
-    // Симуляция поиска нового собеседника
+    // Симуляц��я поиска нового собеседника
     setTimeout(() => {
       setIsSearching(false);
       setPartnerFound(true);
@@ -179,6 +193,14 @@ const Chat = () => {
       autoResize();
       el.focus();
     });
+  };
+
+  const [recState, setRecState] = useState({ isRecording: false, seconds: 0, cancelHint: false, cancelled: false });
+  const cancelRecRef = useRef<(() => void) | null>(null);
+  const formatDur = (seconds: number) => {
+    const m = Math.floor(seconds / 60).toString().padStart(2, '0');
+    const s = Math.floor(seconds % 60).toString().padStart(2, '0');
+    return `${m}:${s}`;
   };
 
   // Disable page scroll while in chat; only chat area scrolls
@@ -288,7 +310,7 @@ const Chat = () => {
                   onClick={handleChangePartner}
                   className="text-xs"
                 >
-                  Сменить параметры поиска
+                  Сменить параметры по����ска
                 </Button>
               </div>
             </div>
@@ -330,7 +352,7 @@ const Chat = () => {
                           const today = new Date();
                           const yesterday = new Date();
                           yesterday.setDate(today.getDate() - 1);
-                          if (d.toDateString() === today.toDateString()) return 'Сегодня';
+                          if (d.toDateString() === today.toDateString()) return 'С��годня';
                           if (d.toDateString() === yesterday.toDateString()) return 'Вчера';
                           return d.toLocaleDateString('ru-RU');
                         })();
@@ -341,7 +363,7 @@ const Chat = () => {
                                 <span className="px-3 py-1 rounded-full bg-background/60 border border-border/50">{dateLabel}</span>
                               </div>
                             )}
-                            <ChatBubble message={message.text} isOwn={message.isOwn} timestamp={message.timestamp} />
+                            <ChatBubble message={message.text} audioUrl={message.audioUrl} audioDuration={message.audioDuration} isOwn={message.isOwn} timestamp={message.timestamp} />
                           </div>
                         );
                       })}
@@ -373,15 +395,30 @@ const Chat = () => {
           <div className="bg-transparent border-t-0 p-4 pt-2 animate-slide-up mt-auto">
             <div className="flex items-end gap-3 max-w-3xl mx-auto flex-wrap">
               <div className="flex-1 min-w-[220px]">
-                <div className={`rounded-2xl transition-all duration-200 shadow-[0_2px_16px_0_rgba(80,80,120,0.10)] border border-[rgba(120,110,255,0.25)] bg-background/80 focus-within:border-[rgba(120,110,255,0.7)] focus-within:shadow-[0_0_0_3px_rgba(120,110,255,0.15)] ${isEnded ? 'opacity-60' : 'hover:brightness-105 hover:shadow-[0_2px_24px_0_rgba(120,110,255,0.10)]'}`}> 
+                <div className={`relative rounded-2xl transition-all duration-200 shadow-[0_2px_16px_0_rgba(80,80,120,0.10)] border border-[rgba(120,110,255,0.25)] bg-background/80 focus-within:border-[rgba(120,110,255,0.7)] focus-within:shadow-[0_0_0_3px_rgba(120,110,255,0.15)] ${isEnded ? 'opacity-60' : 'hover:brightness-105 hover:shadow-[0_2px_24px_0_rgba(120,110,255,0.10)]'}`}>
+                  {recState.isRecording && (
+                    <div className="pointer-events-none absolute inset-x-3 bottom-3 grid grid-cols-3 items-center">
+                      <div className="flex items-center gap-2 justify-self-start">
+                        <span className="h-2 w-2 rounded-full bg-red-500 animate-pulse" />
+                        <span className="tabular-nums text-xs text-muted-foreground">{formatDur(recState.seconds)}</span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => cancelRecRef.current?.()}
+                        className={`justify-self-center text-xs ${recState.cancelled ? 'text-red-400' : 'text-muted-foreground'} pointer-events-auto`}
+                      >
+                        Отмена
+                      </button>
+                    </div>
+                  )}
                   <Textarea
                     ref={textareaRef}
                     value={newMessage}
                     onChange={(e) => { setNewMessage(e.target.value); autoResize(); }}
                     onKeyDown={handleKeyPress}
-                    placeholder="Напишите сообщение..."
-                    disabled={isEnded || !isConnected}
-                    className="w-full max-h-64 min-h-[120px] bg-background/80 border-transparent text-foreground placeholder:text-muted-foreground focus:bg-background transition-all rounded-2xl resize-none disabled:opacity-70 disabled:cursor-not-allowed"
+                    placeholder={recState.isRecording ? '' : 'Напишите сообщение...'}
+                    disabled={isEnded || !isConnected || recState.isRecording}
+                    className={`w-full max-h-64 min-h-[120px] bg-background/80 border-transparent text-foreground placeholder:text-muted-foreground focus:bg-background transition-all rounded-2xl resize-none ${recState.isRecording ? 'pointer-events-none' : ''} disabled:opacity-70 disabled:cursor-not-allowed`}
                     maxLength={500}
                     rows={3}
                   />
@@ -408,13 +445,16 @@ const Chat = () => {
                   </div>
                 </PopoverContent>
               </Popover>
-              <Button
-                onClick={sendMessage}
-                disabled={!newMessage.trim() || isEnded || !isConnected}
-                className="bg-gradient-primary hover:shadow-glow hover:scale-105 active:scale-95 transition-all duration-200"
-              >
-                <Send className="w-4 h-4" />
-              </Button>
+              <VoiceRecorder
+                disabled={isEnded || !isConnected}
+                hasText={!!newMessage.trim()}
+                onSendText={sendMessage}
+                onRecordingState={setRecState}
+                onBindApi={({ cancel }) => { cancelRecRef.current = cancel; }}
+                onSend={({ url, duration }) => {
+                  addAudioMessage(url, duration, true);
+                }}
+              />
             </div>
             <div className="text-xs text-muted-foreground text-center mt-2">
               {newMessage.length}/500 символов

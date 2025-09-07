@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Send, Mic, X, Trash2 } from "lucide-react";
+import { Send, Mic, Trash2, Play, Pause } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface VoiceRecorderProps {
@@ -9,7 +9,6 @@ interface VoiceRecorderProps {
   onSendText?: () => void;
 }
 
-// Utility to format seconds as mm:ss
 const formatDuration = (seconds: number) => {
   const m = Math.floor(seconds / 60)
     .toString()
@@ -20,9 +19,9 @@ const formatDuration = (seconds: number) => {
   return `${m}:${s}`;
 };
 
-const SWIPE_CANCEL_THRESHOLD = 80; // px to the left
+const SWIPE_CANCEL_THRESHOLD = 80;
 
-const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onSend, disabled }) => {
+const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onSend, disabled, hasText, onSendText }) => {
   const [isRecording, setIsRecording] = useState(false);
   const [hasRecording, setHasRecording] = useState(false);
   const [recordedUrl, setRecordedUrl] = useState<string | null>(null);
@@ -30,12 +29,18 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onSend, disabled }) => {
   const [seconds, setSeconds] = useState(0);
   const [cancelSwipe, setCancelSwipe] = useState({ active: false, dx: 0, cancelled: false });
 
+  // Preview playback for just-recorded note
+  const previewAudioRef = useRef<HTMLAudioElement | null>(null);
+  const [previewPlaying, setPreviewPlaying] = useState(false);
+  const [previewProgress, setPreviewProgress] = useState(0);
+
+  // Recorder
   const mediaStreamRef = useRef<MediaStream | null>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
   const timerRef = useRef<number | null>(null);
 
-  // Audio visualization
+  // Visualization
   const analyserRef = useRef<AnalyserNode | null>(null);
   const audioCtxRef = useRef<AudioContext | null>(null);
   const dataArrayRef = useRef<Uint8Array | null>(null);
@@ -49,6 +54,8 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onSend, disabled }) => {
     setRecordedBlob(null);
     setSeconds(0);
     setCancelSwipe({ active: false, dx: 0, cancelled: false });
+    setPreviewPlaying(false);
+    setPreviewProgress(0);
     chunksRef.current = [];
   }, []);
 
@@ -57,25 +64,21 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onSend, disabled }) => {
     rafRef.current = null;
     analyserRef.current = null;
     if (audioCtxRef.current) {
-      // Close context to release resources (best-effort; may throw in some browsers)
-      try { audioCtxRef.current.close(); } catch { /* noop */ }
+      try { audioCtxRef.current.close(); } catch {}
     }
     audioCtxRef.current = null;
     dataArrayRef.current = null;
   }, []);
 
   const stopAll = useCallback(() => {
-    // Stop timer
     if (timerRef.current) {
       window.clearInterval(timerRef.current);
       timerRef.current = null;
     }
-    // Stop media recorder
     if (mediaRecorderRef.current && mediaRecorderRef.current.state !== "inactive") {
-      try { mediaRecorderRef.current.stop(); } catch { /* noop */ }
+      try { mediaRecorderRef.current.stop(); } catch {}
     }
     mediaRecorderRef.current = null;
-    // Stop all tracks
     mediaStreamRef.current?.getTracks().forEach((t) => t.stop());
     mediaStreamRef.current = null;
     stopVisualization();
@@ -86,40 +89,28 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onSend, disabled }) => {
     const source = ctx.createMediaStreamSource(stream);
     const analyser = ctx.createAnalyser();
     analyser.fftSize = 256;
-    const bufferLength = analyser.frequencyBinCount;
-    const dataArray = new Uint8Array(bufferLength);
-
+    const dataArray = new Uint8Array(analyser.frequencyBinCount);
     source.connect(analyser);
-
     analyserRef.current = analyser;
     audioCtxRef.current = ctx;
     dataArrayRef.current = dataArray;
 
     const bars = 16;
-
     const tick = () => {
       if (!analyserRef.current || !dataArrayRef.current) return;
       analyserRef.current.getByteTimeDomainData(dataArrayRef.current);
-      // Compute average deviation from 128 (midline)
       let sum = 0;
-      for (let i = 0; i < dataArrayRef.current.length; i++) {
-        const v = dataArrayRef.current[i] - 128;
-        sum += Math.abs(v);
-      }
-      const avg = sum / dataArrayRef.current.length; // 0..128
-      // Map to 0..1
-      const intensity = Math.min(1, avg / 40);
-      // Create a smooth symmetrical levels array
+      for (let i = 0; i < dataArrayRef.current.length; i++) sum += Math.abs(dataArrayRef.current[i] - 128);
+      const intensity = Math.min(1, (sum / dataArrayRef.current.length) / 40);
       const next = new Array(bars).fill(0).map((_, i) => {
         const center = (bars - 1) / 2;
         const dist = Math.abs(i - center);
-        const falloff = 1 - dist / center; // 0..1
+        const falloff = 1 - dist / center;
         return Math.max(0.08, intensity * (0.6 + 0.4 * falloff));
       });
       setLevels(next);
       rafRef.current = requestAnimationFrame(tick);
     };
-
     tick();
   }, []);
 
@@ -128,36 +119,24 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onSend, disabled }) => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       mediaStreamRef.current = stream;
-
       const recorder = new MediaRecorder(stream);
       mediaRecorderRef.current = recorder;
       chunksRef.current = [];
-
-      recorder.ondataavailable = (e) => {
-        if (e.data && e.data.size > 0) {
-          chunksRef.current.push(e.data);
-        }
-      };
-
+      recorder.ondataavailable = (e) => { if (e.data && e.data.size > 0) chunksRef.current.push(e.data); };
       recorder.onstop = () => {
         const blob = new Blob(chunksRef.current, { type: "audio/webm" });
         const url = URL.createObjectURL(blob);
         setRecordedBlob(blob);
         setRecordedUrl(url);
         setHasRecording(true);
+        setPreviewPlaying(false);
+        setPreviewProgress(0);
       };
-
       recorder.start();
       setIsRecording(true);
       setHasRecording(false);
       setSeconds(0);
-
-      // timer
-      timerRef.current = window.setInterval(() => {
-        setSeconds((s) => s + 1);
-      }, 1000);
-
-      // visualization
+      timerRef.current = window.setInterval(() => setSeconds((s) => s + 1), 1000);
       startVisualization(stream);
     } catch (err) {
       console.error("Microphone permission or recording error", err);
@@ -180,7 +159,6 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onSend, disabled }) => {
     resetState();
   }, [onSend, recordedBlob, recordedUrl, seconds, resetState]);
 
-  // Cleanup on unmount
   useEffect(() => {
     return () => {
       stopAll();
@@ -188,39 +166,52 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onSend, disabled }) => {
     };
   }, [recordedUrl, stopAll]);
 
-  // Pointer (hold-to-record) handling
-  const pressTimeoutRef = useRef<number | null>(null);
+  // Hold-to-record handlers
   const isHoldingRef = useRef(false);
-
   const onPointerDown = (e: React.PointerEvent) => {
-    if (disabled) return;
+    if (disabled || hasText) return;
     (e.target as HTMLElement).setPointerCapture(e.pointerId);
     isHoldingRef.current = true;
-    // Start immediately on press for better UX
     startRecording();
     setCancelSwipe({ active: true, dx: 0, cancelled: false });
   };
-
   const onPointerMove = (e: React.PointerEvent) => {
     if (!isHoldingRef.current || !isRecording) return;
     const dx = e.movementX;
     setCancelSwipe((prev) => {
-      const nextDx = Math.max(-200, Math.min(40, (prev.dx + dx)));
+      const nextDx = Math.max(-200, Math.min(40, prev.dx + dx));
       const cancelled = nextDx <= -SWIPE_CANCEL_THRESHOLD;
       return { active: true, dx: nextDx, cancelled };
     });
   };
-
   const onPointerUp = () => {
     if (!isHoldingRef.current) return;
     isHoldingRef.current = false;
     setCancelSwipe((prev) => ({ ...prev, active: false, dx: 0 }));
-    if (cancelSwipe.cancelled) {
-      cancelRecording();
-    } else {
-      finishRecording();
-    }
+    if (cancelSwipe.cancelled) cancelRecording(); else finishRecording();
   };
+
+  // Preview play/pause wiring
+  useEffect(() => {
+    const a = previewAudioRef.current;
+    if (!a) return;
+    const onTime = () => {
+      if (!a.duration || isNaN(a.duration)) return;
+      setPreviewProgress(a.currentTime / a.duration);
+    };
+    const onEnded = () => setPreviewPlaying(false);
+    a.addEventListener("timeupdate", onTime);
+    a.addEventListener("ended", onEnded);
+    return () => {
+      a.removeEventListener("timeupdate", onTime);
+      a.removeEventListener("ended", onEnded);
+    };
+  }, [recordedUrl]);
+  useEffect(() => {
+    const a = previewAudioRef.current;
+    if (!a) return;
+    if (previewPlaying) a.play(); else a.pause();
+  }, [previewPlaying]);
 
   const micBtn = (
     <button
@@ -236,13 +227,10 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onSend, disabled }) => {
       )}
     >
       <Mic className="h-5 w-5" />
-      {isRecording && (
-        <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 text-[10px] text-white/80">Удерживайте</span>
-      )}
     </button>
   );
 
-  const sendBtn = (
+  const sendVoiceBtn = (
     <button
       type="button"
       aria-label="Отправить голосовое"
@@ -250,6 +238,21 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onSend, disabled }) => {
       className={cn(
         "inline-flex items-center justify-center h-12 w-12 rounded-full bg-gradient-primary text-white shadow-glow",
         "hover:scale-105 active:scale-95 transition-transform"
+      )}
+    >
+      <Send className="h-5 w-5" />
+    </button>
+  );
+
+  const sendTextBtn = (
+    <button
+      type="button"
+      aria-label="Отправить"
+      onClick={() => onSendText && onSendText()}
+      disabled={disabled}
+      className={cn(
+        "inline-flex items-center justify-center h-12 w-12 rounded-full bg-gradient-primary text-white shadow-glow",
+        "hover:scale-105 active:scale-95 transition-transform disabled:opacity-50"
       )}
     >
       <Send className="h-5 w-5" />
@@ -276,13 +279,11 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onSend, disabled }) => {
               ))}
             </div>
           </div>
-          <div className="flex items-center">
-            <div className={cn(
-              "px-2 py-1 rounded-md text-xs",
-              cancelSwipe.cancelled ? "bg-red-500/20 text-red-400 border border-red-500/30" : "text-muted-foreground"
-            )}>
-              {cancelSwipe.cancelled ? "Отпустите, чтобы отменить" : "Свайп влево — отмена"}
-            </div>
+          <div className={cn(
+            "px-2 py-1 rounded-md text-xs",
+            cancelSwipe.cancelled ? "bg-red-500/20 text-red-400 border border-red-500/30" : "text-muted-foreground"
+          )}>
+            {cancelSwipe.cancelled ? "Отпустите, чтобы отменить" : "Свайп влево — отмена"}
           </div>
         </div>
         {cancelSwipe.active && (
@@ -302,32 +303,43 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onSend, disabled }) => {
   const ReadyToSendUI = useMemo(() => {
     if (!hasRecording || isRecording || !recordedUrl) return null;
     return (
-      <div className="flex-1 min-w-[180px]">
+      <div className="flex-1 min-w-[200px]">
         <div className="flex items-center gap-3 px-4 py-3 rounded-2xl bg-card/80 border border-border/50 backdrop-blur-sm">
-          <div className="h-8 w-8 rounded-full bg-gradient-primary/20 border border-[rgba(120,110,255,0.35)] flex items-center justify-center text-primary-foreground/90">
-            <Mic className="h-4 w-4" />
+          <button
+            type="button"
+            aria-label={previewPlaying ? "Пауза" : "Воспроизвести"}
+            onClick={() => setPreviewPlaying((p) => !p)}
+            className="inline-flex items-center justify-center h-8 w-8 rounded-full bg-primary/10 text-primary"
+          >
+            {previewPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+          </button>
+          <span className="tabular-nums text-sm text-foreground">{formatDuration(seconds)}</span>
+          <div className="h-[3px] flex-1 rounded-full bg-border overflow-hidden">
+            <div className="h-full bg-primary" style={{ width: `${Math.round(previewProgress * 100)}%` }} />
           </div>
-          <span className="tabular-nums text-sm text-muted-foreground">{formatDuration(seconds)}</span>
-          <audio src={recordedUrl} className="hidden" />
-          <div className="ml-auto text-xs text-muted-foreground">Прослушайте и отправьте</div>
+          <audio ref={previewAudioRef} src={recordedUrl} preload="metadata" className="hidden" />
         </div>
       </div>
     );
-  }, [hasRecording, isRecording, recordedUrl, seconds]);
+  }, [hasRecording, isRecording, recordedUrl, seconds, previewPlaying, previewProgress]);
 
   return (
     <div className="flex items-center gap-3 w-full">
       {RecordingUI || ReadyToSendUI}
-      {hasRecording ? sendBtn : micBtn}
-      {!isRecording && hasRecording && (
-        <button
-          type="button"
-          aria-label="Отменить"
-          className="inline-flex items-center justify-center h-12 w-12 rounded-full bg-background/60 border border-border/60 hover:bg-background/80"
-          onClick={resetState}
-        >
-          <X className="h-5 w-5" />
-        </button>
+      {hasRecording ? (
+        <>
+          {sendVoiceBtn}
+          <button
+            type="button"
+            aria-label="Удалить голосовое"
+            onClick={resetState}
+            className="inline-flex items-center justify-center h-12 w-12 rounded-full bg-background/60 border border-border/60 hover:bg-background/80"
+          >
+            <Trash2 className="h-5 w-5" />
+          </button>
+        </>
+      ) : (
+        hasText ? sendTextBtn : micBtn
       )}
     </div>
   );

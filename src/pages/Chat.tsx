@@ -106,7 +106,7 @@ const Chat = () => {
       toast({
         variant: "destructive",
         title: "Сообщение заблокировано",
-        description: "Ваше сообщение содержит запрещенные слова",
+        description: "Ваше сообщение содержит запрещенны�� слова",
       });
       return;
     }
@@ -407,16 +407,8 @@ const Chat = () => {
                             <span className="tabular-nums text-xs text-muted-foreground">{formatDur(recState.seconds)}</span>
                           </>
                         ) : (
-                          <button
-                            type="button"
-                            onClick={() => cancelRecRef.current?.()}
-                            className="justify-self-start text-muted-foreground inline-flex items-center justify-center h-6 w-6 rounded-full bg-background/60 border border-border/50 hover:bg-background pointer-events-auto"
-                            aria-label="Удалить запись"
-                          >
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 text-muted-foreground" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0 1 16.138 21H7.862a2 2 0 0 1-1.995-1.858L5 7m5 4v6m4-6v6M1 7h22M10 3h4a1 1 0 0 1 1 1v1H9V4a1 1 0 0 1 1-1z" />
-                            </svg>
-                          </button>
+                          // left area intentionally empty when preview available (trash moved into pill)
+                          null
                         )}
                       </div>
                       <div className="justify-self-center">

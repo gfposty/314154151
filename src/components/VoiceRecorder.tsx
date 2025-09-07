@@ -7,6 +7,7 @@ interface VoiceRecorderProps {
   disabled?: boolean;
   hasText?: boolean;
   onSendText?: () => void;
+  onRecordingState?: (state: { isRecording: boolean; seconds: number; cancelHint: boolean; cancelled: boolean }) => void;
 }
 
 const formatDuration = (seconds: number) => {

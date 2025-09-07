@@ -181,30 +181,13 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onSend, disabled, hasText
   // Hold-to-record handlers
   const isHoldingRef = useRef(false);
   const onPointerDown = (e: React.PointerEvent) => {
-    if (disabled || hasText) return;
-    (e.target as HTMLElement).setPointerCapture(e.pointerId);
-    isHoldingRef.current = true;
-    startRecording();
-    setCancelSwipe({ active: true, dx: 0, cancelled: false });
+    // no-op: hold-to-record disabled in favor of click-to-record
   };
-  const onPointerMove = (e: React.PointerEvent) => {
-    if (!isHoldingRef.current || !isRecording) return;
-    const dx = e.movementX;
-    setCancelSwipe((prev) => {
-      const nextDx = Math.max(-200, Math.min(40, prev.dx + dx));
-      const cancelled = nextDx <= -SWIPE_CANCEL_THRESHOLD;
-      return { active: true, dx: nextDx, cancelled };
-    });
+  const onPointerMove = (_e: React.PointerEvent) => {
+    // swipe-to-cancel removed for click-to-record mode
   };
   const onPointerUp = () => {
-    if (!isHoldingRef.current) return;
-    isHoldingRef.current = false;
-    setCancelSwipe((prev) => ({ ...prev, active: false, dx: 0 }));
-    if (cancelSwipe.cancelled) {
-      cancelRecording();
-    } else {
-      finishRecording();
-    }
+    // no-op in click-to-record mode
   };
 
   // Preview play/pause wiring
@@ -230,20 +213,30 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onSend, disabled, hasText
   }, [previewPlaying]);
 
   const micBtn = (
-    <button
-      type="button"
-      aria-label="Записать голосовое"
-      disabled={disabled}
-      onPointerDown={onPointerDown}
-      onPointerMove={onPointerMove}
-      onPointerUp={onPointerUp}
-      className={cn(
-        "relative inline-flex items-center justify-center h-10 w-10 rounded-full bg-gradient-primary text-white shadow-glow transition-transform",
-        "active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+    <div className="relative">
+      <button
+        type="button"
+        aria-label="Записать голосовое"
+        disabled={disabled || isRecording || hasRecording}
+        onClick={() => startRecording()}
+        className={cn(
+          "inline-flex items-center justify-center h-10 w-10 rounded-full bg-gradient-primary text-white shadow-glow transition-transform",
+          "active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+        )}
+      >
+        <Mic className="h-4 w-4" />
+      </button>
+      {isRecording && (
+        <button
+          type="button"
+          aria-label="Остановить запись"
+          onClick={finishRecording}
+          className="absolute -top-11 right-0 h-8 w-8 rounded-full bg-background/80 border border-border/60 flex items-center justify-center hover:bg-background"
+        >
+          <Pause className="h-4 w-4" />
+        </button>
       )}
-    >
-      <Mic className="h-4 w-4" />
-    </button>
+    </div>
   );
 
   const sendVoiceBtn = (
@@ -323,21 +316,29 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onSend, disabled, hasText
         <div className="flex items-center gap-3 px-4 py-3 rounded-2xl bg-card/80 border border-border/50 backdrop-blur-sm">
           <button
             type="button"
+            aria-label="Удалить запись"
+            onClick={resetState}
+            className="inline-flex items-center justify-center h-8 w-8 rounded-full bg-background/60 border border-border/60 hover:bg-background/80"
+          >
+            <Trash2 className="h-4 w-4" />
+          </button>
+          <button
+            type="button"
             aria-label={previewPlaying ? "Пауза" : "Воспроизвести"}
             onClick={() => setPreviewPlaying((p) => !p)}
             className="inline-flex items-center justify-center h-8 w-8 rounded-full bg-primary/10 text-primary"
           >
             {previewPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
           </button>
-          <span className="tabular-nums text-sm text-foreground">{formatDuration(seconds)}</span>
           <div className="h-[3px] flex-1 rounded-full bg-border overflow-hidden">
             <div className="h-full bg-primary" style={{ width: `${Math.round(previewProgress * 100)}%` }} />
           </div>
+          <span className="tabular-nums text-sm text-foreground">{formatDuration(seconds)}</span>
           <audio ref={previewAudioRef} src={recordedUrl} preload="metadata" className="hidden" />
         </div>
       </div>
     );
-  }, [hasRecording, isRecording, recordedUrl, seconds, previewPlaying, previewProgress]);
+  }, [hasRecording, isRecording, recordedUrl, seconds, previewPlaying, previewProgress, resetState]);
 
   useEffect(() => {
     onRecordingState?.({ isRecording, seconds, cancelHint: cancelSwipe.active, cancelled: cancelSwipe.cancelled });
@@ -348,19 +349,11 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onSend, disabled, hasText
   }, [onBindApi, cancelRecording, finishRecording]);
 
   return (
-    <div className="inline-flex items-center gap-2 shrink-0">
+    <div className="inline-flex items-center gap-2 shrink-0 relative">
       {ReadyToSendUI}
       {hasRecording ? (
         <>
           {sendVoiceBtn}
-          <button
-            type="button"
-            aria-label="Удалить голосовое"
-            onClick={resetState}
-            className="inline-flex items-center justify-center h-10 w-10 rounded-full bg-background/60 border border-border/60 hover:bg-background/80"
-          >
-            <Trash2 className="h-4 w-4" />
-          </button>
         </>
       ) : (
         hasText ? sendTextBtn : micBtn

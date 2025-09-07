@@ -85,7 +85,7 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onSend, disabled, hasText
       window.clearInterval(timerRef.current);
       timerRef.current = null;
     }
-    // Stop recorder first ��� allow ondataavailable/onstop to run and gather data
+    // Stop recorder first — allow ondataavailable/onstop to run and gather data
     if (mediaRecorderRef.current && mediaRecorderRef.current.state !== "inactive") {
       try { mediaRecorderRef.current.stop(); } catch {}
     }
@@ -338,13 +338,18 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onSend, disabled, hasText
             {previewPlaying ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5" />}
           </button>
 
-          <div className="flex-1 mx-2">
-            <div className="relative h-8 w-full rounded-full bg-[rgba(255,255,255,0.03)] overflow-hidden">
-              <div className="absolute inset-0 flex items-end px-3 gap-[4px]">
+          <div className="flex-1 mx-2 relative">
+            <div className="absolute -left-12 top-1/2 transform -translate-y-1/2">
+              <button onClick={resetState} aria-label="Удалить запись" className="h-9 w-9 rounded-md bg-white/6 flex items-center justify-center text-white/80 hover:bg-white/10 transition-colors">
+                <Trash2 className="h-5 w-5" />
+              </button>
+            </div>
+            <div className="relative h-10 w-full rounded-full bg-[rgba(255,255,255,0.03)] overflow-hidden px-3 flex items-center">
+              <div className="flex items-end gap-[4px] w-full">
                 {previewLevels.map((lvl, i) => (
                   <div
                     key={i}
-                    style={{ height: `${Math.max(4, Math.round(lvl * 28))}px`, width: 3 }}
+                    style={{ height: `${Math.max(4, Math.round(lvl * 28))}px`, width: 4 }}
                     className={`rounded-full bg-white/40 transition-all ${previewPlaying ? 'opacity-100' : 'opacity-60'}`}
                   />
                 ))}
@@ -353,7 +358,7 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onSend, disabled, hasText
             </div>
           </div>
 
-          <div className="tabular-nums text-sm text-white/90 ml-2 w-14 text-right">{formatDuration(seconds)}</div>
+          <div className="tabular-nums text-sm text-white/90 ml-4 w-16 text-right">{formatDuration(seconds)}</div>
 
           <audio ref={previewAudioRef} src={recordedUrl} preload="metadata" className="hidden" />
         </div>

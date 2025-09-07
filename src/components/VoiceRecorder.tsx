@@ -49,6 +49,12 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onSend, disabled, hasText
   const dataArrayRef = useRef<Uint8Array | null>(null);
   const rafRef = useRef<number | null>(null);
   const [levels, setLevels] = useState<number[]>(() => new Array(16).fill(0));
+  // Preview waveform state and analyser refs
+  const [previewLevels, setPreviewLevels] = useState<number[]>(() => new Array(48).fill(0));
+  const previewAnalyserRef = useRef<AnalyserNode | null>(null);
+  const previewAudioCtxRef = useRef<AudioContext | null>(null);
+  const previewDataRef = useRef<Uint8Array | null>(null);
+  const previewRafRef = useRef<number | null>(null);
   const cancelledRef = useRef(false);
 
   const resetState = useCallback(() => {

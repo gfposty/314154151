@@ -7,10 +7,13 @@ import { ArrowLeft, Send, SkipForward, X, Users, Heart, Paperclip, Smile } from 
 import { toast } from "@/hooks/use-toast";
 import ChatBubble from "@/components/ChatBubble";
 import ConfirmDialog from "@/components/ConfirmDialog";
+import VoiceRecorder from "@/components/VoiceRecorder";
 
 interface Message {
   id: string;
-  text: string;
+  text?: string;
+  audioUrl?: string;
+  audioDuration?: number;
   isOwn: boolean;
   timestamp: number;
 }
@@ -79,6 +82,17 @@ const Chat = () => {
       timestamp: Date.now()
     };
     setMessages(prev => [...prev, message]);
+  };
+
+  const addAudioMessage = (url: string, duration: number, isOwn: boolean) => {
+    const message: Message = {
+      id: (Date.now() + Math.random()).toString(),
+      audioUrl: url,
+      audioDuration: duration,
+      isOwn,
+      timestamp: Date.now(),
+    };
+    setMessages((prev) => [...prev, message]);
   };
 
   const sendMessage = () => {
@@ -288,7 +302,7 @@ const Chat = () => {
                   onClick={handleChangePartner}
                   className="text-xs"
                 >
-                  Сменить параметры поиска
+                  Сменить параметры по��ска
                 </Button>
               </div>
             </div>
@@ -330,7 +344,7 @@ const Chat = () => {
                           const today = new Date();
                           const yesterday = new Date();
                           yesterday.setDate(today.getDate() - 1);
-                          if (d.toDateString() === today.toDateString()) return 'Сегодня';
+                          if (d.toDateString() === today.toDateString()) return 'С��годня';
                           if (d.toDateString() === yesterday.toDateString()) return 'Вчера';
                           return d.toLocaleDateString('ru-RU');
                         })();
@@ -341,7 +355,7 @@ const Chat = () => {
                                 <span className="px-3 py-1 rounded-full bg-background/60 border border-border/50">{dateLabel}</span>
                               </div>
                             )}
-                            <ChatBubble message={message.text} isOwn={message.isOwn} timestamp={message.timestamp} />
+                            <ChatBubble message={message.text} audioUrl={message.audioUrl} audioDuration={message.audioDuration} isOwn={message.isOwn} timestamp={message.timestamp} />
                           </div>
                         );
                       })}
@@ -408,6 +422,12 @@ const Chat = () => {
                   </div>
                 </PopoverContent>
               </Popover>
+              <VoiceRecorder
+                disabled={isEnded || !isConnected}
+                onSend={({ url, duration }) => {
+                  addAudioMessage(url, duration, true);
+                }}
+              />
               <Button
                 onClick={sendMessage}
                 disabled={!newMessage.trim() || isEnded || !isConnected}

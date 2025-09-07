@@ -85,7 +85,7 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onSend, disabled, hasText
       window.clearInterval(timerRef.current);
       timerRef.current = null;
     }
-    // Stop recorder first — allow ondataavailable/onstop to run and gather data
+    // Stop recorder first ��� allow ondataavailable/onstop to run and gather data
     if (mediaRecorderRef.current && mediaRecorderRef.current.state !== "inactive") {
       try { mediaRecorderRef.current.stop(); } catch {}
     }
@@ -332,10 +332,10 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onSend, disabled, hasText
             type="button"
             aria-label={previewPlaying ? "Пауза" : "Воспроизвести"}
             onClick={() => setPreviewPlaying((p) => !p)}
-            className="inline-flex items-center justify-center h-9 w-9 rounded-full bg-white/8 text-white shadow-sm"
+            className="inline-flex items-center justify-center h-10 w-10 rounded-full bg-white/10 text-white shadow-md border border-[rgba(255,255,255,0.06)] hover:scale-105 transition-transform"
             style={{ flex: '0 0 auto' }}
           >
-            {previewPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+            {previewPlaying ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5" />}
           </button>
 
           <div className="flex-1 mx-2">

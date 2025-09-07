@@ -145,7 +145,7 @@ const Chat = () => {
       title: "Поиск нового собеседника...",
       description: "Подождите, мы ищем вам ново��о собеседника",
     });
-    // Симуляция поиска нового собеседника
+    // Симуляц��я поиска нового собеседника
     setTimeout(() => {
       setIsSearching(false);
       setPartnerFound(true);
@@ -196,6 +196,7 @@ const Chat = () => {
   };
 
   const [recState, setRecState] = useState({ isRecording: false, seconds: 0, cancelHint: false, cancelled: false });
+  const cancelRecRef = useRef<(() => void) | null>(null);
   const formatDur = (seconds: number) => {
     const m = Math.floor(seconds / 60).toString().padStart(2, '0');
     const s = Math.floor(seconds % 60).toString().padStart(2, '0');
@@ -309,7 +310,7 @@ const Chat = () => {
                   onClick={handleChangePartner}
                   className="text-xs"
                 >
-                  Сменить параметры по���ска
+                  Сменить параметры по����ска
                 </Button>
               </div>
             </div>
@@ -401,9 +402,13 @@ const Chat = () => {
                         <span className="h-2 w-2 rounded-full bg-red-500 animate-pulse" />
                         <span className="tabular-nums text-xs text-muted-foreground">{formatDur(recState.seconds)}</span>
                       </div>
-                      <div className="justify-self-center">
-                        <span className={`text-xs ${recState.cancelled ? 'text-red-400' : 'text-muted-foreground'}`}>Отмена</span>
-                      </div>
+                      <button
+                        type="button"
+                        onClick={() => cancelRecRef.current?.()}
+                        className={`justify-self-center text-xs ${recState.cancelled ? 'text-red-400' : 'text-muted-foreground'} pointer-events-auto`}
+                      >
+                        Отмена
+                      </button>
                     </div>
                   )}
                   <Textarea
@@ -412,8 +417,8 @@ const Chat = () => {
                     onChange={(e) => { setNewMessage(e.target.value); autoResize(); }}
                     onKeyDown={handleKeyPress}
                     placeholder={recState.isRecording ? '' : 'Напишите сообщение...'}
-                    disabled={isEnded || !isConnected}
-                    className="w-full max-h-64 min-h-[120px] bg-background/80 border-transparent text-foreground placeholder:text-muted-foreground focus:bg-background transition-all rounded-2xl resize-none disabled:opacity-70 disabled:cursor-not-allowed"
+                    disabled={isEnded || !isConnected || recState.isRecording}
+                    className={`w-full max-h-64 min-h-[120px] bg-background/80 border-transparent text-foreground placeholder:text-muted-foreground focus:bg-background transition-all rounded-2xl resize-none ${recState.isRecording ? 'pointer-events-none' : ''} disabled:opacity-70 disabled:cursor-not-allowed`}
                     maxLength={500}
                     rows={3}
                   />
@@ -445,6 +450,7 @@ const Chat = () => {
                 hasText={!!newMessage.trim()}
                 onSendText={sendMessage}
                 onRecordingState={setRecState}
+                onBindApi={({ cancel }) => { cancelRecRef.current = cancel; }}
                 onSend={({ url, duration }) => {
                   addAudioMessage(url, duration, true);
                 }}

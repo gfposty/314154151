@@ -224,10 +224,10 @@ const Chat = () => {
         {/* Header */}
         <div className="bg-transparent border-b-0 p-4 animate-fade-in">
           <div className="max-w-3xl mx-auto">
-            <div className="rounded-3xl border border-[rgba(120,110,255,0.18)] bg-background/70 px-3 py-2 flex items-center justify-between">
-              <div className="flex items-center space-x-3">
-                <img src="/123.png" alt="Bezlico Logo" className="w-20 h-20 rounded-2xl object-contain -my-2" />
-                <div className="flex items-center space-x-4 text-xs text-muted-foreground">
+            <div className="rounded-3xl border border-[rgba(120,110,255,0.18)] bg-background/70 px-3 py-2 flex items-center justify-between flex-wrap gap-2 sm:gap-3">
+              <div className="flex items-center space-x-3 flex-shrink min-w-0">
+                <img src="/123.png" alt="Bezlico Logo" className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl object-contain -my-2" />
+                <div className="flex items-center flex-wrap gap-x-3 gap-y-1 text-xs text-muted-foreground">
                   {isEnded ? (
                     <span>Чат завершён</span>
                   ) : isSearching ? (
@@ -236,11 +236,11 @@ const Chat = () => {
                     <>
                       <div className="flex items-center space-x-1">
                         <Users className="w-3 h-3" />
-                        <span>{ageCategory}</span>
+                        <span className="truncate max-w-[40vw] sm:max-w-none">{ageCategory}</span>
                       </div>
                       <div className="flex items-center space-x-1">
                         <Heart className="w-3 h-3" />
-                        <span>{getGenderText(genderPreference)}</span>
+                        <span className="truncate max-w-[40vw] sm:max-w-none">{getGenderText(genderPreference)}</span>
                       </div>
                     </>
                   ) : (
@@ -248,7 +248,7 @@ const Chat = () => {
                   )}
                 </div>
               </div>
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center gap-2 flex-wrap justify-end w-full sm:w-auto">
                 {isConnected && (
                   <>
                     <ConfirmDialog
@@ -371,8 +371,8 @@ const Chat = () => {
         {/* Message Input (always visible, disabled if ended) */}
         {!isSearching && (
           <div className="bg-transparent border-t-0 p-4 pt-2 animate-slide-up mt-auto">
-            <div className="flex items-end gap-3 max-w-3xl mx-auto">
-              <div className="flex-1">
+            <div className="flex items-end gap-3 max-w-3xl mx-auto flex-wrap">
+              <div className="flex-1 min-w-[220px]">
                 <div className={`rounded-2xl transition-all duration-200 shadow-[0_2px_16px_0_rgba(80,80,120,0.10)] border border-[rgba(120,110,255,0.25)] bg-background/80 focus-within:border-[rgba(120,110,255,0.7)] focus-within:shadow-[0_0_0_3px_rgba(120,110,255,0.15)] ${isEnded ? 'opacity-60' : 'hover:brightness-105 hover:shadow-[0_2px_24px_0_rgba(120,110,255,0.10)]'}`}> 
                   <Textarea
                     ref={textareaRef}

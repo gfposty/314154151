@@ -67,7 +67,7 @@ const Chat = () => {
       playSound(CHAT_START_SOUND);
       // Добавляем приветственное сообщение от системы
       setTimeout(() => {
-        addMessage("Привет! Как дела?", false);
+        addMessage("При��ет! Как дела?", false);
       }, 1000);
     }, Math.random() * 3000 + 1000); // 1-4 секунды
 
@@ -229,7 +229,7 @@ const Chat = () => {
     switch (gender) {
       case 'male': return 'Мужской';
       case 'female': return 'Женский';
-      case 'any': return 'Любой';
+      case 'any': return 'Люб��й';
       default: return gender;
     }
   };
@@ -289,7 +289,7 @@ const Chat = () => {
                     </ConfirmDialog>
                     <ConfirmDialog
                       title="Завершить чат?"
-                      description="Вы ��верены, что хотите покинуть чат и вернуться на главную страницу?"
+                      description="Вы уверены, что хотите покинуть чат и вернуться на главную страницу?"
                       onConfirm={handleEndChat}
                       destructive
                     >
@@ -440,7 +440,7 @@ const Chat = () => {
                     value={newMessage}
                     onChange={(e) => { setNewMessage(e.target.value); autoResize(); }}
                     onKeyDown={handleKeyPress}
-                    placeholder={recState.isRecording ? '' : 'Напишите сообщение...'}
+                    placeholder={recState.isRecording || recState.hasRecording ? '' : 'Напишите сообщение...'}
                     disabled={isEnded || !isConnected || recState.isRecording}
                     className={`w-full max-h-64 min-h-[120px] bg-background/80 border-transparent text-foreground placeholder:text-muted-foreground focus:bg-background transition-all rounded-2xl resize-none ${recState.isRecording ? 'pointer-events-none' : ''} disabled:opacity-70 disabled:cursor-not-allowed`}
                     maxLength={500}

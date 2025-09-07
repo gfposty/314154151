@@ -223,7 +223,7 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onSend, disabled, hasText
     <div className="relative">
       <button
         type="button"
-        aria-label="Записать голосовое"
+        aria-label="Записать голосо��ое"
         disabled={disabled || isRecording || hasRecording}
         onClick={() => startRecording()}
         className={cn(
@@ -323,15 +323,6 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onSend, disabled, hasText
         <div className="pointer-events-auto flex items-center gap-3 px-3 py-2 rounded-full bg-gradient-to-r from-[#40284a] via-[#512b60] to-[#40284a] border border-[rgba(255,255,255,0.03)] w-full max-w-[720px]">
           <button
             type="button"
-            aria-label="Удалить запись"
-            onClick={resetState}
-            className="inline-flex items-center justify-center h-8 w-8 rounded-md bg-transparent text-muted-foreground hover:bg-white/5"
-          >
-            <Trash2 className="h-4 w-4" />
-          </button>
-
-          <button
-            type="button"
             aria-label={previewPlaying ? "Пауза" : "Воспроизвести"}
             onClick={() => setPreviewPlaying((p) => !p)}
             className="inline-flex items-center justify-center h-9 w-9 rounded-full bg-white/8 text-white shadow-sm"
@@ -342,17 +333,14 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onSend, disabled, hasText
 
           <div className="flex-1 mx-2">
             <div className="relative h-8 w-full rounded-full bg-[rgba(255,255,255,0.03)] overflow-hidden">
-              <div className="absolute inset-0 flex items-center px-3 gap-[4px]">
-                {Array.from({ length: 48 }).map((_, i) => {
-                  const h = Math.round(6 + 18 * (0.5 + 0.5 * Math.sin(i + previewProgress * 10)));
-                  return (
-                    <div
-                      key={i}
-                      style={{ height: `${h}px`, width: 3 }}
-                      className={`rounded-full bg-white/40 transition-all ${previewPlaying ? 'opacity-100' : 'opacity-60'}`}
-                    />
-                  );
-                })}
+              <div className="absolute inset-0 flex items-end px-3 gap-[4px]">
+                {previewLevels.map((lvl, i) => (
+                  <div
+                    key={i}
+                    style={{ height: `${Math.max(4, Math.round(lvl * 28))}px`, width: 3 }}
+                    className={`rounded-full bg-white/40 transition-all ${previewPlaying ? 'opacity-100' : 'opacity-60'}`}
+                  />
+                ))}
               </div>
               <div className="absolute left-0 top-0 h-full bg-gradient-to-r from-[rgba(255,255,255,0.12)] to-transparent" style={{ width: `${Math.round(previewProgress * 100)}%`, pointerEvents: 'none' }} />
             </div>
@@ -380,6 +368,58 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onSend, disabled, hasText
   useEffect(() => {
     onBindApi?.({ cancel: cancelRecording, finish: finishRecording });
   }, [onBindApi, cancelRecording, finishRecording]);
+
+  // Setup analyser for preview playback to animate waveform based on audio amplitude
+  useEffect(() => {
+    const audioEl = previewAudioRef.current;
+    if (!audioEl || !recordedUrl) return;
+
+    const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+    const source = ctx.createMediaElementSource(audioEl);
+    const analyser = ctx.createAnalyser();
+    analyser.fftSize = 256;
+    const dataArray = new Uint8Array(analyser.frequencyBinCount);
+    source.connect(analyser);
+    analyser.connect(ctx.destination);
+
+    previewAudioCtxRef.current = ctx;
+    previewAnalyserRef.current = analyser;
+    previewDataRef.current = dataArray;
+
+    const bars = previewLevels.length;
+    const tick = () => {
+      if (!previewAnalyserRef.current || !previewDataRef.current) return;
+      previewAnalyserRef.current.getByteTimeDomainData(previewDataRef.current);
+      // split data into bars and compute RMS-like amplitude per bar
+      const chunkSize = Math.floor(previewDataRef.current.length / bars) || 1;
+      const next = new Array(bars).fill(0).map((_, bi) => {
+        let sum = 0;
+        const start = bi * chunkSize;
+        for (let i = 0; i < chunkSize; i++) {
+          const v = previewDataRef.current![start + i] - 128;
+          sum += Math.abs(v);
+        }
+        const avg = sum / chunkSize;
+        // normalize roughly to 0..1
+        return Math.min(1, avg / 40);
+      });
+      setPreviewLevels(next);
+      previewRafRef.current = requestAnimationFrame(tick);
+    };
+
+    previewRafRef.current = requestAnimationFrame(tick);
+
+    return () => {
+      if (previewRafRef.current) cancelAnimationFrame(previewRafRef.current);
+      previewRafRef.current = null;
+      try { analyser.disconnect(); } catch {}
+      try { source.disconnect(); } catch {}
+      try { ctx.close(); } catch {}
+      previewAnalyserRef.current = null;
+      previewAudioCtxRef.current = null;
+      previewDataRef.current = null;
+    };
+  }, [recordedUrl]);
 
   return (
     <div className="inline-flex items-center gap-2 shrink-0 relative">

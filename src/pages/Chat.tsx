@@ -48,7 +48,7 @@ const Chat = () => {
   const [isEnded, setIsEnded] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // Симуляция подключения к собеседнику
+  // Симуляция п��дключения к собеседнику
   useEffect(() => {
     if (!ageCategory || !genderPreference) {
       navigate('/');
@@ -402,7 +402,7 @@ const Chat = () => {
                         <span className="tabular-nums text-xs text-muted-foreground">{formatDur(recState.seconds)}</span>
                       </div>
                       <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-                        <span className={cn("text-sm", recState.cancelled ? "text-red-400" : "text-muted-foreground")}>Отмена</span>
+                        <span className={`text-sm ${recState.cancelled ? 'text-red-400' : 'text-muted-foreground'}`}>Отмена</span>
                       </div>
                     </>
                   )}

@@ -195,6 +195,13 @@ const Chat = () => {
     });
   };
 
+  const [recState, setRecState] = useState({ isRecording: false, seconds: 0, cancelHint: false, cancelled: false });
+  const formatDur = (seconds: number) => {
+    const m = Math.floor(seconds / 60).toString().padStart(2, '0');
+    const s = Math.floor(seconds % 60).toString().padStart(2, '0');
+    return `${m}:${s}`;
+  };
+
   // Disable page scroll while in chat; only chat area scrolls
   useEffect(() => {
     const htmlEl = document.documentElement;
@@ -387,13 +394,24 @@ const Chat = () => {
           <div className="bg-transparent border-t-0 p-4 pt-2 animate-slide-up mt-auto">
             <div className="flex items-end gap-3 max-w-3xl mx-auto flex-wrap">
               <div className="flex-1 min-w-[220px]">
-                <div className={`rounded-2xl transition-all duration-200 shadow-[0_2px_16px_0_rgba(80,80,120,0.10)] border border-[rgba(120,110,255,0.25)] bg-background/80 focus-within:border-[rgba(120,110,255,0.7)] focus-within:shadow-[0_0_0_3px_rgba(120,110,255,0.15)] ${isEnded ? 'opacity-60' : 'hover:brightness-105 hover:shadow-[0_2px_24px_0_rgba(120,110,255,0.10)]'}`}> 
+                <div className={`relative rounded-2xl transition-all duration-200 shadow-[0_2px_16px_0_rgba(80,80,120,0.10)] border border-[rgba(120,110,255,0.25)] bg-background/80 focus-within:border-[rgba(120,110,255,0.7)] focus-within:shadow-[0_0_0_3px_rgba(120,110,255,0.15)] ${isEnded ? 'opacity-60' : 'hover:brightness-105 hover:shadow-[0_2px_24px_0_rgba(120,110,255,0.10)]'}`}>
+                  {recState.isRecording && (
+                    <>
+                      <div className="pointer-events-none absolute left-3 bottom-3 flex items-center gap-2">
+                        <span className="h-2 w-2 rounded-full bg-red-500 animate-pulse" />
+                        <span className="tabular-nums text-xs text-muted-foreground">{formatDur(recState.seconds)}</span>
+                      </div>
+                      <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+                        <span className={cn("text-sm", recState.cancelled ? "text-red-400" : "text-muted-foreground")}>Отмена</span>
+                      </div>
+                    </>
+                  )}
                   <Textarea
                     ref={textareaRef}
                     value={newMessage}
                     onChange={(e) => { setNewMessage(e.target.value); autoResize(); }}
                     onKeyDown={handleKeyPress}
-                    placeholder="Напишите со��бщение..."
+                    placeholder="Напишите сообщение..."
                     disabled={isEnded || !isConnected}
                     className="w-full max-h-64 min-h-[120px] bg-background/80 border-transparent text-foreground placeholder:text-muted-foreground focus:bg-background transition-all rounded-2xl resize-none disabled:opacity-70 disabled:cursor-not-allowed"
                     maxLength={500}
@@ -426,6 +444,7 @@ const Chat = () => {
                 disabled={isEnded || !isConnected}
                 hasText={!!newMessage.trim()}
                 onSendText={sendMessage}
+                onRecordingState={setRecState}
                 onSend={({ url, duration }) => {
                   addAudioMessage(url, duration, true);
                 }}

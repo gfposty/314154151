@@ -71,6 +71,7 @@ export default {
       },
       boxShadow: {
         'glow': 'var(--shadow-glow)',
+        'glow-subtle': '0 0 15px hsl(263 85% 65% / 0.15)',
         'soft': 'var(--shadow-soft)',
         'particle': 'var(--shadow-particle)',
       },

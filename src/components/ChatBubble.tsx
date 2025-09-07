@@ -25,7 +25,7 @@ const ChatBubble = ({ message, isOwn, timestamp }: ChatBubbleProps) => {
         <div className={cn(
           "max-w-xs lg:max-w-md px-4 py-3 rounded-2xl relative group transition-all duration-200 hover:scale-105",
           isOwn
-            ? "bg-gradient-primary text-white rounded-br-sm shadow-glow"
+            ? "bg-gradient-primary text-white rounded-br-sm shadow-glow-subtle"
             : "bg-card/80 backdrop-blur-sm text-foreground rounded-bl-sm border border-border/50"
         )}>
           <p className="text-sm break-words leading-relaxed">{message}</p>

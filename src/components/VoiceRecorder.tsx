@@ -78,12 +78,16 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onSend, disabled, hasText
       window.clearInterval(timerRef.current);
       timerRef.current = null;
     }
+    // Stop recorder first — allow ondataavailable/onstop to run and gather data
     if (mediaRecorderRef.current && mediaRecorderRef.current.state !== "inactive") {
       try { mediaRecorderRef.current.stop(); } catch {}
     }
     mediaRecorderRef.current = null;
-    mediaStreamRef.current?.getTracks().forEach((t) => t.stop());
-    mediaStreamRef.current = null;
+    // Delay stopping tracks slightly to let browser emit dataavailable/onstop events
+    setTimeout(() => {
+      try { mediaStreamRef.current?.getTracks().forEach((t) => t.stop()); } catch {}
+      mediaStreamRef.current = null;
+    }, 120);
     stopVisualization();
   }, [stopVisualization]);
 
@@ -341,8 +345,8 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onSend, disabled, hasText
   }, [hasRecording, isRecording, recordedUrl, seconds, previewPlaying, previewProgress, resetState]);
 
   useEffect(() => {
-    onRecordingState?.({ isRecording, seconds, cancelHint: cancelSwipe.active, cancelled: cancelSwipe.cancelled });
-  }, [onRecordingState, isRecording, seconds, cancelSwipe.active, cancelSwipe.cancelled]);
+    onRecordingState?.({ isRecording, seconds, cancelHint: cancelSwipe.active, cancelled: cancelSwipe.cancelled, hasRecording });
+  }, [onRecordingState, isRecording, seconds, cancelSwipe.active, cancelSwipe.cancelled, hasRecording]);
 
   useEffect(() => {
     onBindApi?.({ cancel: cancelRecording, finish: finishRecording });

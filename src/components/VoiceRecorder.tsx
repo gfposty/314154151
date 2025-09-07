@@ -175,8 +175,6 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onSend, disabled }) => {
   const sendRecording = useCallback(() => {
     if (!recordedBlob || !recordedUrl) return;
     onSend({ blob: recordedBlob, url: recordedUrl, duration: seconds });
-    // cleanup
-    if (recordedUrl) URL.revokeObjectURL(recordedUrl);
     resetState();
   }, [onSend, recordedBlob, recordedUrl, seconds, resetState]);
 
@@ -309,7 +307,7 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onSend, disabled }) => {
           </div>
           <span className="tabular-nums text-sm text-muted-foreground">{formatDuration(seconds)}</span>
           <audio src={recordedUrl} className="hidden" />
-          <div className="ml-auto text-xs text-muted-foreground">Прослушайте и отправ��те</div>
+          <div className="ml-auto text-xs text-muted-foreground">Прослушайте и отправьте</div>
         </div>
       </div>
     );

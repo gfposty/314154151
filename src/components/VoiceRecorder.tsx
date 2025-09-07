@@ -132,25 +132,19 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onSend, disabled, hasText
         setHasRecording(true);
         setPreviewPlaying(false);
         setPreviewProgress(0);
-        onRecordingState?.({ isRecording: false, seconds, cancelHint: false, cancelled: false });
       };
       recorder.start();
       setIsRecording(true);
       setHasRecording(false);
       setSeconds(0);
-      onRecordingState?.({ isRecording: true, seconds: 0, cancelHint: false, cancelled: false });
       timerRef.current = window.setInterval(() => {
-        setSeconds((s) => {
-          const ns = s + 1;
-          onRecordingState?.({ isRecording: true, seconds: ns, cancelHint: cancelSwipe.active, cancelled: cancelSwipe.cancelled });
-          return ns;
-        });
+        setSeconds((s) => s + 1);
       }, 1000);
       startVisualization(stream);
     } catch (err) {
       console.error("Microphone permission or recording error", err);
     }
-  }, [disabled, isRecording, startVisualization, onRecordingState, cancelSwipe.active, cancelSwipe.cancelled]);
+  }, [disabled, isRecording, startVisualization, cancelSwipe.active, cancelSwipe.cancelled]);
 
   const finishRecording = useCallback(() => {
     if (!isRecording) return;
@@ -190,7 +184,6 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onSend, disabled, hasText
     setCancelSwipe((prev) => {
       const nextDx = Math.max(-200, Math.min(40, prev.dx + dx));
       const cancelled = nextDx <= -SWIPE_CANCEL_THRESHOLD;
-      onRecordingState?.({ isRecording: true, seconds, cancelHint: true, cancelled });
       return { active: true, dx: nextDx, cancelled };
     });
   };
@@ -199,7 +192,6 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onSend, disabled, hasText
     isHoldingRef.current = false;
     setCancelSwipe((prev) => ({ ...prev, active: false, dx: 0 }));
     if (cancelSwipe.cancelled) {
-      onRecordingState?.({ isRecording: false, seconds: 0, cancelHint: false, cancelled: true });
       cancelRecording();
     } else {
       finishRecording();
@@ -337,6 +329,10 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onSend, disabled, hasText
       </div>
     );
   }, [hasRecording, isRecording, recordedUrl, seconds, previewPlaying, previewProgress]);
+
+  useEffect(() => {
+    onRecordingState?.({ isRecording, seconds, cancelHint: cancelSwipe.active, cancelled: cancelSwipe.cancelled });
+  }, [onRecordingState, isRecording, seconds, cancelSwipe.active, cancelSwipe.cancelled]);
 
   return (
     <div className="inline-flex items-center gap-2 shrink-0">

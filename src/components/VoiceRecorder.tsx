@@ -404,7 +404,7 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onSend, disabled, hasText
       previewAnalyserRef.current.getByteTimeDomainData(previewDataRef.current);
       // split data into bars and compute RMS-like amplitude per bar
       const chunkSize = Math.floor(previewDataRef.current.length / bars) || 1;
-      const next = new Array(bars).fill(0).map((_, bi) => {
+      const nextRaw = new Array(bars).fill(0).map((_, bi) => {
         let sum = 0;
         const start = bi * chunkSize;
         for (let i = 0; i < chunkSize; i++) {
@@ -415,7 +415,14 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onSend, disabled, hasText
         // normalize roughly to 0..1
         return Math.min(1, avg / 40);
       });
-      setPreviewLevels(next);
+      // smooth with previous values for nicer animation
+      setPreviewLevels((prev) => {
+        const next = nextRaw.map((v, i) => {
+          const p = prev[i] ?? 0;
+          return p * 0.75 + v * 0.25;
+        });
+        return next;
+      });
       previewRafRef.current = requestAnimationFrame(tick);
     };
 

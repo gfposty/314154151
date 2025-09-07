@@ -150,7 +150,7 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onSend, disabled, hasText
     } catch (err) {
       console.error("Microphone permission or recording error", err);
     }
-  }, [disabled, isRecording, startVisualization]);
+  }, [disabled, isRecording, startVisualization, onRecordingState, cancelSwipe.active, cancelSwipe.cancelled]);
 
   const finishRecording = useCallback(() => {
     if (!isRecording) return;

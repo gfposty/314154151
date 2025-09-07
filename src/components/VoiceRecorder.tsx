@@ -22,7 +22,7 @@ const formatDuration = (seconds: number) => {
 
 const SWIPE_CANCEL_THRESHOLD = 80;
 
-const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onSend, disabled, hasText, onSendText }) => {
+const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onSend, disabled, hasText, onSendText, onRecordingState }) => {
   const [isRecording, setIsRecording] = useState(false);
   const [hasRecording, setHasRecording] = useState(false);
   const [recordedUrl, setRecordedUrl] = useState<string | null>(null);

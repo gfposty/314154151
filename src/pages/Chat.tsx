@@ -62,7 +62,7 @@ const Chat = () => {
       setIsConnected(true);
       toast({
         title: "Собеседник найден!",
-        description: "Вы подключены к анонимному чату",
+        description: "Вы под��лючены к анонимному чату",
       });
       playSound(CHAT_START_SOUND);
       // Добавляем приветственное сообщение от системы
@@ -143,7 +143,7 @@ const Chat = () => {
     setIsSearching(true);
     toast({
       title: "Поиск нового собеседника...",
-      description: "Подождите, мы ищем вам нового собеседника",
+      description: "Подождите, мы ищем вам ново��о собеседника",
     });
     // Симуляция поиска нового собеседника
     setTimeout(() => {
@@ -309,7 +309,7 @@ const Chat = () => {
                   onClick={handleChangePartner}
                   className="text-xs"
                 >
-                  Сменить параметры по��ска
+                  Сменить параметры по���ска
                 </Button>
               </div>
             </div>
@@ -396,15 +396,15 @@ const Chat = () => {
               <div className="flex-1 min-w-[220px]">
                 <div className={`relative rounded-2xl transition-all duration-200 shadow-[0_2px_16px_0_rgba(80,80,120,0.10)] border border-[rgba(120,110,255,0.25)] bg-background/80 focus-within:border-[rgba(120,110,255,0.7)] focus-within:shadow-[0_0_0_3px_rgba(120,110,255,0.15)] ${isEnded ? 'opacity-60' : 'hover:brightness-105 hover:shadow-[0_2px_24px_0_rgba(120,110,255,0.10)]'}`}>
                   {recState.isRecording && (
-                    <>
-                      <div className="pointer-events-none absolute left-3 bottom-3 flex items-center gap-2">
+                    <div className="pointer-events-none absolute inset-x-3 bottom-3 grid grid-cols-3 items-center">
+                      <div className="flex items-center gap-2 justify-self-start">
                         <span className="h-2 w-2 rounded-full bg-red-500 animate-pulse" />
                         <span className="tabular-nums text-xs text-muted-foreground">{formatDur(recState.seconds)}</span>
                       </div>
-                      <div className="pointer-events-none absolute bottom-3 left-1/2 -translate-x-1/2">
-                        <span className={`text-sm ${recState.cancelled ? 'text-red-400' : 'text-muted-foreground'}`}>Отмена</span>
+                      <div className="justify-self-center">
+                        <span className={`text-xs ${recState.cancelled ? 'text-red-400' : 'text-muted-foreground'}`}>Отмена</span>
                       </div>
-                    </>
+                    </div>
                   )}
                   <Textarea
                     ref={textareaRef}

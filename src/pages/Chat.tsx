@@ -112,7 +112,7 @@ const Chat = () => {
     }
     addMessage(newMessage, true);
     setNewMessage('');
-    // Симуляция ответа собеседник��
+    // Симуляция ответа собеседника
     setTimeout(() => {
       const responses = [
         "Интересно!",
@@ -289,7 +289,7 @@ const Chat = () => {
                     </ConfirmDialog>
                     <ConfirmDialog
                       title="Завершить чат?"
-                      description="Вы уверены, что хотите покинуть чат и вернуться на главную страницу?"
+                      description="Вы ��верены, что хотите покинуть чат и вернуться на главную страницу?"
                       onConfirm={handleEndChat}
                       destructive
                     >
@@ -341,7 +341,7 @@ const Chat = () => {
               </div>
             ) : (
               <div className="h-full flex flex-col">
-                <div className="rounded-3xl border border-[rgba(120,110,255,0.18)] bg-background/70 shadow-[0_4px_32px_0_rgba(80,80,120,0.10)] px-2 sm:px-6 py-4 min-h-[320px] flex flex-col transition-all duration-200 h-full overflow-y-auto overscroll-contain pr-2 space-y-1 custom-scrollbar" style={{ scrollbarGutter: 'stable' }}>
+                <div className={`rounded-3xl border border-[rgba(120,110,255,0.18)] bg-background/70 shadow-[0_4px_32px_0_rgba(80,80,120,0.10)] px-2 sm:px-6 py-4 min-h-[320px] flex flex-col transition-all duration-200 h-full overflow-y-auto overscroll-contain pr-2 space-y-1 custom-scrollbar ${recState.isRecording || recState.hasRecording ? 'pointer-events-none select-none opacity-80 blur-sm' : ''}` } style={{ scrollbarGutter: 'stable' }}>
                   {messages.length > 0 && (
                     <>
                       {messages.map((message, index) => {

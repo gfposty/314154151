@@ -326,7 +326,7 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onSend, disabled, hasText
     if (!hasRecording || isRecording || !recordedUrl) return null;
     const ui = (
       <div className="w-full flex justify-center">
-        <div className="relative pointer-events-auto flex items-center gap-4 px-4 py-2 rounded-full bg-[#0B0B0D] border border-[rgba(255,255,255,0.04)] shadow-sm w-full max-w-[720px]">
+        <div className="relative pointer-events-auto flex items-center gap-4 px-4 py-2 rounded-full bg-[#0B0B0D] border border-[rgba(255,255,255,0.04)] shadow-sm w-full max-w-[640px]">
           {/* Trash icon outside pill on the left, no background */}
           <button onClick={resetState} aria-label="Удалить запись" className="absolute -left-10 top-1/2 transform -translate-y-1/2 text-white/70 hover:text-white transition-colors">
             <Trash2 className="h-5 w-5" />

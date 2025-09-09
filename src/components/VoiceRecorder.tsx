@@ -403,21 +403,13 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onSend, disabled, hasText
           {/* Waveform container */}
           <div className="flex-1 flex items-center justify-center relative">
             <div className="w-full max-w-[820px]">
-              <div className="relative h-10 rounded-md bg-[rgba(255,255,255,0.02)] overflow-hidden">
+              <div className="relative h-12 rounded-md bg-primary/6 overflow-hidden">
                 {/* progress overlay */}
-                <div className="absolute left-0 top-0 h-full bg-gradient-to-r from-primary to-primary/60" style={{ width: `${Math.round(previewProgress * 100)}%`, transition: 'width 120ms linear', opacity: 0.45 }} />
+                <div className="absolute left-0 top-0 h-full bg-gradient-to-r from-primary to-primary/60" style={{ width: `${Math.round(previewProgress * 100)}%`, transition: 'width 120ms linear', opacity: 0.35 }} />
 
-                {/* dynamic bars */}
-                <div className="relative z-10 h-full flex items-end justify-center px-2">
-                  <div className="flex items-end gap-[6px] w-full overflow-hidden justify-center">
-                    {previewLevels.map((lvl, i) => (
-                      <div
-                        key={i}
-                        style={{ height: `${Math.max(6, Math.round(lvl * 36))}px`, width: 6 }}
-                        className={`inline-block bg-gradient-to-t from-primary to-primary/60 rounded-sm transition-all ${previewPlaying ? 'opacity-100' : 'opacity-70'}`}
-                      />
-                    ))}
-                  </div>
+                {/* canvas waveform */}
+                <div className="relative z-10 h-full flex items-center justify-center px-2">
+                  <canvas ref={previewCanvasRef} style={{ width: '100%', height: '100%' }} />
                 </div>
 
                 {/* centered play button (overlay) */}

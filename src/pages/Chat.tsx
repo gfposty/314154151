@@ -62,12 +62,12 @@ const Chat = () => {
       setIsConnected(true);
       toast({
         title: "Собеседник найден!",
-        description: "Вы под��лючены к анонимному чату",
+        description: "Вы подключены к анонимному чату",
       });
       playSound(CHAT_START_SOUND);
       // Добавляем приветственное сообщение от системы
       setTimeout(() => {
-        addMessage("При��ет! Как дела?", false);
+        addMessage("Привет! Как дела?", false);
       }, 1000);
     }, Math.random() * 3000 + 1000); // 1-4 секунды
 
@@ -106,7 +106,7 @@ const Chat = () => {
       toast({
         variant: "destructive",
         title: "Сообщение заблокировано",
-        description: "Ваше сообщение содержит запрещенны�� слова",
+        description: "Ваше сообщение содержит запрещенные слова",
       });
       return;
     }
@@ -143,9 +143,9 @@ const Chat = () => {
     setIsSearching(true);
     toast({
       title: "Поиск нового собеседника...",
-      description: "Подождите, мы ищем вам ново��о собеседника",
+      description: "Подождите, мы ищем вам нового собеседника",
     });
-    // Симуляц��я поиска нового собеседника
+    // Симуляция поиска нового собеседника
     setTimeout(() => {
       setIsSearching(false);
       setPartnerFound(true);
@@ -227,7 +227,7 @@ const Chat = () => {
     switch (gender) {
       case 'male': return 'Мужской';
       case 'female': return 'Женский';
-      case 'any': return 'Люб��й';
+      case 'any': return 'Любой';
       default: return gender;
     }
   };
@@ -238,7 +238,7 @@ const Chat = () => {
 
   return (
     <div className="fixed inset-0 w-full h-full overflow-hidden overscroll-none">
-      {/* SVG-паттерн дл�� фона */}
+      {/* SVG-паттерн для фона */}
       <div className="bg-pattern" />
       <div className="relative flex flex-col w-full h-full z-10">
         {/* Header */}
@@ -273,7 +273,7 @@ const Chat = () => {
                   <>
                     <ConfirmDialog
                       title="Найти нового собеседника?"
-                      description="Текущий диалог будет завершен, и мы найдем вам нового собеседника."
+                      description="Текущий диалог будет завер��ен, и мы найдем вам нового собеседника."
                       onConfirm={handleNextChat}
                     >
                       <Button
@@ -308,7 +308,7 @@ const Chat = () => {
                   onClick={handleChangePartner}
                   className="text-xs"
                 >
-                  Сменить параметры по����ска
+                  Сменить параметры поиска
                 </Button>
               </div>
             </div>
@@ -350,7 +350,7 @@ const Chat = () => {
                           const today = new Date();
                           const yesterday = new Date();
                           yesterday.setDate(today.getDate() - 1);
-                          if (d.toDateString() === today.toDateString()) return 'С��годня';
+                          if (d.toDateString() === today.toDateString()) return 'Сегодня';
                           if (d.toDateString() === yesterday.toDateString()) return 'Вчера';
                           return d.toLocaleDateString('ru-RU');
                         })();

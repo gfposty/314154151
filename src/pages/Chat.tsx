@@ -1,4 +1,3 @@
-import { useState, useEffect, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -7,7 +6,7 @@ import { ArrowLeft, Send, SkipForward, X, Users, Heart, Paperclip, Smile } from 
 import { toast } from "@/hooks/use-toast";
 import ChatBubble from "@/components/ChatBubble";
 import ConfirmDialog from "@/components/ConfirmDialog";
-import VoiceRecorder from "@/components/VoiceRecorder";
+import { useUserActivity } from "@/hooks/useUserActivity";
 
 interface Message {
   id: string;
@@ -48,6 +47,36 @@ const Chat = () => {
   const [isEnded, setIsEnded] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
+  // Activity/visibility tracking
+  const isInactive = useUserActivity(30000);
+  const [isHidden, setIsHidden] = useState(document.visibilityState === 'hidden');
+  const hideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    const onVisibility = () => {
+      const hidden = document.visibilityState === 'hidden';
+      setIsHidden(hidden);
+      if (hidden) {
+        if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
+        hideTimerRef.current = setTimeout(() => {
+          if (!isEnded && isConnected) {
+            handleEndChat();
+          }
+        }, 60000);
+      } else {
+        if (hideTimerRef.current) {
+          clearTimeout(hideTimerRef.current);
+          hideTimerRef.current = null;
+        }
+      }
+    };
+    document.addEventListener('visibilitychange', onVisibility);
+    return () => {
+      document.removeEventListener('visibilitychange', onVisibility);
+      if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
+    };
+  }, [isConnected, isEnded]);
+
   // Симуляция подключения к собеседнику
   useEffect(() => {
     if (!ageCategory || !genderPreference) {
@@ -82,17 +111,6 @@ const Chat = () => {
       timestamp: Date.now()
     };
     setMessages(prev => [...prev, message]);
-  };
-
-  const addAudioMessage = (url: string, duration: number, isOwn: boolean) => {
-    const message: Message = {
-      id: (Date.now() + Math.random()).toString(),
-      audioUrl: url,
-      audioDuration: duration,
-      isOwn,
-      timestamp: Date.now(),
-    };
-    setMessages((prev) => [...prev, message]);
   };
 
   const sendMessage = () => {
@@ -178,29 +196,6 @@ const Chat = () => {
     // the input from expanding vertically when a lot of text is entered.
   };
 
-  const insertAtCursor = (text: string) => {
-    const el = textareaRef.current;
-    if (!el) return;
-    const start = el.selectionStart ?? newMessage.length;
-    const end = el.selectionEnd ?? newMessage.length;
-    const updated = newMessage.slice(0, start) + text + newMessage.slice(end);
-    setNewMessage(updated);
-    requestAnimationFrame(() => {
-      if (!el) return;
-      el.selectionStart = el.selectionEnd = start + text.length;
-      autoResize();
-      el.focus();
-    });
-  };
-
-  const [recState, setRecState] = useState({ isRecording: false, seconds: 0, cancelHint: false, cancelled: false, hasRecording: false });
-  const cancelRecRef = useRef<(() => void) | null>(null);
-  const formatDur = (seconds: number) => {
-    const m = Math.floor(seconds / 60).toString().padStart(2, '0');
-    const s = Math.floor(seconds % 60).toString().padStart(2, '0');
-    return `${m}:${s}`;
-  };
-
   // Disable page scroll while in chat; only chat area scrolls
   useEffect(() => {
     const htmlEl = document.documentElement;
@@ -236,6 +231,9 @@ const Chat = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
+  const statusColor = isHidden ? 'bg-red-500' : (isInactive ? 'bg-yellow-400' : 'bg-green-500');
+  const statusText = isHidden ? 'вышел' : (isInactive ? 'отошёл' : 'в сети');
+
   return (
     <div className="fixed inset-0 w-full h-full overflow-hidden overscroll-none">
       {/* SVG-паттерн для фона */}
@@ -255,6 +253,10 @@ const Chat = () => {
                     <span className="animate-pulse">Поиск собеседника...</span>
                   ) : partnerFound ? (
                     <>
+                      <div className="flex items-center space-x-1">
+                        <span className={`w-2.5 h-2.5 rounded-full ${statusColor} shadow`} />
+                        <span className="truncate max-w-[40vw] sm:max-w-none">{statusText}</span>
+                      </div>
                       <div className="flex items-center space-x-1">
                         <Users className="w-3 h-3" />
                         <span className="truncate max-w-[40vw] sm:max-w-none">{ageCategory}</span>
@@ -353,7 +355,7 @@ const Chat = () => {
                           yesterday.setDate(today.getDate() - 1);
                           if (d.toDateString() === today.toDateString()) return 'Сегодня';
                           if (d.toDateString() === yesterday.toDateString()) return 'Вчера';
-                          return d.toLocaleDateString('ru-RU');
+                          return d.toLocaleDateString('ру-RU');
                         })();
                         return (
                           <div key={message.id} className="animate-slide-up" style={{ animationDelay: `${index * 0.06}s` }}>
@@ -394,50 +396,19 @@ const Chat = () => {
           <div className="bg-transparent border-t-0 p-4 pt-2 animate-slide-up mt-auto">
             <div className="flex items-end gap-3 max-w-3xl mx-auto flex-wrap">
               <div className="flex-1 min-w-[220px]">
-                <div className={`relative rounded-2xl transition-all duration-200 shadow-[0_2px_16px_0_rgba(80,80,120,0.10)] border border-[rgba(120,110,255,0.25)] bg-background/80 focus-within:border-[rgba(120,110,255,0.7)] focus-within:shadow-[0_0_0_3px_rgba(120,110,255,0.15)] ${isEnded ? 'opacity-60' : 'hover:brightness-105 hover:shadow-[0_2px_24px_0_rgba(120,110,255,0.10)]'} ${recState.isRecording || recState.hasRecording ? 'pointer-events-none select-none opacity-80' : ''}`}>
-                  {/* root for voice preview portal (preview will render inside this container) */}
-                  <div id="voice-preview-root" className="absolute left-3 right-20 bottom-3 flex items-center justify-center pointer-events-auto" />
-                  {(recState.isRecording || recState.hasRecording) && (
-                    <div className="pointer-events-none absolute inset-x-3 bottom-3 grid grid-cols-3 items-center">
-                      <div className="flex items-center gap-2 justify-self-start">
-                        {recState.isRecording ? (
-                          <>
-                            <span className="h-2 w-2 rounded-full bg-red-500 animate-pulse" />
-                            <span className="tabular-nums text-xs text-muted-foreground">{formatDur(recState.seconds)}</span>
-                          </>
-                        ) : (
-                          // left area intentionally empty when preview available (trash moved into pill)
-                          null
-                        )}
-                      </div>
-                      <div className="justify-self-center">
-                        {recState.isRecording ? (
-                          <button
-                            type="button"
-                            onClick={() => cancelRecRef.current?.()}
-                            className={`justify-self-center px-2 py-0.5 rounded-md font-medium text-sm pointer-events-auto transition-colors ${recState.cancelled ? 'text-red-400 bg-red-500/10' : 'text-primary bg-primary/10'} drop-shadow-[0_0_6px_hsl(var(--primary))]`}
-                          >
-                            Отмена
-                          </button>
-                        ) : null}
-                      </div>
-                      <div className="flex items-center justify-self-end">
-                        {/* right empty when recording; when preview available we show nothing here (preview UI is in recorder) */}
-                      </div>
-                    </div>
-                  )}
+                <div className={`relative rounded-2xl transition-all duration-200 shadow-[0_2px_16px_0_rgba(80,80,120,0.10)] border border-[rgba(120,110,255,0.25)] bg-background/80 focus-within:border-[rgba(120,110,255,0.7)] focus-within:shadow-[0_0_0_3px_rgba(120,110,255,0.15)] ${isEnded ? 'opacity-60' : 'hover:brightness-105 hover:shadow-[0_2px_24px_0_rgba(120,110,255,0.10)]'}`}>
                   <Textarea
                     ref={textareaRef}
                     value={newMessage}
                     onChange={(e) => { setNewMessage(e.target.value); }}
                     onKeyDown={handleKeyPress}
-                    placeholder={recState.isRecording || recState.hasRecording ? '' : 'Напишите сообщение...'}
-                    disabled={isEnded || !isConnected || recState.isRecording}
-                    className={`w-full h-32 pr-16 bg-background/80 border-transparent text-foreground placeholder:text-muted-foreground focus:bg-background transition-all rounded-2xl resize-none overflow-y-auto hide-scrollbar ${recState.isRecording || recState.hasRecording ? 'pointer-events-none' : ''} disabled:opacity-70 disabled:cursor-not-allowed`}
+                    placeholder={'Напишите сообщение...'}
+                    disabled={isEnded || !isConnected}
+                    className={`w-full h-32 pr-20 bg-background/80 border-transparent text-foreground placeholder:text-muted-foreground focus:bg-background transition-all rounded-2xl resize-none overflow-y-auto hide-scrollbar disabled:opacity-70 disabled:cursor-not-allowed`}
                     maxLength={500}
                   />
 
-                  {/* Icons inside input: emoji + voice recorder (aligned) */}
+                  {/* Icons inside input: emoji + send */}
                   <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-2 pointer-events-auto z-20">
                     <Popover open={emojiOpen} onOpenChange={setEmojiOpen}>
                       <PopoverTrigger asChild>
@@ -461,18 +432,14 @@ const Chat = () => {
                       </PopoverContent>
                     </Popover>
 
-                    <div className="flex items-center">
-                      <VoiceRecorder
-                        disabled={isEnded || !isConnected}
-                        hasText={!!newMessage.trim()}
-                        onSendText={sendMessage}
-                        onRecordingState={setRecState}
-                        onBindApi={({ cancel }) => { cancelRecRef.current = cancel; }}
-                        onSend={({ url, duration }) => {
-                          addAudioMessage(url, duration, true);
-                        }}
-                      />
-                    </div>
+                    <Button
+                      onClick={sendMessage}
+                      disabled={isEnded || !isConnected || !newMessage.trim()}
+                      size="icon"
+                      className="h-10 w-10"
+                    >
+                      <Send className="h-4 w-4" />
+                    </Button>
                   </div>
                 </div>
               </div>

@@ -59,7 +59,7 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onSend, disabled, hasText
   const previewRafRef = useRef<number | null>(null);
   const cancelledRef = useRef(false);
 
-  // draw waveform to canvas when previewLevels change
+  // draw waveform to canvas when previewLevels change (compact, lower height)
   useEffect(() => {
     const canvas = previewCanvasRef.current;
     if (!canvas) return;
@@ -67,25 +67,44 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onSend, disabled, hasText
     if (!ctx) return;
     const dpr = window.devicePixelRatio || 1;
     const rect = canvas.getBoundingClientRect();
+    // guard for zero-sized canvas
+    if (rect.width === 0 || rect.height === 0) return;
     canvas.width = rect.width * dpr;
     canvas.height = rect.height * dpr;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    const barCount = previewLevels.length;
-    const barWidth = Math.max(2, Math.floor(canvas.width / (barCount * 1.5)));
-    const gap = Math.max(2, Math.floor(barWidth * 0.5));
+    const barCount = Math.min(previewLevels.length, 40);
+    // compute bar width and gap to keep waveform compact
+    const totalGapRatio = 0.35; // percent of canvas used for gaps
+    const availableWidth = canvas.width;
+    const barWidth = Math.max(2 * dpr, Math.floor((availableWidth / (barCount + (barCount - 1) * totalGapRatio))));
+    const gap = Math.max(1 * dpr, Math.floor(barWidth * totalGapRatio));
     const totalWidth = barCount * barWidth + (barCount - 1) * gap;
-    let x = (canvas.width - totalWidth) / 2;
+    let x = Math.round((canvas.width - totalWidth) / 2);
     for (let i = 0; i < barCount; i++) {
       const v = previewLevels[i] ?? 0;
-      const h = Math.max(6, Math.round(v * canvas.height * 0.8));
-      const y = canvas.height - h;
+      // scale down heights for compact look
+      const h = Math.max(4 * dpr, Math.round(v * canvas.height * 0.5));
+      const y = canvas.height - h - Math.round(2 * dpr);
       const gradient = ctx.createLinearGradient(0, y, 0, canvas.height);
-      gradient.addColorStop(0, 'rgba(168,85,247,0.95)');
-      gradient.addColorStop(1, 'rgba(124,58,237,0.6)');
+      gradient.addColorStop(0, 'rgba(168,85,247,0.98)');
+      gradient.addColorStop(1, 'rgba(124,58,237,0.7)');
       ctx.fillStyle = gradient;
       const bx = Math.round(x);
       const bw = Math.round(barWidth);
-      ctx.fillRect(bx, y, bw, h);
+      // rounded corners via path
+      const radius = Math.max(1, Math.floor(bw / 2));
+      ctx.beginPath();
+      ctx.moveTo(bx + radius, y);
+      ctx.lineTo(bx + bw - radius, y);
+      ctx.quadraticCurveTo(bx + bw, y, bx + bw, y + radius);
+      ctx.lineTo(bx + bw, y + h - radius);
+      ctx.quadraticCurveTo(bx + bw, y + h, bx + bw - radius, y + h);
+      ctx.lineTo(bx + radius, y + h);
+      ctx.quadraticCurveTo(bx, y + h, bx, y + h - radius);
+      ctx.lineTo(bx, y + radius);
+      ctx.quadraticCurveTo(bx, y, bx + radius, y);
+      ctx.closePath();
+      ctx.fill();
       x += barWidth + gap;
     }
   }, [previewLevels]);
@@ -373,7 +392,7 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onSend, disabled, hasText
             "px-2 py-1 rounded-md text-xs",
             cancelSwipe.cancelled ? "bg-red-500/20 text-red-400 border border-red-500/30" : "text-muted-foreground"
           )}>
-            {cancelSwipe.cancelled ? "Отпу��тите, чтобы отменить" : "Свайп влево — отмена"}
+            {cancelSwipe.cancelled ? "Отпустите, чтобы отменить" : "Свайп влево — отмена"}
           </div>
         </div>
         {cancelSwipe.active && (

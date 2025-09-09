@@ -392,7 +392,7 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onSend, disabled, hasText
             "px-2 py-1 rounded-md text-xs",
             cancelSwipe.cancelled ? "bg-red-500/20 text-red-400 border border-red-500/30" : "text-muted-foreground"
           )}>
-            {cancelSwipe.cancelled ? "Отпустите, чтобы отменить" : "Свайп вл��во — отмена"}
+            {cancelSwipe.cancelled ? "Отпустите, чтобы отменить" : "Свайп влево — отмена"}
           </div>
         </div>
         {cancelSwipe.active && (

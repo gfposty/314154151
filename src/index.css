@@ -1,4 +1,3 @@
-@tailwind base;
 @tailwind components;
 @tailwind utilities;
 
@@ -148,5 +147,20 @@ All colors MUST be HSL.
     width: 0px;
     height: 0px;
     background: transparent;
+  }
+}
+
+@layer components {
+  .site-brand {
+    font-weight: 600;
+    font-size: 1.125rem; /* ~18px */
+    line-height: 1;
+    background-image: linear-gradient(90deg, #ffffff 0%, hsl(263 85% 65%) 100%);
+    background-size: 200% 200%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: gradient-shift 5s ease-in-out infinite;
+    transition: opacity 200ms ease;
   }
 }

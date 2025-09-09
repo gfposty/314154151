@@ -95,7 +95,7 @@ const Chat = () => {
         description: "Вы подключены к анонимному чату",
       });
       playSound(CHAT_START_SOUND);
-      // Добавляем приветственное сообщение от системы
+      // Добавляем приветственн��е сообщение от системы
       setTimeout(() => {
         addMessage("Привет! Как дела?", false);
       }, 1000);
@@ -264,7 +264,7 @@ const Chat = () => {
                 <img src="/123.png" alt="Bezlico Logo" className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl object-contain -my-2" />
                 <div className="flex items-center flex-wrap gap-x-3 gap-y-1 text-xs text-muted-foreground">
                   {isEnded ? (
-                    <span>Чат з��вершён</span>
+                    <span>Чат завершён</span>
                   ) : isSearching ? (
                     <span className="animate-pulse">Поиск собеседника...</span>
                   ) : partnerFound ? (

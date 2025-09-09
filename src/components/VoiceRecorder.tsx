@@ -456,21 +456,33 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onSend, disabled, hasText
         try {
           previewSourceRef.current = previewAudioCtxRef.current!.createMediaElementSource(audioEl);
         } catch (err) {
-          console.warn("createMediaElementSource failed on reuse, skipping visualiser", err);
-          return;
+          // createMediaElementSource may fail if the element was already connected to another context.
+          // Fallback: use captureStream() on the audio element and create a MediaStreamSource from that.
+          try {
+            const captureStream = (audioEl as any).captureStream ? (audioEl as any).captureStream() : null;
+            if (captureStream) {
+              previewSourceRef.current = previewAudioCtxRef.current!.createMediaStreamSource(captureStream);
+            } else {
+              console.warn('createMediaElementSource failed and captureStream unavailable, skipping visualiser', err);
+              return;
+            }
+          } catch (err2) {
+            console.warn('captureStream fallback failed, skipping visualiser', err2);
+            return;
+          }
         }
       }
 
       const ctx = previewAudioCtxRef.current!;
       const source = previewSourceRef.current!;
       const analyser = ctx.createAnalyser();
-      analyser.fftSize = 256;
+      analyser.fftSize = 1024;
       const dataArray = new Uint8Array(analyser.frequencyBinCount);
 
-      // connect source -> analyser -> destination
+      // connect source -> analyser (do not connect to destination to avoid double audio)
       try {
         source.connect(analyser);
-        analyser.connect(ctx.destination);
+        // don't connect analyser to ctx.destination for preview visualiser to avoid extra routing
       } catch (err) {
         console.warn('Failed to connect audio nodes for preview visualiser', err);
       }

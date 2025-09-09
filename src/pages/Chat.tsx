@@ -270,10 +270,6 @@ const Chat = () => {
                   ) : partnerFound ? (
                     <>
                       <div className="flex items-center space-x-1">
-                        <span className={`w-2.5 h-2.5 rounded-full ${statusColor} shadow`} />
-                        <span className="truncate max-w-[40vw] sm:max-w-none">{statusText}</span>
-                      </div>
-                      <div className="flex items-center space-x-1">
                         <Users className="w-3 h-3" />
                         <span className="truncate max-w-[40vw] sm:max-w-none">{ageCategory}</span>
                       </div>
@@ -333,17 +329,17 @@ const Chat = () => {
             </div>
           </div>
         </div>
-        {/* Persistent top-left status badge (stays visible during scroll) */}
-        <div className="absolute top-6 left-6 z-30 pointer-events-auto">
-          <div className="flex items-center space-x-2 bg-background/80 px-3 py-1 rounded-full border border-border/50 shadow-sm">
-            <span className={`w-2.5 h-2.5 rounded-full ${statusColor} shadow`} />
-            <span className="text-xs text-muted-foreground lowercase">{statusText}</span>
-          </div>
-        </div>
         {/* Messages */}
         <div className="flex-1 px-4 pt-2 pb-12 sm:pb-16 min-h-0">
           <div className="relative max-w-3xl mx-auto h-full">
             <div className="absolute top-0 left-0 right-0 h-6 bg-gradient-to-b from-background/80 to-transparent z-10 pointer-events-none" />
+            {/* Status badge inside chat container (stays visible while messages scroll) */}
+            <div className="absolute top-4 left-4 z-20 pointer-events-auto">
+              <div className="flex items-center space-x-2 bg-background/80 px-3 py-1 rounded-full border border-border/50 shadow-sm">
+                <span className={`w-2.5 h-2.5 rounded-full ${statusColor} shadow`} />
+                <span className="text-xs text-muted-foreground lowercase">{statusText}</span>
+              </div>
+            </div>
             {isSearching && !isEnded ? (
               <div className="h-full flex flex-col items-center justify-center">
                 <div className="text-center py-12 animate-fade-in">

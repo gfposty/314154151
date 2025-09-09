@@ -261,7 +261,6 @@ const Chat = () => {
           <div className="max-w-3xl mx-auto relative">
             <div className="rounded-3xl border border-[rgba(120,110,255,0.18)] bg-background/70 px-3 py-2 flex items-center justify-between flex-wrap gap-2 sm:gap-3">
               <div className="flex items-center space-x-3 flex-shrink min-w-0">
-                <img src="/123.png" alt="Bezlico Logo" className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl object-contain -my-2" />
                 <div className="flex items-center flex-wrap gap-x-3 gap-y-1 text-xs text-muted-foreground">
                   {isEnded ? (
                     <span>Чат завершён</span>
@@ -468,7 +467,7 @@ const Chat = () => {
               </div>
             </div>
             <div className="text-xs text-muted-foreground text-center mt-2">
-              {newMessage.length}/500 символов
+              {newMessage.length}/500 сим��олов
             </div>
           </div>
         )}

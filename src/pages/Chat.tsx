@@ -277,7 +277,7 @@ const Chat = () => {
                       </div>
                     </>
                   ) : (
-                    'Не подключен'
+                    'Не подключ��н'
                   )}
                 </div>
               </div>
@@ -355,6 +355,11 @@ const Chat = () => {
                         <Heart className="w-3 h-3" />
                         <span>Пол: {getGenderText(genderPreference)}</span>
                       </div>
+                    </div>
+                    <div className="mt-6 flex justify-center">
+                      <Button variant="outline" onClick={() => { setIsSearching(false); setIsConnected(false); setPartnerFound(false); navigate('/'); }}>
+                        Отменить
+                      </Button>
                     </div>
                   </div>
                 </div>

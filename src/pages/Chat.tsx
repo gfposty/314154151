@@ -162,7 +162,7 @@ const Chat = () => {
     setIsSearching(true);
     toast({
       title: "Поиск нового собеседника...",
-      description: "Подождите, мы ищем вам нового собеседника",
+      description: "Подождите, мы ищем вам нового собеседник��",
     });
     // Симуляция поиска ново��о собеседника
     setTimeout(() => {
@@ -423,7 +423,7 @@ const Chat = () => {
                     onKeyDown={handleKeyPress}
                     placeholder={'Напишите сообщение...'}
                     disabled={isEnded || !isConnected}
-                    className={`w-full h-32 pr-20 bg-background/80 border-transparent text-foreground placeholder:text-muted-foreground focus:bg-background transition-all rounded-2xl resize-none overflow-y-auto hide-scrollbar disabled:opacity-70 disabled:cursor-not-allowed`}
+                    className={`w-full h-32 pr-28 bg-background/80 border-transparent text-foreground placeholder:text-muted-foreground focus:bg-background transition-all rounded-2xl resize-none overflow-y-auto hide-scrollbar disabled:opacity-70 disabled:cursor-not-allowed`}
                     maxLength={500}
                   />
 

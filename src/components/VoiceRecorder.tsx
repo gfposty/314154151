@@ -406,6 +406,8 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onSend, disabled, hasText
             </div>
           </div>
         </div>
+        {/* hidden audio element used for preview playback / analyser */}
+        <audio ref={previewAudioRef} src={recordedUrl || undefined} preload="metadata" className="hidden" />
       </div>
     );
 

@@ -349,7 +349,7 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onSend, disabled, hasText
         "hover:scale-105 active:scale-95 transition-transform"
       )}
     >
-      <Send className="h-4 w-4" />
+      <Send className="h-5 w-5" />
     </button>
   );
 
@@ -364,7 +364,7 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onSend, disabled, hasText
         "hover:scale-105 active:scale-95 transition-transform disabled:opacity-50"
       )}
     >
-      <Send className="h-4 w-4" />
+      <Send className="h-5 w-5" />
     </button>
   );
 
@@ -392,7 +392,7 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onSend, disabled, hasText
             "px-2 py-1 rounded-md text-xs",
             cancelSwipe.cancelled ? "bg-red-500/20 text-red-400 border border-red-500/30" : "text-muted-foreground"
           )}>
-            {cancelSwipe.cancelled ? "Отпус��ите, чтобы отменить" : "Свайп влево — отмена"}
+            {cancelSwipe.cancelled ? "Отпустите, чтобы отменить" : "Свайп влево — отмена"}
           </div>
         </div>
         {cancelSwipe.active && (

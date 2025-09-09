@@ -131,7 +131,7 @@ const Chat = () => {
     }
     addMessage(newMessage, true);
     setNewMessage('');
-    // Симуляция ответа собеседника
+    // Сим��ляция ответа собеседника
     setTimeout(() => {
       const responses = [
         "Интересно!",
@@ -423,7 +423,7 @@ const Chat = () => {
                     onKeyDown={handleKeyPress}
                     placeholder={'Напишите сообщение...'}
                     disabled={isEnded || !isConnected}
-                    className={`w-full h-32 pr-36 bg-background/80 border-transparent text-foreground placeholder:text-muted-foreground focus:bg-background transition-all rounded-2xl resize-none overflow-y-auto hide-scrollbar disabled:opacity-70 disabled:cursor-not-allowed`}
+                    className={`w-full h-12 py-2 pr-36 bg-background/80 border-transparent text-foreground placeholder:text-muted-foreground focus:bg-background transition-all rounded-2xl resize-none overflow-y-auto hide-scrollbar disabled:opacity-70 disabled:cursor-not-allowed`}
                     maxLength={500}
                   />
 

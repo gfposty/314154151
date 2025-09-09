@@ -105,7 +105,7 @@ const Chat = () => {
     if (hasBannedWord) {
       toast({
         variant: "destructive",
-        title: "Соо��щение заблокировано",
+        title: "Сообщение заблокировано",
         description: "Ваше сообщение содержит запрещенны�� слова",
       });
       return;
@@ -145,7 +145,7 @@ const Chat = () => {
       title: "Поиск нового собеседника...",
       description: "Подождите, мы ищем вам ново��о собеседника",
     });
-    // Симуляц���я поиска нового собеседника
+    // Симуляц��я поиска нового собеседника
     setTimeout(() => {
       setIsSearching(false);
       setPartnerFound(true);
@@ -432,7 +432,7 @@ const Chat = () => {
                     onKeyDown={handleKeyPress}
                     placeholder={recState.isRecording || recState.hasRecording ? '' : 'Напишите сообщение...'}
                     disabled={isEnded || !isConnected || recState.isRecording}
-                    className={`w-full h-32 bg-background/80 border-transparent text-foreground placeholder:text-muted-foreground focus:bg-background transition-all rounded-2xl resize-none overflow-y-auto ${recState.isRecording || recState.hasRecording ? 'pointer-events-none' : ''} disabled:opacity-70 disabled:cursor-not-allowed`}
+                    className={`w-full h-32 bg-background/80 border-transparent text-foreground placeholder:text-muted-foreground focus:bg-background transition-all rounded-2xl resize-none overflow-y-auto hide-scrollbar ${recState.isRecording || recState.hasRecording ? 'pointer-events-none' : ''} disabled:opacity-70 disabled:cursor-not-allowed`}
                     maxLength={500}
                   />
                 </div>

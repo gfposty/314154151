@@ -34,8 +34,40 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onSend, disabled, hasText
 
   // Preview playback for just-recorded note
   const previewAudioRef = useRef<HTMLAudioElement | null>(null);
+  const previewCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const [previewPlaying, setPreviewPlaying] = useState(false);
   const [previewProgress, setPreviewProgress] = useState(0);
+
+  // draw waveform to canvas when previewLevels change
+  useEffect(() => {
+    const canvas = previewCanvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    const dpr = window.devicePixelRatio || 1;
+    const rect = canvas.getBoundingClientRect();
+    canvas.width = rect.width * dpr;
+    canvas.height = rect.height * dpr;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    const barCount = previewLevels.length;
+    const barWidth = Math.max(2, Math.floor(canvas.width / (barCount * 1.5)));
+    const gap = Math.max(2, Math.floor(barWidth * 0.5));
+    const totalWidth = barCount * barWidth + (barCount - 1) * gap;
+    let x = (canvas.width - totalWidth) / 2;
+    for (let i = 0; i < barCount; i++) {
+      const v = previewLevels[i] ?? 0;
+      const h = Math.max(6, Math.round(v * canvas.height * 0.8));
+      const y = canvas.height - h;
+      const gradient = ctx.createLinearGradient(0, y, 0, canvas.height);
+      gradient.addColorStop(0, 'rgba(168,85,247,0.95)');
+      gradient.addColorStop(1, 'rgba(124,58,237,0.6)');
+      ctx.fillStyle = gradient;
+      const bx = Math.round(x);
+      const bw = Math.round(barWidth);
+      ctx.fillRect(bx, y, bw, h);
+      x += barWidth + gap;
+    }
+  }, [previewLevels]);
 
   // Recorder
   const mediaStreamRef = useRef<MediaStream | null>(null);

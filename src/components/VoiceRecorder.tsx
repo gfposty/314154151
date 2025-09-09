@@ -543,13 +543,7 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onSend, disabled, hasText
   return (
     <div className="inline-flex items-center gap-2 shrink-0 relative">
       {ReadyToSendUI}
-      {hasRecording ? (
-        <>
-          {sendVoiceBtn}
-        </>
-      ) : (
-        hasText ? sendTextBtn : micBtn
-      )}
+      {hasText ? sendTextBtn : micBtn}
     </div>
   );
 };

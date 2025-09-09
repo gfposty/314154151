@@ -567,9 +567,13 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onSend, disabled, hasText
   }, [recordedUrl]);
 
   return (
-    <div className="inline-flex items-center gap-2 shrink-0 relative">
-      {ReadyToSendUI}
-      {hasText ? sendTextBtn : micBtn}
+    <div className="inline-flex items-center gap-3 shrink-0 relative w-full">
+      <div className="flex-1 flex justify-center">
+        {ReadyToSendUI}
+      </div>
+      <div className="flex items-center">
+        {hasRecording ? sendVoiceBtn : (hasText ? sendTextBtn : micBtn)}
+      </div>
     </div>
   );
 };

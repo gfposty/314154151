@@ -95,7 +95,7 @@ const Chat = () => {
         description: "Вы подключены к анонимному чату",
       });
       playSound(CHAT_START_SOUND);
-      // Добавляем приветственн��е сообщение от системы
+      // Добавляем приветственное сообщение от системы
       setTimeout(() => {
         addMessage("Привет! Как дела?", false);
       }, 1000);
@@ -400,7 +400,7 @@ const Chat = () => {
           <div className="flex justify-center items-end w-full mb-4">
             <div className="max-w-3xl w-full px-4">
               <div className="rounded-2xl bg-transparent px-4 py-5 text-center shadow-none border-none">
-                <div className="text-lg font-semibold text-foreground mb-1">Вы завершили чат</div>
+                <div className="text-2xl font-bold text-foreground mb-1">Чат завершён</div>
                 <a href="#" className="text-muted-foreground text-sm underline hover:text-primary mb-5 inline-block">Пожаловаться на собеседника</a>
                 <div className="flex flex-col sm:flex-row gap-3 justify-center">
                   <Button onClick={handleChangePartner} variant="outline" className="border-primary text-primary hover:bg-primary hover:text-white">Изменить параметры</Button>

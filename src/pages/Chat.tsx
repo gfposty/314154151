@@ -116,7 +116,7 @@ const Chat = () => {
     setTimeout(() => {
       const responses = [
         "Интересно!",
-        "А чт�� думаешь об этом?", 
+        "А что думаешь об этом?", 
         "Согласен",
         "Расскажи подробнее",
         "Понятно",
@@ -241,11 +241,10 @@ const Chat = () => {
       {/* SVG-паттерн для фона */}
       <div className="bg-pattern" />
       <div className="relative flex flex-col w-full h-full z-10">
-          {/* Large decorative background title (subtle, non-intrusive) */}
+          {/* Large decorative background title: centered, slightly larger and rotated */}
           <h1
             aria-hidden="true"
-            className="pointer-events-none absolute inset-x-0 top-4 z-0 text-[clamp(4rem,12vw,10rem)] font-extrabold tracking-tight text-white/6 text-center select-none"
-            style={{ WebkitMaskImage: 'linear-gradient(0deg, rgba(0,0,0,0.25) 0%, rgba(0,0,0,1) 40%)', maskImage: 'linear-gradient(0deg, rgba(0,0,0,0.25) 0%, rgba(0,0,0,1) 40%)', opacity: 0.22 }}
+            className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 -z-10 text-[clamp(6rem,18vw,14rem)] font-extrabold tracking-tight text-white/6 text-center select-none -rotate-6 blur-sm opacity-20"
           >
             Bezlico
           </h1>
@@ -259,7 +258,7 @@ const Chat = () => {
                   {isEnded ? (
                     <span>Чат завершён</span>
                   ) : isSearching ? (
-                    <span className="animate-pulse">Поиск собеседника...</span>
+                    <span className="animate-pulse">Поиск ��обеседника...</span>
                   ) : partnerFound ? (
                     <>
                       <div className="flex items-center space-x-1">

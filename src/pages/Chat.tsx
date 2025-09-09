@@ -438,7 +438,7 @@ const Chat = () => {
                   />
 
                   {/* Icons inside input: emoji + voice recorder (aligned) */}
-                  <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-2 pointer-events-auto">
+                  <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-2 pointer-events-auto z-20">
                     <Popover open={emojiOpen} onOpenChange={setEmojiOpen}>
                       <PopoverTrigger asChild>
                         <Button variant="outline" size="icon" className="shrink-0 h-10 w-10 bg-background/60 border-border/50" disabled={isEnded || !isConnected}>

@@ -382,7 +382,7 @@ const Chat = () => {
                           return d.toLocaleDateString('ru-RU');
                         })();
                         return (
-                          <div key={message.id} className="animate-slide-up" style={{ animationDelay: `${index * 0.06}s` }}>
+                          <div key={message.id} className={`animate-slide-up ${index === 0 ? 'mt-6' : ''}`} style={{ animationDelay: `${index * 0.06}s` }}>
                             {isNewDay && (
                               <div className="py-2 text-center text-xs text-muted-foreground">
                                 <span className="px-3 py-1 rounded-full bg-background/60 border border-border/50">{dateLabel}</span>

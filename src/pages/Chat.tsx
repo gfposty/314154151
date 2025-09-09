@@ -62,7 +62,7 @@ const Chat = () => {
       setIsConnected(true);
       toast({
         title: "Собеседник найден!",
-        description: "Вы под��лючены к анонимному чату",
+        description: "Вы под��лючены к а��онимному чату",
       });
       playSound(CHAT_START_SOUND);
       // Добавляем приветственное сообщение от системы
@@ -174,10 +174,8 @@ const Chat = () => {
   };
 
   const autoResize = () => {
-    const el = textareaRef.current;
-    if (!el) return;
-    el.style.height = '0px';
-    el.style.height = Math.min(el.scrollHeight, 6 * 24 + 24) + 'px';
+    // Intentionally left empty: we use a fixed textarea height with internal scrolling to prevent
+    // the input from expanding vertically when a lot of text is entered.
   };
 
   const insertAtCursor = (text: string) => {

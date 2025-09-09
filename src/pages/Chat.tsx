@@ -41,7 +41,7 @@ const Chat = () => {
   const [newMessage, setNewMessage] = useState('');
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const [emojiOpen, setEmojiOpen] = useState(false);
-  const emojis = ["😀","😁","😂","🤣","😊","😍","😘","😜","🤔","😎","😇","😅","🙃","😉","👍","👎","🙏","👏","🔥","💯","🎉","❤️","💜","✨","🤝","🤷","🤗","😴"];
+  const emojis = ["😀","��","😂","🤣","😊","😍","😘","😜","🤔","😎","😇","😅","🙃","😉","👍","👎","🙏","👏","🔥","💯","🎉","❤️","💜","✨","🤝","🤷","🤗","😴"];
   const [isConnected, setIsConnected] = useState(false);
   const [isSearching, setIsSearching] = useState(true);
   const [partnerFound, setPartnerFound] = useState(false);
@@ -137,7 +137,7 @@ const Chat = () => {
         "Интересно!",
         "А что думаешь об этом?", 
         "Согласен",
-        "��асскажи подробнее",
+        "Расскажи подробнее",
         "Понятно",
         "А у тебя как?"
       ];
@@ -300,7 +300,7 @@ const Chat = () => {
                     </ConfirmDialog>
                     <ConfirmDialog
                       title="Завершить чат?"
-                      description="Вы уверены, что хотите покину��ь чат и вернуться на главную страницу?"
+                      description="Вы уверены, что хотите покинуть чат и вернуться на главную страницу?"
                       onConfirm={handleEndChat}
                       destructive
                     >
@@ -333,7 +333,7 @@ const Chat = () => {
             <div className="absolute top-0 left-0 right-0 h-6 bg-gradient-to-b from-background/80 to-transparent z-10 pointer-events-none" />
             {/* Status badge inside chat container (stays visible while messages scroll) */}
             {partnerFound && isConnected && !isSearching && !isEnded && (
-              <div className="absolute top-4 left-4 z-20 pointer-events-auto">
+              <div className="absolute top-6 left-4 z-20 pointer-events-auto">
                 <div className="flex items-center space-x-2 bg-background/80 px-3 py-1 rounded-full border border-border/50 shadow-sm">
                   <span className={`w-2.5 h-2.5 rounded-full ${statusColor} shadow`} />
                   <span className="text-xs text-muted-foreground lowercase">{statusText}</span>

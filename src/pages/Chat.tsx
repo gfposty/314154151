@@ -92,7 +92,7 @@ const Chat = () => {
       setIsConnected(true);
       toast({
         title: "Собеседник найден!",
-        description: "Вы подключены к анонимному чату",
+        description: "Вы подключены к анонимному ч��ту",
       });
       playSound(CHAT_START_SOUND);
       // Добавляем приветственное сообщение от системы
@@ -131,7 +131,7 @@ const Chat = () => {
     }
     addMessage(newMessage, true);
     setNewMessage('');
-    // Симуляция ответа собеседника
+    // Симуляция ответа собесе��ника
     setTimeout(() => {
       const responses = [
         "Интересно!",
@@ -334,9 +334,9 @@ const Chat = () => {
             {/* Status badge inside chat container (stays visible while messages scroll) */}
             {partnerFound && isConnected && !isSearching && !isEnded && (
               <div className="absolute top-5 left-4 z-20 pointer-events-auto">
-                <div className="flex items-center space-x-2 bg-background/80 px-3 py-1 rounded-full border border-border/50 shadow-sm">
+                <div className="flex items-center space-x-2 bg-background px-3 py-1 rounded-full border border-border/50 shadow-sm">
                   <span className={`w-2.5 h-2.5 rounded-full ${statusColor} shadow`} />
-                  <span className="text-xs text-muted-foreground lowercase">{statusText}</span>
+                  <span className="text-xs text-foreground lowercase">{statusText}</span>
                 </div>
               </div>
             )}

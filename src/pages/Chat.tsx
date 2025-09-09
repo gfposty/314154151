@@ -62,7 +62,7 @@ const Chat = () => {
       setIsConnected(true);
       toast({
         title: "Собеседник найден!",
-        description: "Вы под��лючены к а��онимному чату",
+        description: "Вы под��лючены к анонимному чату",
       });
       playSound(CHAT_START_SOUND);
       // Добавляем приветственное сообщение от системы
@@ -105,7 +105,7 @@ const Chat = () => {
     if (hasBannedWord) {
       toast({
         variant: "destructive",
-        title: "Сообщение заблокировано",
+        title: "Соо��щение заблокировано",
         description: "Ваше сообщение содержит запрещенны�� слова",
       });
       return;
@@ -145,7 +145,7 @@ const Chat = () => {
       title: "Поиск нового собеседника...",
       description: "Подождите, мы ищем вам ново��о собеседника",
     });
-    // Симуляц��я поиска нового собеседника
+    // Симуляц���я поиска нового собеседника
     setTimeout(() => {
       setIsSearching(false);
       setPartnerFound(true);
@@ -428,13 +428,12 @@ const Chat = () => {
                   <Textarea
                     ref={textareaRef}
                     value={newMessage}
-                    onChange={(e) => { setNewMessage(e.target.value); autoResize(); }}
+                    onChange={(e) => { setNewMessage(e.target.value); }}
                     onKeyDown={handleKeyPress}
                     placeholder={recState.isRecording || recState.hasRecording ? '' : 'Напишите сообщение...'}
                     disabled={isEnded || !isConnected || recState.isRecording}
-                    className={`w-full max-h-64 min-h-[120px] bg-background/80 border-transparent text-foreground placeholder:text-muted-foreground focus:bg-background transition-all rounded-2xl resize-none ${recState.isRecording || recState.hasRecording ? 'pointer-events-none' : ''} disabled:opacity-70 disabled:cursor-not-allowed`}
+                    className={`w-full h-32 bg-background/80 border-transparent text-foreground placeholder:text-muted-foreground focus:bg-background transition-all rounded-2xl resize-none overflow-y-auto ${recState.isRecording || recState.hasRecording ? 'pointer-events-none' : ''} disabled:opacity-70 disabled:cursor-not-allowed`}
                     maxLength={500}
-                    rows={3}
                   />
                 </div>
               </div>

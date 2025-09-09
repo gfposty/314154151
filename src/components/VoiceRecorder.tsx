@@ -391,62 +391,103 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onSend, disabled, hasText
   }, [onBindApi, cancelRecording, finishRecording]);
 
   // Setup analyser for preview playback to animate waveform based on audio amplitude
+  // This effect is defensive: creating a MediaElementSource can fail if the audio element
+  // was previously connected to a different AudioContext. We reuse existing context/source
+  // when possible and defend against repeated createMediaElementSource errors.
+  const previewSourceRef = useRef<MediaElementAudioSourceNode | null>(null);
+
   useEffect(() => {
     const audioEl = previewAudioRef.current;
     if (!audioEl || !recordedUrl) return;
 
-    const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
-    const source = ctx.createMediaElementSource(audioEl);
-    const analyser = ctx.createAnalyser();
-    analyser.fftSize = 256;
-    const dataArray = new Uint8Array(analyser.frequencyBinCount);
-    source.connect(analyser);
-    analyser.connect(ctx.destination);
-
-    previewAudioCtxRef.current = ctx;
-    previewAnalyserRef.current = analyser;
-    previewDataRef.current = dataArray;
-
-    const bars = previewLevels.length;
-    const tick = () => {
-      if (!previewAnalyserRef.current || !previewDataRef.current) return;
-      previewAnalyserRef.current.getByteTimeDomainData(previewDataRef.current);
-      // split data into bars and compute RMS-like amplitude per bar
-      const chunkSize = Math.floor(previewDataRef.current.length / bars) || 1;
-      const nextRaw = new Array(bars).fill(0).map((_, bi) => {
-        let sum = 0;
-        const start = bi * chunkSize;
-        for (let i = 0; i < chunkSize; i++) {
-          const v = previewDataRef.current![start + i] - 128;
-          sum += Math.abs(v);
+    // If there's an existing audio context and source, reuse them to avoid attempting
+    // to create a new MediaElementSource for the same HTMLMediaElement.
+    try {
+      if (!previewAudioCtxRef.current) {
+        const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+        // try to create source; this can throw if the element was previously used
+        try {
+          const source = ctx.createMediaElementSource(audioEl);
+          previewAudioCtxRef.current = ctx;
+          previewSourceRef.current = source;
+        } catch (err) {
+          // failed to create source: clean up and fallback by closing ctx
+          try { ctx.close(); } catch {}
+          console.warn("createMediaElementSource failed, skipping visualiser setup", err);
+          return;
         }
-        const avg = sum / chunkSize;
-        // normalize roughly to 0..1
-        return Math.min(1, avg / 40);
-      });
-      // smooth with previous values for nicer animation
-      setPreviewLevels((prev) => {
-        const next = nextRaw.map((v, i) => {
-          const p = prev[i] ?? 0;
-          return p * 0.75 + v * 0.25;
+      } else if (!previewSourceRef.current) {
+        // audio context exists but we don't have a source stored for it — try to create once
+        try {
+          previewSourceRef.current = previewAudioCtxRef.current!.createMediaElementSource(audioEl);
+        } catch (err) {
+          console.warn("createMediaElementSource failed on reuse, skipping visualiser", err);
+          return;
+        }
+      }
+
+      const ctx = previewAudioCtxRef.current!;
+      const source = previewSourceRef.current!;
+      const analyser = ctx.createAnalyser();
+      analyser.fftSize = 256;
+      const dataArray = new Uint8Array(analyser.frequencyBinCount);
+
+      // connect source -> analyser -> destination
+      try {
+        source.connect(analyser);
+        analyser.connect(ctx.destination);
+      } catch (err) {
+        console.warn('Failed to connect audio nodes for preview visualiser', err);
+      }
+
+      previewAnalyserRef.current = analyser;
+      previewDataRef.current = dataArray;
+
+      const bars = previewLevels.length;
+      const tick = () => {
+        if (!previewAnalyserRef.current || !previewDataRef.current) return;
+        previewAnalyserRef.current.getByteTimeDomainData(previewDataRef.current);
+        // split data into bars and compute RMS-like amplitude per bar
+        const chunkSize = Math.floor(previewDataRef.current.length / bars) || 1;
+        const nextRaw = new Array(bars).fill(0).map((_, bi) => {
+          let sum = 0;
+          const start = bi * chunkSize;
+          for (let i = 0; i < chunkSize; i++) {
+            const v = previewDataRef.current![start + i] - 128;
+            sum += Math.abs(v);
+          }
+          const avg = sum / chunkSize;
+          // normalize roughly to 0..1
+          return Math.min(1, avg / 40);
         });
-        return next;
-      });
+        // smooth with previous values for nicer animation
+        setPreviewLevels((prev) => {
+          const next = nextRaw.map((v, i) => {
+            const p = prev[i] ?? 0;
+            return p * 0.75 + v * 0.25;
+          });
+          return next;
+        });
+        previewRafRef.current = requestAnimationFrame(tick);
+      };
+
       previewRafRef.current = requestAnimationFrame(tick);
-    };
 
-    previewRafRef.current = requestAnimationFrame(tick);
-
-    return () => {
-      if (previewRafRef.current) cancelAnimationFrame(previewRafRef.current);
-      previewRafRef.current = null;
-      try { analyser.disconnect(); } catch {}
-      try { source.disconnect(); } catch {}
-      try { ctx.close(); } catch {}
-      previewAnalyserRef.current = null;
-      previewAudioCtxRef.current = null;
-      previewDataRef.current = null;
-    };
+      return () => {
+        if (previewRafRef.current) cancelAnimationFrame(previewRafRef.current);
+        previewRafRef.current = null;
+        try { previewAnalyserRef.current?.disconnect(); } catch {}
+        // do NOT disconnect the source here — it may be shared across renders/contexts
+        try { ctx.close(); } catch {}
+        previewAnalyserRef.current = null;
+        previewAudioCtxRef.current = null;
+        previewDataRef.current = null;
+        previewSourceRef.current = null;
+      };
+    } catch (err) {
+      console.warn('Preview visualiser setup failed', err);
+      return;
+    }
   }, [recordedUrl]);
 
   return (

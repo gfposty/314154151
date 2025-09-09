@@ -102,7 +102,7 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onSend, disabled, hasText
     const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
     const source = ctx.createMediaStreamSource(stream);
     const analyser = ctx.createAnalyser();
-    analyser.fftSize = 256;
+    analyser.fftSize = 2048; // larger FFT for smoother per-bar data
     const dataArray = new Uint8Array(analyser.frequencyBinCount);
     source.connect(analyser);
     analyserRef.current = analyser;
@@ -113,16 +113,24 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onSend, disabled, hasText
     const tick = () => {
       if (!analyserRef.current || !dataArrayRef.current) return;
       analyserRef.current.getByteTimeDomainData(dataArrayRef.current);
-      let sum = 0;
-      for (let i = 0; i < dataArrayRef.current.length; i++) sum += Math.abs(dataArrayRef.current[i] - 128);
-      const intensity = Math.min(1, (sum / dataArrayRef.current.length) / 40);
-      const next = new Array(bars).fill(0).map((_, i) => {
-        const center = (bars - 1) / 2;
-        const dist = Math.abs(i - center);
-        const falloff = 1 - dist / center;
-        return Math.max(0.08, intensity * (0.6 + 0.4 * falloff));
+      // split time domain data into bars and compute average magnitude per bar
+      const chunkSize = Math.floor(dataArrayRef.current.length / bars) || 1;
+      const nextRaw = new Array(bars).fill(0).map((_, bi) => {
+        let sum = 0;
+        const start = bi * chunkSize;
+        for (let i = 0; i < chunkSize; i++) {
+          const v = Math.abs(dataArrayRef.current[start + i] - 128);
+          sum += v;
+        }
+        const avg = sum / chunkSize;
+        // normalize roughly to 0..1
+        return Math.min(1, avg / 40);
       });
-      setLevels(next);
+      // apply slight smoothing to previous values for nicer animation
+      setLevels((prev) => nextRaw.map((v, i) => {
+        const p = prev[i] ?? 0;
+        return p * 0.7 + v * 0.3;
+      }));
       rafRef.current = requestAnimationFrame(tick);
     };
     tick();

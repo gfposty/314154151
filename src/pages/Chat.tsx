@@ -245,9 +245,6 @@ const Chat = () => {
         {/* Header */}
         <div className="bg-transparent border-b-0 p-4 animate-fade-in">
           <div className="max-w-3xl mx-auto relative">
-            <h1 aria-hidden="true" className="pointer-events-none absolute inset-x-0 -top-10 -z-10 text-[clamp(5rem,14vw,12rem)] font-extrabold tracking-tight text-white/6 text-center select-none -rotate-6 blur-sm opacity-8" style={{ WebkitMaskImage: 'linear-gradient(180deg, rgba(0,0,0,1) 0%, rgba(0,0,0,0.7) 40%, rgba(0,0,0,0) 75%)' }}>
-              Bezlico
-            </h1>
             <div className="rounded-3xl border border-[rgba(120,110,255,0.18)] bg-background/70 px-3 py-2 flex items-center justify-between flex-wrap gap-2 sm:gap-3">
               <div className="flex items-center space-x-3 flex-shrink min-w-0">
                 <img src="/123.png" alt="Bezlico Logo" className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl object-contain -my-2" />

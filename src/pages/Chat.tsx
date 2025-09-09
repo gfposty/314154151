@@ -151,7 +151,7 @@ const Chat = () => {
       setPartnerFound(true);
       setIsConnected(true);
       toast({
-        title: "Новый собеседник найден!",
+        title: "Новый собе��едник найден!",
         description: "Вы подключены к новому чату",
       });
       playSound(CHAT_START_SOUND);
@@ -244,7 +244,12 @@ const Chat = () => {
           {/* Large decorative background title: centered, slightly larger and rotated */}
           <h1
             aria-hidden="true"
-            className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 -z-10 text-[clamp(6rem,18vw,14rem)] font-extrabold tracking-tight text-white/6 text-center select-none -rotate-6 blur-sm opacity-20"
+            className="background-title pointer-events-none absolute left-1/2 top-28 -translate-x-1/2 -z-10 text-[clamp(6rem,22vw,18rem)] font-extrabold tracking-tight text-white/6 text-center select-none -rotate-6 blur-sm opacity-18"
+            style={{
+              WebkitMaskImage: 'linear-gradient(180deg, rgba(0,0,0,1) 0%, rgba(0,0,0,0.6) 30%, rgba(0,0,0,0) 70%)',
+              maskImage: 'linear-gradient(180deg, rgba(0,0,0,1) 0%, rgba(0,0,0,0.6) 30%, rgba(0,0,0,0) 70%)',
+              textShadow: '0 20px 60px rgba(0,0,0,0.8)',
+            }}
           >
             Bezlico
           </h1>
@@ -258,7 +263,7 @@ const Chat = () => {
                   {isEnded ? (
                     <span>Чат завершён</span>
                   ) : isSearching ? (
-                    <span className="animate-pulse">Поиск ��обеседника...</span>
+                    <span className="animate-pulse">Поиск собеседника...</span>
                   ) : partnerFound ? (
                     <>
                       <div className="flex items-center space-x-1">

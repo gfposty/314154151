@@ -373,7 +373,7 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onSend, disabled, hasText
             {/* Waveform / progress */}
             <div className="relative w-full h-4 rounded-full bg-[rgba(255,255,255,0.03)] overflow-hidden">
               {/* progress overlay */}
-              <div className="absolute left-0 top-0 h-full bg-gradient-to-r from-primary to-primary/60" style={{ width: `${Math.round(previewProgress * 100)}%`, transition: 'width 120ms linear', mixBlendMode: 'screen' }} />
+              <div className="absolute left-0 top-0 h-full bg-gradient-to-r from-primary to-primary/60" style={{ width: `${Math.round(previewProgress * 100)}%`, transition: 'width 120ms linear', mixBlendMode: 'screen', opacity: 0.6 }} />
 
               {/* responsive bars */}
               <div className="relative z-10 flex items-end justify-between h-full px-3">

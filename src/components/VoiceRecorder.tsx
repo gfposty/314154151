@@ -326,36 +326,44 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onSend, disabled, hasText
     if (!hasRecording || isRecording || !recordedUrl) return null;
     const ui = (
       <div className="w-full flex justify-start">
-        <div className="relative pointer-events-auto flex items-center gap-4 px-4 py-2 rounded-full bg-[#0B0B0D] border border-[rgba(255,255,255,0.04)] shadow-sm w-full max-w-[640px] ml-2">
-          {/* Trash icon outside pill on the left, no background */}
-          <button onClick={resetState} aria-label="Удалить запись" className="flex-none p-1 rounded-md bg-transparent text-white/80 hover:text-white mr-2 transition-colors" style={{ pointerEvents: 'auto' }}>
+        <div className="relative pointer-events-auto flex items-center gap-4 px-3 py-3 rounded-2xl bg-gradient-to-r from-[#0B0B0D] to-[#0B0B0D]/60 border border-[rgba(255,255,255,0.03)] shadow-sm w-full max-w-[640px] ml-2">
+          {/* Delete button */}
+          <button onClick={resetState} aria-label="Удалить запись" className="flex-none p-2 rounded-md bg-transparent text-white/70 hover:text-white transition-colors" style={{ pointerEvents: 'auto' }}>
             <Trash2 className="h-4 w-4" />
           </button>
 
-          {/* Play inside circle */}
+          {/* Play/Pause */}
           <button
             type="button"
             aria-label={previewPlaying ? "Пауза" : "Воспроизвести"}
             onClick={() => setPreviewPlaying((p) => !p)}
-            className="inline-flex items-center justify-center h-10 w-10 rounded-full bg-white/6 text-white/90 hover:bg-white/8 transition-colors shadow-sm"
+            className="inline-flex items-center justify-center h-10 w-10 rounded-full bg-gradient-to-br from-white/6 to-white/3 text-white/90 hover:from-white/8 hover:to-white/5 transition-transform shadow-sm"
             style={{ flex: '0 0 auto' }}
           >
             {previewPlaying ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5" />}
           </button>
 
-          {/* Waveform centered */}
-          <div className="flex-1 mx-2 flex items-center justify-center">
-            <div className="relative h-8 w-full max-w-[480px] rounded-full bg-[rgba(255,255,255,0.02)] overflow-hidden flex items-end px-3">
-              <div className="flex items-end gap-[3px] mx-auto w-full max-w-full justify-center">
+          {/* Waveform */}
+          <div className="flex-1 mx-2 flex items-center">
+            <div className="relative h-10 w-full max-w-[480px] rounded-xl bg-[rgba(255,255,255,0.02)] overflow-hidden flex items-center px-3">
+              {/* Progress overlay */}
+              <div className="absolute left-0 top-0 h-full bg-gradient-to-r from-primary/40 to-transparent" style={{ width: `${Math.round(previewProgress * 100)}%`, pointerEvents: 'none', mixBlendMode: 'screen' }} />
+
+              {/* Bars */}
+              <div className="relative z-10 flex items-end gap-[4px] w-full">
                 {previewLevels.map((lvl, i) => (
                   <div
                     key={i}
-                    style={{ height: `${Math.max(3, Math.round(lvl * 18))}px`, width: 3 }}
-                    className={`rounded-full bg-white/30 transition-all ${previewPlaying ? 'opacity-100' : 'opacity-60'}`}
+                    style={{ height: `${Math.max(4, Math.round(lvl * 28))}px`, width: 4, borderRadius: 4 }}
+                    className={`bg-gradient-to-t from-primary to-primary/50 transition-all ${previewPlaying ? 'opacity-100' : 'opacity-60'}`}
                   />
                 ))}
               </div>
-              <div className="absolute left-0 top-0 h-full bg-white/10" style={{ width: `${Math.round(previewProgress * 100)}%`, mixBlendMode: 'overlay', pointerEvents: 'none' }} />
+
+              {/* Subtle baseline */}
+              <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
+                <div className="h-[2px] w-full bg-white/6 rounded" />
+              </div>
             </div>
           </div>
 

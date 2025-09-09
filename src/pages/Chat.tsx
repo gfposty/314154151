@@ -165,7 +165,7 @@ const Chat = () => {
       title: "Поиск нового собеседника...",
       description: "Подождите, мы ищем вам нового собеседника",
     });
-    // Симуляция поиска нового собеседника
+    // Симуляция поиска ново��о собеседника
     setTimeout(() => {
       setIsSearching(false);
       setPartnerFound(true);
@@ -196,6 +196,21 @@ const Chat = () => {
   const autoResize = () => {
     // Intentionally left empty: we use a fixed textarea height with internal scrolling to prevent
     // the input from expanding vertically when a lot of text is entered.
+  };
+
+  const insertAtCursor = (text: string) => {
+    const el = textareaRef.current;
+    if (!el) return;
+    const start = el.selectionStart ?? newMessage.length;
+    const end = el.selectionEnd ?? newMessage.length;
+    const updated = newMessage.slice(0, start) + text + newMessage.slice(end);
+    setNewMessage(updated);
+    requestAnimationFrame(() => {
+      if (!el) return;
+      el.selectionStart = el.selectionEnd = start + text.length;
+      autoResize();
+      el.focus();
+    });
   };
 
   // Disable page scroll while in chat; only chat area scrolls

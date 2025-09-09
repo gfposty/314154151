@@ -139,9 +139,30 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onSend, disabled, hasText
   const startRecording = useCallback(async () => {
     if (disabled || isRecording) return;
     try {
+      if (typeof MediaRecorder === 'undefined') {
+        console.error('MediaRecorder API is not supported in this browser');
+        return;
+      }
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      if (!stream) {
+        console.error('No media stream obtained');
+        return;
+      }
       mediaStreamRef.current = stream;
-      const recorder = new MediaRecorder(stream);
+      let recorder: MediaRecorder;
+      try {
+        recorder = new MediaRecorder(stream);
+      } catch (err) {
+        console.error('Failed to create MediaRecorder', err);
+        // try using a different mimeType fallback
+        try {
+          recorder = new MediaRecorder(stream, { mimeType: 'audio/webm;codecs=opus' });
+        } catch (err2) {
+          console.error('Fallback MediaRecorder creation failed', err2);
+          stream.getTracks().forEach((t) => t.stop());
+          return;
+        }
+      }
       mediaRecorderRef.current = recorder;
       chunksRef.current = [];
       recorder.ondataavailable = (e) => { if (e.data && e.data.size > 0) chunksRef.current.push(e.data); };
@@ -151,7 +172,7 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onSend, disabled, hasText
           chunksRef.current = [];
           return;
         }
-        const blob = new Blob(chunksRef.current, { type: "audio/webm" });
+        const blob = new Blob(chunksRef.current, { type: chunksRef.current.length ? chunksRef.current[0].type || 'audio/webm' : 'audio/webm' });
         const url = URL.createObjectURL(blob);
         setRecordedBlob(blob);
         setRecordedUrl(url);
@@ -161,7 +182,13 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onSend, disabled, hasText
         // mark recording finished so UI can show preview
         setIsRecording(false);
       };
-      recorder.start();
+      try {
+        recorder.start();
+      } catch (err) {
+        console.error('Failed to start MediaRecorder', err);
+        stream.getTracks().forEach((t) => t.stop());
+        return;
+      }
       cancelledRef.current = false;
       setIsRecording(true);
       setHasRecording(false);

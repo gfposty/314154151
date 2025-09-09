@@ -333,7 +333,7 @@ const Chat = () => {
             <div className="absolute top-0 left-0 right-0 h-6 bg-gradient-to-b from-background/80 to-transparent z-10 pointer-events-none" />
             {/* Status badge inside chat container (stays visible while messages scroll) */}
             {partnerFound && isConnected && !isSearching && !isEnded && (
-              <div className="absolute top-6 left-4 z-20 pointer-events-auto">
+              <div className="absolute top-5 left-4 z-20 pointer-events-auto">
                 <div className="flex items-center space-x-2 bg-background/80 px-3 py-1 rounded-full border border-border/50 shadow-sm">
                   <span className={`w-2.5 h-2.5 rounded-full ${statusColor} shadow`} />
                   <span className="text-xs text-muted-foreground lowercase">{statusText}</span>

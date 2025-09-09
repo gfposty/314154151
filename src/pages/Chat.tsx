@@ -436,6 +436,44 @@ const Chat = () => {
                     className={`w-full h-32 pr-16 bg-background/80 border-transparent text-foreground placeholder:text-muted-foreground focus:bg-background transition-all rounded-2xl resize-none overflow-y-auto hide-scrollbar ${recState.isRecording || recState.hasRecording ? 'pointer-events-none' : ''} disabled:opacity-70 disabled:cursor-not-allowed`}
                     maxLength={500}
                   />
+
+                  {/* Icons inside input: emoji + voice recorder (aligned) */}
+                  <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-2 pointer-events-auto">
+                    <Popover open={emojiOpen} onOpenChange={setEmojiOpen}>
+                      <PopoverTrigger asChild>
+                        <Button variant="outline" size="icon" className="shrink-0 h-10 w-10 bg-background/60 border-border/50" disabled={isEnded || !isConnected}>
+                          <Smile className="h-4 w-4" />
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent align="end" className="w-60 p-2">
+                        <div className="grid grid-cols-8 gap-1">
+                          {emojis.map((e) => (
+                            <button
+                              key={e}
+                              type="button"
+                              className="h-7 w-7 rounded-md hover:bg-accent"
+                              onClick={() => { insertAtCursor(e); setEmojiOpen(false); }}
+                            >
+                              {e}
+                            </button>
+                          ))}
+                        </div>
+                      </PopoverContent>
+                    </Popover>
+
+                    <div className="flex items-center">
+                      <VoiceRecorder
+                        disabled={isEnded || !isConnected}
+                        hasText={!!newMessage.trim()}
+                        onSendText={sendMessage}
+                        onRecordingState={setRecState}
+                        onBindApi={({ cancel }) => { cancelRecRef.current = cancel; }}
+                        onSend={({ url, duration }) => {
+                          addAudioMessage(url, duration, true);
+                        }}
+                      />
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>

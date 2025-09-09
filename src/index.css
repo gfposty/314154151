@@ -167,10 +167,10 @@ All colors MUST be HSL.
   }
 
   .site-brand--header {
-    font-size: 1.375rem; /* larger in header */
+    font-size: 1.75rem; /* larger in header */
     font-weight: 700;
     display: inline-block;
     vertical-align: middle;
-    animation: gradient-shift 3.5s ease-in-out infinite;
+    animation: gradient-shift 3s ease-in-out infinite;
   }
 }

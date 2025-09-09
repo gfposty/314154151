@@ -373,7 +373,7 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onSend, disabled, hasText
             "px-2 py-1 rounded-md text-xs",
             cancelSwipe.cancelled ? "bg-red-500/20 text-red-400 border border-red-500/30" : "text-muted-foreground"
           )}>
-            {cancelSwipe.cancelled ? "Отпустите, чтобы отменить" : "Свайп влево — отмена"}
+            {cancelSwipe.cancelled ? "Отпу��тите, чтобы отменить" : "Свайп влево — отмена"}
           </div>
         </div>
         {cancelSwipe.active && (
@@ -401,10 +401,6 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onSend, disabled, hasText
             <button onClick={resetState} aria-label="Удалить запись" className="p-2 rounded-md bg-transparent text-white/70 hover:text-white transition-colors">
               <Trash2 className="h-5 w-5" />
             </button>
-            <div aria-hidden className="p-2 rounded-md bg-transparent text-white/50">
-              {/* non-interactive forward/play-next icon */}
-              <Play className="h-5 w-5" />
-            </div>
           </div>
 
           {/* Waveform container (smaller) */}

@@ -78,7 +78,7 @@ const Chat = () => {
     };
   }, [isConnected, isEnded]);
 
-  // Си��уляция подключения к собеседнику
+  // Симуляция подключения к собеседнику
   useEffect(() => {
     if (!ageCategory || !genderPreference) {
       navigate('/');
@@ -138,7 +138,7 @@ const Chat = () => {
         "А что думаешь об этом?", 
         "Согласен",
         "Расскажи подробнее",
-        "Понятно",
+        "Понят��о",
         "А у тебя как?"
       ];
       const randomResponse = responses[Math.floor(Math.random() * responses.length)];
@@ -263,9 +263,7 @@ const Chat = () => {
               <div className="flex items-center space-x-3 flex-shrink min-w-0">
                 <span className="site-brand site-brand--header pointer-events-auto mr-2">Bezlico</span>
                 <div className="flex items-center flex-wrap gap-x-3 gap-y-1 text-xs text-muted-foreground">
-                  {isEnded ? (
-                    <span>Чат завершён</span>
-                  ) : isSearching ? (
+                  {isEnded ? null : isSearching ? (
                     <span className="animate-pulse">Поиск собеседника...</span>
                   ) : partnerFound ? (
                     <>

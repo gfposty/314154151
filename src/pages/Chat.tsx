@@ -355,7 +355,7 @@ const Chat = () => {
                           yesterday.setDate(today.getDate() - 1);
                           if (d.toDateString() === today.toDateString()) return 'Сегодня';
                           if (d.toDateString() === yesterday.toDateString()) return 'Вчера';
-                          return d.toLocaleDateString('ру-RU');
+                          return d.toLocaleDateString('ru-RU');
                         })();
                         return (
                           <div key={message.id} className="animate-slide-up" style={{ animationDelay: `${index * 0.06}s` }}>

@@ -362,47 +362,49 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onSend, disabled, hasText
 
     const ui = (
       <div className="w-full flex justify-center pointer-events-auto">
-        <div className="relative flex items-center gap-4 px-4 py-3 rounded-2xl bg-transparent border border-[rgba(124,58,237,0.06)] max-w-3xl w-full mx-auto">
+        <div className="relative flex items-center gap-3 px-4 py-3 rounded-2xl bg-transparent border border-[rgba(124,58,237,0.06)] max-w-3xl w-full mx-auto">
           {/* Trash on the far left */}
           <button onClick={resetState} aria-label="Удалить запись" className="flex-none p-2 rounded-md bg-transparent text-white/70 hover:text-white transition-colors">
             <Trash2 className="h-5 w-5" />
           </button>
 
-          {/* Main area: waveform with centered play button */}
-          <div className="relative flex-1 flex items-center">
-            {/* Waveform / progress */}
-            <div className="relative w-full h-4 rounded-full bg-[rgba(255,255,255,0.03)] overflow-hidden">
-              {/* progress overlay */}
-              <div className="absolute left-0 top-0 h-full bg-gradient-to-r from-primary to-primary/60" style={{ width: `${Math.round(previewProgress * 100)}%`, transition: 'width 120ms linear', mixBlendMode: 'screen', opacity: 0.6 }} />
+          {/* Waveform container */}
+          <div className="flex-1 flex items-center justify-center relative">
+            <div className="w-full max-w-[820px]">
+              <div className="relative h-10 rounded-md bg-[rgba(255,255,255,0.02)] overflow-hidden">
+                {/* progress overlay */}
+                <div className="absolute left-0 top-0 h-full bg-gradient-to-r from-primary to-primary/60" style={{ width: `${Math.round(previewProgress * 100)}%`, transition: 'width 120ms linear', opacity: 0.45 }} />
 
-              {/* responsive bars */}
-              <div className="relative z-10 flex items-end justify-between h-full px-3">
-                <div className="flex items-end gap-2 w-full overflow-hidden">
-                  {previewLevels.map((lvl, i) => (
-                    <div
-                      key={i}
-                      style={{ height: `${Math.max(6, Math.round(lvl * 34))}px`, width: 6 }}
-                      className={`rounded-sm bg-gradient-to-t from-primary/90 to-primary/60 transition-all ${previewPlaying ? 'opacity-100' : 'opacity-60'}`}
-                    />
-                  ))}
+                {/* dynamic bars */}
+                <div className="relative z-10 h-full flex items-end justify-center px-2">
+                  <div className="flex items-end gap-[6px] w-full overflow-hidden justify-center">
+                    {previewLevels.map((lvl, i) => (
+                      <div
+                        key={i}
+                        style={{ height: `${Math.max(6, Math.round(lvl * 36))}px`, width: 6 }}
+                        className={`inline-block bg-gradient-to-t from-primary to-primary/60 rounded-sm transition-all ${previewPlaying ? 'opacity-100' : 'opacity-70'}`}
+                      />
+                    ))}
+                  </div>
                 </div>
+
+                {/* centered play button (overlay) */}
+                <button
+                  type="button"
+                  aria-label={previewPlaying ? "Пауза" : "Воспроизвести"}
+                  onClick={() => setPreviewPlaying((p) => !p)}
+                  className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 inline-flex items-center justify-center h-10 w-10 rounded-full bg-white/6 text-white/90 hover:bg-white/8 transition-colors"
+                >
+                  {previewPlaying ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5" />}
+                </button>
+              </div>
+
+              <div className="mt-2 flex items-center justify-between text-xs text-white/80">
+                <span className="tabular-nums">{formatDuration(seconds)}</span>
+                {/* no send button per request - delete icon handles removal */}
               </div>
             </div>
-
-            {/* Play button centered over waveform */}
-            <button
-              type="button"
-              aria-label={previewPlaying ? "Пауза" : "Воспроизвести"}
-              onClick={() => setPreviewPlaying((p) => !p)}
-              className="absolute left-1/2 -translate-x-1/2 -translate-y-1/2 inline-flex items-center justify-center h-10 w-10 rounded-full bg-white/6 text-white/90 hover:bg-white/8 transition-colors"
-              style={{ transform: 'translate(-50%, -50%)' }}
-            >
-              {previewPlaying ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5" />}
-            </button>
           </div>
-
-          {/* Duration on the right */}
-          <div className="tabular-nums text-xs text-white/80 ml-4 w-12 text-right">{formatDuration(seconds)}</div>
         </div>
       </div>
     );

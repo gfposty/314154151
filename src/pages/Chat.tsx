@@ -252,7 +252,7 @@ const Chat = () => {
 
   return (
     <div className="fixed inset-0 w-full h-full overflow-hidden overscroll-none">
-      {/* SVG-паттерн для фон�� */}
+      {/* SVG-паттерн для фона */}
       <div className="bg-pattern" />
       <div className="relative flex flex-col w-full h-full z-10">
           {/* Large decorative background title: centered, slightly larger and rotated */}

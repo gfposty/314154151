@@ -274,7 +274,7 @@ const Chat = () => {
                   <>
                     <ConfirmDialog
                       title="Найти нового собеседника?"
-                      description="Текущий диалог будет завершен, и мы найдем вам нового собеседника."
+                      description="Т��кущий диалог будет завершен, и мы найдем вам нового собеседника."
                       onConfirm={handleNextChat}
                     >
                       <Button
@@ -433,7 +433,7 @@ const Chat = () => {
                     onKeyDown={handleKeyPress}
                     placeholder={recState.isRecording || recState.hasRecording ? '' : 'Напишите сообщение...'}
                     disabled={isEnded || !isConnected || recState.isRecording}
-                    className={`w-full h-32 bg-background/80 border-transparent text-foreground placeholder:text-muted-foreground focus:bg-background transition-all rounded-2xl resize-none overflow-y-auto hide-scrollbar ${recState.isRecording || recState.hasRecording ? 'pointer-events-none' : ''} disabled:opacity-70 disabled:cursor-not-allowed`}
+                    className={`w-full h-32 pr-16 bg-background/80 border-transparent text-foreground placeholder:text-muted-foreground focus:bg-background transition-all rounded-2xl resize-none overflow-y-auto hide-scrollbar ${recState.isRecording || recState.hasRecording ? 'pointer-events-none' : ''} disabled:opacity-70 disabled:cursor-not-allowed`}
                     maxLength={500}
                   />
                 </div>

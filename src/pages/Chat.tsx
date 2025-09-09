@@ -264,7 +264,7 @@ const Chat = () => {
                 <img src="/123.png" alt="Bezlico Logo" className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl object-contain -my-2" />
                 <div className="flex items-center flex-wrap gap-x-3 gap-y-1 text-xs text-muted-foreground">
                   {isEnded ? (
-                    <span>Чат завершён</span>
+                    <span>Чат з��вершён</span>
                   ) : isSearching ? (
                     <span className="animate-pulse">Поиск собеседника...</span>
                   ) : partnerFound ? (
@@ -331,6 +331,13 @@ const Chat = () => {
                 </Button>
               </div>
             </div>
+          </div>
+        </div>
+        {/* Persistent top-left status badge (stays visible during scroll) */}
+        <div className="absolute top-6 left-6 z-30 pointer-events-auto">
+          <div className="flex items-center space-x-2 bg-background/80 px-3 py-1 rounded-full border border-border/50 shadow-sm">
+            <span className={`w-2.5 h-2.5 rounded-full ${statusColor} shadow`} />
+            <span className="text-xs text-muted-foreground lowercase">{statusText}</span>
           </div>
         </div>
         {/* Messages */}

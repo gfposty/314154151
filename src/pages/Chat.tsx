@@ -19,7 +19,7 @@ interface Message {
 }
 
 const CHAT_START_SOUND = "https://cdn.pixabay.com/audio/2022/03/15/audio_115b9b7b44.mp3"; // notify
-const CHAT_END_SOUND = "https://cdn.pixabay.com/audio/2022/03/15/audio_115b9b7b44.mp3"; // можно замени��ь на другой
+const CHAT_END_SOUND = "https://cdn.pixabay.com/audio/2022/03/15/audio_115b9b7b44.mp3"; // можно заменить на другой
 
 function playSound(url: string) {
   const audio = new window.Audio(url);
@@ -48,7 +48,7 @@ const Chat = () => {
   const [isEnded, setIsEnded] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // Симуляция подключения к соб��седнику
+  // Симуляция подключения к собеседнику
   useEffect(() => {
     if (!ageCategory || !genderPreference) {
       navigate('/');
@@ -116,7 +116,7 @@ const Chat = () => {
     setTimeout(() => {
       const responses = [
         "Интересно!",
-        "А что думаешь об этом?", 
+        "А чт�� думаешь об этом?", 
         "Согласен",
         "Расскажи подробнее",
         "Понятно",
@@ -241,8 +241,14 @@ const Chat = () => {
       {/* SVG-паттерн для фона */}
       <div className="bg-pattern" />
       <div className="relative flex flex-col w-full h-full z-10">
-          {/* Large decorative background title */}
-          <h1 aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-8 -z-10 text-[clamp(6rem,18vw,14rem)] font-extrabold tracking-tight text-white/6 text-center select-none blur-sm mix-blend-overlay">Bezlico</h1>
+          {/* Large decorative background title (subtle, non-intrusive) */}
+          <h1
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-x-0 top-4 z-0 text-[clamp(4rem,12vw,10rem)] font-extrabold tracking-tight text-white/6 text-center select-none"
+            style={{ WebkitMaskImage: 'linear-gradient(0deg, rgba(0,0,0,0.25) 0%, rgba(0,0,0,1) 40%)', maskImage: 'linear-gradient(0deg, rgba(0,0,0,0.25) 0%, rgba(0,0,0,1) 40%)', opacity: 0.22 }}
+          >
+            Bezlico
+          </h1>
         {/* Header */}
         <div className="bg-transparent border-b-0 p-4 animate-fade-in">
           <div className="max-w-3xl mx-auto">

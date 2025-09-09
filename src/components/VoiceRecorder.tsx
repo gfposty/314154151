@@ -414,17 +414,20 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onSend, disabled, hasText
 
     const ui = (
       <div className="w-full flex justify-center pointer-events-auto">
-        <div className="relative flex items-center gap-3 px-3 py-3 rounded-2xl bg-transparent border border-[rgba(124,58,237,0.04)] max-w-3xl w-full mx-auto">
-          {/* Left controls inside input: trash + forward (non-clickable) */}
+        <div className="relative flex items-center gap-3 px-3 py-3 rounded-2xl bg-transparent border border-[rgba(124,58,237,0.04)] w-full mx-auto" style={{ maxWidth: 'calc(100% - 160px)' }}>
+          {/* Left controls inside input: trash + small arrow (non-interactive) */}
           <div className="flex items-center gap-2 flex-none pl-1">
             <button onClick={resetState} aria-label="Удалить запись" className="p-2 rounded-md bg-transparent text-white/70 hover:text-white transition-colors">
               <Trash2 className="h-5 w-5" />
             </button>
+            <div aria-hidden className="p-2 rounded-md bg-transparent text-white/60">
+              <Send className="h-5 w-5" />
+            </div>
           </div>
 
           {/* Waveform container (smaller) */}
           <div className="flex-1 flex items-center justify-center relative">
-            <div className="w-full max-w-[760px]">
+            <div className="w-full max-w-[620px]">
               <div className="relative h-8 rounded-md bg-[rgba(255,255,255,0.02)] overflow-hidden">
                 {/* progress overlay */}
                 <div className="absolute left-0 top-0 h-full bg-gradient-to-r from-primary to-primary/60" style={{ width: `${Math.round(previewProgress * 100)}%`, transition: 'width 120ms linear', opacity: 0.35 }} />

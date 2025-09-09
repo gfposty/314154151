@@ -14,6 +14,10 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
+      {/* Site brand (top-left of site) */}
+      <div className="fixed top-4 left-4 z-50 pointer-events-none">
+        <span className="site-brand pointer-events-auto">Bezlico</span>
+      </div>
       {/* Romantic Tech Animated Background */}
       <div className="bg-romantic-tech">
         <div className="particle particle-1" />

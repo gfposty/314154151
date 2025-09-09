@@ -327,41 +327,47 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onSend, disabled, hasText
 
     const ui = (
       <div className="w-full flex justify-center pointer-events-auto">
-        <div className="flex items-center gap-4 px-4 py-3 rounded-2xl bg-gradient-to-r from-primary/20 to-primary/40 border border-[rgba(124,58,237,0.12)] shadow-glow max-w-3xl w-full mx-auto">
-          {/* Play/Pause */}
-          <button
-            type="button"
-            aria-label={previewPlaying ? "Пауза" : "Воспроизвести"}
-            onClick={() => setPreviewPlaying((p) => !p)}
-            className="inline-flex items-center justify-center h-10 w-10 rounded-full bg-white/6 text-white/90 hover:bg-white/8 transition-colors"
-          >
-            {previewPlaying ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5" />}
+        <div className="relative flex items-center gap-4 px-4 py-3 rounded-2xl bg-transparent border border-[rgba(124,58,237,0.06)] max-w-3xl w-full mx-auto">
+          {/* Trash on the far left */}
+          <button onClick={resetState} aria-label="Удалить запись" className="flex-none p-2 rounded-md bg-transparent text-white/70 hover:text-white transition-colors">
+            <Trash2 className="h-5 w-5" />
           </button>
 
-          {/* Waveform / progress */}
-          <div className="flex-1 flex flex-col">
-            <div className="relative h-3 w-full rounded-full bg-white/6 overflow-hidden">
-              <div className="absolute left-0 top-0 h-full bg-gradient-to-r from-primary to-primary/60" style={{ width: `${Math.round(previewProgress * 100)}%`, transition: 'width 120ms linear' }} />
-              <div className="relative z-10 flex items-center justify-between px-2">
-                <div className="flex items-center gap-[4px] w-full overflow-hidden">
+          {/* Main area: waveform with centered play button */}
+          <div className="relative flex-1 flex items-center">
+            {/* Waveform / progress */}
+            <div className="relative w-full h-4 rounded-full bg-[rgba(255,255,255,0.03)] overflow-hidden">
+              {/* progress overlay */}
+              <div className="absolute left-0 top-0 h-full bg-gradient-to-r from-primary to-primary/60" style={{ width: `${Math.round(previewProgress * 100)}%`, transition: 'width 120ms linear', mixBlendMode: 'screen' }} />
+
+              {/* responsive bars */}
+              <div className="relative z-10 flex items-end justify-between h-full px-3">
+                <div className="flex items-end gap-2 w-full overflow-hidden">
                   {previewLevels.map((lvl, i) => (
                     <div
                       key={i}
-                      style={{ height: `${Math.max(3, Math.round(lvl * 14))}px`, width: 4 }}
-                      className={`rounded-full bg-white/90/30 transition-all ${previewPlaying ? 'opacity-90' : 'opacity-60'}`}
+                      style={{ height: `${Math.max(3, Math.round(lvl * 24))}px`, width: 6 }}
+                      className={`rounded-sm bg-gradient-to-t from-primary/90 to-primary/60 transition-all ${previewPlaying ? 'opacity-100' : 'opacity-60'}`}
                     />
                   ))}
                 </div>
               </div>
             </div>
-            <div className="flex items-center justify-between mt-2 text-xs text-white/80">
-              <span className="tabular-nums">{formatDuration(seconds)}</span>
-              <div className="flex items-center gap-3">
-                <button onClick={resetState} aria-label="Удалить запись" className="text-white/70 hover:text-white text-sm">Удалить</button>
-                <button onClick={sendRecording} aria-label="Отправить" className="inline-flex items-center justify-center h-8 px-3 rounded-full bg-gradient-to-br from-primary to-primary/70 text-white shadow-sm">Отправить</button>
-              </div>
-            </div>
+
+            {/* Play button centered over waveform */}
+            <button
+              type="button"
+              aria-label={previewPlaying ? "Пауза" : "Воспроизвести"}
+              onClick={() => setPreviewPlaying((p) => !p)}
+              className="absolute left-1/2 -translate-x-1/2 -translate-y-1/2 inline-flex items-center justify-center h-10 w-10 rounded-full bg-white/6 text-white/90 hover:bg-white/8 transition-colors"
+              style={{ transform: 'translate(-50%, -50%)' }}
+            >
+              {previewPlaying ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5" />}
+            </button>
           </div>
+
+          {/* Duration on the right */}
+          <div className="tabular-nums text-xs text-white/80 ml-4 w-12 text-right">{formatDuration(seconds)}</div>
         </div>
       </div>
     );
@@ -374,7 +380,7 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onSend, disabled, hasText
     }
 
     return ui;
-  }, [hasRecording, isRecording, recordedUrl, seconds, previewPlaying, previewProgress, resetState, sendRecording]);
+  }, [hasRecording, isRecording, recordedUrl, seconds, previewPlaying, previewProgress, resetState]);
 
   useEffect(() => {
     onRecordingState?.({ isRecording, seconds, cancelHint: cancelSwipe.active, cancelled: cancelSwipe.cancelled, hasRecording });

@@ -395,8 +395,8 @@ const Chat = () => {
             <div className="flex items-end gap-3 max-w-3xl mx-auto flex-wrap">
               <div className="flex-1 min-w-[220px]">
                 <div className={`relative rounded-2xl transition-all duration-200 shadow-[0_2px_16px_0_rgba(80,80,120,0.10)] border border-[rgba(120,110,255,0.25)] bg-background/80 focus-within:border-[rgba(120,110,255,0.7)] focus-within:shadow-[0_0_0_3px_rgba(120,110,255,0.15)] ${isEnded ? 'opacity-60' : 'hover:brightness-105 hover:shadow-[0_2px_24px_0_rgba(120,110,255,0.10)]'} ${recState.isRecording || recState.hasRecording ? 'pointer-events-none select-none opacity-80' : ''}`}>
-                  {/* root for voice preview portal */}
-                  <div id="voice-preview-root" className="absolute left-3 right-3 bottom-3 flex items-center justify-center pointer-events-auto" />
+                  {/* root for voice preview portal (preview will render inside this container) */}
+                  <div id="voice-preview-root" className="absolute left-3 right-20 bottom-3 flex items-center justify-center pointer-events-auto" />
                   {(recState.isRecording || recState.hasRecording) && (
                     <div className="pointer-events-none absolute inset-x-3 bottom-3 grid grid-cols-3 items-center">
                       <div className="flex items-center gap-2 justify-self-start">

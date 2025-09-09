@@ -1,6 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
@@ -253,7 +252,7 @@ const Chat = () => {
 
   return (
     <div className="fixed inset-0 w-full h-full overflow-hidden overscroll-none">
-      {/* SVG-паттерн для фона */}
+      {/* SVG-паттерн для фон�� */}
       <div className="bg-pattern" />
       <div className="relative flex flex-col w-full h-full z-10">
           {/* Large decorative background title: centered, slightly larger and rotated */}

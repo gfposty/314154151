@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { Send, Mic, Trash2, Play, Pause } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -33,8 +34,10 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onSend, disabled, hasText
 
   // Preview playback for just-recorded note
   const previewAudioRef = useRef<HTMLAudioElement | null>(null);
+  const previewCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const [previewPlaying, setPreviewPlaying] = useState(false);
   const [previewProgress, setPreviewProgress] = useState(0);
+
 
   // Recorder
   const mediaStreamRef = useRef<MediaStream | null>(null);
@@ -48,7 +51,63 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onSend, disabled, hasText
   const dataArrayRef = useRef<Uint8Array | null>(null);
   const rafRef = useRef<number | null>(null);
   const [levels, setLevels] = useState<number[]>(() => new Array(16).fill(0));
+  // Preview waveform state and analyser refs
+  const [previewLevels, setPreviewLevels] = useState<number[]>(() => new Array(48).fill(0));
+  const previewAnalyserRef = useRef<AnalyserNode | null>(null);
+  const previewAudioCtxRef = useRef<AudioContext | null>(null);
+  const previewDataRef = useRef<Uint8Array | null>(null);
+  const previewRafRef = useRef<number | null>(null);
   const cancelledRef = useRef(false);
+
+  // draw waveform to canvas when previewLevels change (compact, lower height)
+  useEffect(() => {
+    const canvas = previewCanvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    const dpr = window.devicePixelRatio || 1;
+    const rect = canvas.getBoundingClientRect();
+    // guard for zero-sized canvas
+    if (rect.width === 0 || rect.height === 0) return;
+    canvas.width = rect.width * dpr;
+    canvas.height = rect.height * dpr;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    const barCount = Math.min(previewLevels.length, 40);
+    // compute bar width and gap to keep waveform compact
+    const totalGapRatio = 0.35; // percent of canvas used for gaps
+    const availableWidth = canvas.width;
+    const barWidth = Math.max(2 * dpr, Math.floor((availableWidth / (barCount + (barCount - 1) * totalGapRatio))));
+    const gap = Math.max(1 * dpr, Math.floor(barWidth * totalGapRatio));
+    const totalWidth = barCount * barWidth + (barCount - 1) * gap;
+    let x = Math.round((canvas.width - totalWidth) / 2);
+    for (let i = 0; i < barCount; i++) {
+      const v = previewLevels[i] ?? 0;
+      // scale down heights for compact look
+      const h = Math.max(4 * dpr, Math.round(v * canvas.height * 0.5));
+      const y = canvas.height - h - Math.round(2 * dpr);
+      const gradient = ctx.createLinearGradient(0, y, 0, canvas.height);
+      gradient.addColorStop(0, 'rgba(168,85,247,0.98)');
+      gradient.addColorStop(1, 'rgba(124,58,237,0.7)');
+      ctx.fillStyle = gradient;
+      const bx = Math.round(x);
+      const bw = Math.round(barWidth);
+      // rounded corners via path
+      const radius = Math.max(1, Math.floor(bw / 2));
+      ctx.beginPath();
+      ctx.moveTo(bx + radius, y);
+      ctx.lineTo(bx + bw - radius, y);
+      ctx.quadraticCurveTo(bx + bw, y, bx + bw, y + radius);
+      ctx.lineTo(bx + bw, y + h - radius);
+      ctx.quadraticCurveTo(bx + bw, y + h, bx + bw - radius, y + h);
+      ctx.lineTo(bx + radius, y + h);
+      ctx.quadraticCurveTo(bx, y + h, bx, y + h - radius);
+      ctx.lineTo(bx, y + radius);
+      ctx.quadraticCurveTo(bx, y, bx + radius, y);
+      ctx.closePath();
+      ctx.fill();
+      x += barWidth + gap;
+    }
+  }, [previewLevels]);
 
   const resetState = useCallback(() => {
     setIsRecording(false);
@@ -78,12 +137,16 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onSend, disabled, hasText
       window.clearInterval(timerRef.current);
       timerRef.current = null;
     }
+    // Stop recorder first — allow ondataavailable/onstop to run and gather data
     if (mediaRecorderRef.current && mediaRecorderRef.current.state !== "inactive") {
       try { mediaRecorderRef.current.stop(); } catch {}
     }
     mediaRecorderRef.current = null;
-    mediaStreamRef.current?.getTracks().forEach((t) => t.stop());
-    mediaStreamRef.current = null;
+    // Delay stopping tracks slightly to let browser emit dataavailable/onstop events
+    setTimeout(() => {
+      try { mediaStreamRef.current?.getTracks().forEach((t) => t.stop()); } catch {}
+      mediaStreamRef.current = null;
+    }, 120);
     stopVisualization();
   }, [stopVisualization]);
 
@@ -91,7 +154,7 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onSend, disabled, hasText
     const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
     const source = ctx.createMediaStreamSource(stream);
     const analyser = ctx.createAnalyser();
-    analyser.fftSize = 256;
+    analyser.fftSize = 2048; // larger FFT for smoother per-bar data
     const dataArray = new Uint8Array(analyser.frequencyBinCount);
     source.connect(analyser);
     analyserRef.current = analyser;
@@ -102,16 +165,24 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onSend, disabled, hasText
     const tick = () => {
       if (!analyserRef.current || !dataArrayRef.current) return;
       analyserRef.current.getByteTimeDomainData(dataArrayRef.current);
-      let sum = 0;
-      for (let i = 0; i < dataArrayRef.current.length; i++) sum += Math.abs(dataArrayRef.current[i] - 128);
-      const intensity = Math.min(1, (sum / dataArrayRef.current.length) / 40);
-      const next = new Array(bars).fill(0).map((_, i) => {
-        const center = (bars - 1) / 2;
-        const dist = Math.abs(i - center);
-        const falloff = 1 - dist / center;
-        return Math.max(0.08, intensity * (0.6 + 0.4 * falloff));
+      // split time domain data into bars and compute average magnitude per bar
+      const chunkSize = Math.floor(dataArrayRef.current.length / bars) || 1;
+      const nextRaw = new Array(bars).fill(0).map((_, bi) => {
+        let sum = 0;
+        const start = bi * chunkSize;
+        for (let i = 0; i < chunkSize; i++) {
+          const v = Math.abs(dataArrayRef.current[start + i] - 128);
+          sum += v;
+        }
+        const avg = sum / chunkSize;
+        // normalize roughly to 0..1
+        return Math.min(1, avg / 40);
       });
-      setLevels(next);
+      // apply slight smoothing to previous values for nicer animation
+      setLevels((prev) => nextRaw.map((v, i) => {
+        const p = prev[i] ?? 0;
+        return p * 0.7 + v * 0.3;
+      }));
       rafRef.current = requestAnimationFrame(tick);
     };
     tick();
@@ -120,9 +191,30 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onSend, disabled, hasText
   const startRecording = useCallback(async () => {
     if (disabled || isRecording) return;
     try {
+      if (typeof MediaRecorder === 'undefined') {
+        console.error('MediaRecorder API is not supported in this browser');
+        return;
+      }
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      if (!stream) {
+        console.error('No media stream obtained');
+        return;
+      }
       mediaStreamRef.current = stream;
-      const recorder = new MediaRecorder(stream);
+      let recorder: MediaRecorder;
+      try {
+        recorder = new MediaRecorder(stream);
+      } catch (err) {
+        console.error('Failed to create MediaRecorder', err);
+        // try using a different mimeType fallback
+        try {
+          recorder = new MediaRecorder(stream, { mimeType: 'audio/webm;codecs=opus' });
+        } catch (err2) {
+          console.error('Fallback MediaRecorder creation failed', err2);
+          stream.getTracks().forEach((t) => t.stop());
+          return;
+        }
+      }
       mediaRecorderRef.current = recorder;
       chunksRef.current = [];
       recorder.ondataavailable = (e) => { if (e.data && e.data.size > 0) chunksRef.current.push(e.data); };
@@ -132,15 +224,23 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onSend, disabled, hasText
           chunksRef.current = [];
           return;
         }
-        const blob = new Blob(chunksRef.current, { type: "audio/webm" });
+        const blob = new Blob(chunksRef.current, { type: chunksRef.current.length ? chunksRef.current[0].type || 'audio/webm' : 'audio/webm' });
         const url = URL.createObjectURL(blob);
         setRecordedBlob(blob);
         setRecordedUrl(url);
         setHasRecording(true);
         setPreviewPlaying(false);
         setPreviewProgress(0);
+        // mark recording finished so UI can show preview
+        setIsRecording(false);
       };
-      recorder.start();
+      try {
+        recorder.start();
+      } catch (err) {
+        console.error('Failed to start MediaRecorder', err);
+        stream.getTracks().forEach((t) => t.stop());
+        return;
+      }
       cancelledRef.current = false;
       setIsRecording(true);
       setHasRecording(false);
@@ -181,30 +281,13 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onSend, disabled, hasText
   // Hold-to-record handlers
   const isHoldingRef = useRef(false);
   const onPointerDown = (e: React.PointerEvent) => {
-    if (disabled || hasText) return;
-    (e.target as HTMLElement).setPointerCapture(e.pointerId);
-    isHoldingRef.current = true;
-    startRecording();
-    setCancelSwipe({ active: true, dx: 0, cancelled: false });
+    // no-op: hold-to-record disabled in favor of click-to-record
   };
-  const onPointerMove = (e: React.PointerEvent) => {
-    if (!isHoldingRef.current || !isRecording) return;
-    const dx = e.movementX;
-    setCancelSwipe((prev) => {
-      const nextDx = Math.max(-200, Math.min(40, prev.dx + dx));
-      const cancelled = nextDx <= -SWIPE_CANCEL_THRESHOLD;
-      return { active: true, dx: nextDx, cancelled };
-    });
+  const onPointerMove = (_e: React.PointerEvent) => {
+    // swipe-to-cancel removed for click-to-record mode
   };
   const onPointerUp = () => {
-    if (!isHoldingRef.current) return;
-    isHoldingRef.current = false;
-    setCancelSwipe((prev) => ({ ...prev, active: false, dx: 0 }));
-    if (cancelSwipe.cancelled) {
-      cancelRecording();
-    } else {
-      finishRecording();
-    }
+    // no-op in click-to-record mode
   };
 
   // Preview play/pause wiring
@@ -230,20 +313,30 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onSend, disabled, hasText
   }, [previewPlaying]);
 
   const micBtn = (
-    <button
-      type="button"
-      aria-label="Записать голосовое"
-      disabled={disabled}
-      onPointerDown={onPointerDown}
-      onPointerMove={onPointerMove}
-      onPointerUp={onPointerUp}
-      className={cn(
-        "relative inline-flex items-center justify-center h-10 w-10 rounded-full bg-gradient-primary text-white shadow-glow transition-transform",
-        "active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+    <div className="relative">
+      <button
+        type="button"
+        aria-label="Записать голосовое"
+        disabled={disabled || isRecording || hasRecording}
+        onClick={() => startRecording()}
+        className={cn(
+          "inline-flex items-center justify-center h-10 w-10 rounded-full bg-gradient-primary text-white shadow-glow transition-transform",
+          "active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+        )}
+      >
+        <Mic className="h-4 w-4" />
+      </button>
+      {isRecording && (
+        <button
+          type="button"
+          aria-label="Остановить запись"
+          onClick={finishRecording}
+          className="absolute -top-11 right-0 h-8 w-8 rounded-full bg-background/80 border border-border/60 flex items-center justify-center hover:bg-background"
+        >
+          <Pause className="h-4 w-4" />
+        </button>
       )}
-    >
-      <Mic className="h-4 w-4" />
-    </button>
+    </div>
   );
 
   const sendVoiceBtn = (
@@ -256,7 +349,7 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onSend, disabled, hasText
         "hover:scale-105 active:scale-95 transition-transform"
       )}
     >
-      <Send className="h-4 w-4" />
+      <Send className="h-5 w-5" />
     </button>
   );
 
@@ -271,7 +364,7 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onSend, disabled, hasText
         "hover:scale-105 active:scale-95 transition-transform disabled:opacity-50"
       )}
     >
-      <Send className="h-4 w-4" />
+      <Send className="h-5 w-5" />
     </button>
   );
 
@@ -299,7 +392,7 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onSend, disabled, hasText
             "px-2 py-1 rounded-md text-xs",
             cancelSwipe.cancelled ? "bg-red-500/20 text-red-400 border border-red-500/30" : "text-muted-foreground"
           )}>
-            {cancelSwipe.cancelled ? "Отпустите, чтобы отменить" : "Свайп влево — отмена"}
+            {cancelSwipe.cancelled ? "Отпустите, чтобы отменить" : "Свайп вл��во — отмена"}
           </div>
         </div>
         {cancelSwipe.active && (
@@ -318,53 +411,192 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onSend, disabled, hasText
 
   const ReadyToSendUI = useMemo(() => {
     if (!hasRecording || isRecording || !recordedUrl) return null;
-    return (
-      <div className="flex-1 min-w-[200px]">
-        <div className="flex items-center gap-3 px-4 py-3 rounded-2xl bg-card/80 border border-border/50 backdrop-blur-sm">
-          <button
-            type="button"
-            aria-label={previewPlaying ? "Пауза" : "Воспроизвести"}
-            onClick={() => setPreviewPlaying((p) => !p)}
-            className="inline-flex items-center justify-center h-8 w-8 rounded-full bg-primary/10 text-primary"
-          >
-            {previewPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
-          </button>
-          <span className="tabular-nums text-sm text-foreground">{formatDuration(seconds)}</span>
-          <div className="h-[3px] flex-1 rounded-full bg-border overflow-hidden">
-            <div className="h-full bg-primary" style={{ width: `${Math.round(previewProgress * 100)}%` }} />
+
+    const ui = (
+      <div className="w-full flex justify-center pointer-events-auto">
+        <div className="relative flex items-center gap-3 px-3 py-3 rounded-2xl bg-transparent border border-[rgba(124,58,237,0.04)] w-full mx-auto" style={{ maxWidth: 'calc(100% - 160px)' }}>
+          {/* Left controls inside input: trash + small arrow (non-interactive) */}
+          <div className="flex items-center gap-2 flex-none pl-1">
+            <button onClick={resetState} aria-label="Удалить запись" className="p-2 rounded-md bg-transparent text-white/70 hover:text-white transition-colors">
+              <Trash2 className="h-5 w-5" />
+            </button>
+            <div aria-hidden className="p-2 rounded-md bg-transparent">
+              <img src="/123.png" alt="logo" className="h-5 w-5 object-contain rounded-sm" />
+            </div>
           </div>
-          <audio ref={previewAudioRef} src={recordedUrl} preload="metadata" className="hidden" />
+
+          {/* Waveform container (smaller) */}
+          <div className="flex-1 flex items-center justify-center relative">
+            <div className="w-full max-w-[620px]">
+              <div className="relative h-8 rounded-md bg-[rgba(255,255,255,0.02)] overflow-hidden">
+                {/* progress overlay */}
+                <div className="absolute left-0 top-0 h-full bg-gradient-to-r from-primary to-primary/60" style={{ width: `${Math.round(previewProgress * 100)}%`, transition: 'width 120ms linear', opacity: 0.35 }} />
+
+                {/* canvas waveform centered */}
+                <div className="relative z-10 h-full flex items-center justify-center px-2">
+                  <canvas ref={previewCanvasRef} style={{ width: '100%', height: '100%' }} />
+                </div>
+
+                {/* centered play button (overlay) - slightly smaller icon */}
+                <button
+                  type="button"
+                  aria-label={previewPlaying ? "Пауза" : "Воспроизвести"}
+                  onClick={() => setPreviewPlaying((p) => !p)}
+                  className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 inline-flex items-center justify-center h-8 w-8 rounded-full bg-white/6 text-white/90 hover:bg-white/8 transition-colors"
+                >
+                  {previewPlaying ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5" />}
+                </button>
+              </div>
+
+              <div className="mt-2 flex items-center justify-between text-xs text-white/80">
+                <span className="tabular-nums">{formatDuration(seconds)}</span>
+                {/* no send button per request - delete icon handles removal */}
+              </div>
+            </div>
+          </div>
         </div>
+        {/* hidden audio element used for preview playback / analyser */}
+        <audio ref={previewAudioRef} src={recordedUrl || undefined} preload="metadata" className="hidden" />
       </div>
     );
-  }, [hasRecording, isRecording, recordedUrl, seconds, previewPlaying, previewProgress]);
+
+    try {
+      const target = typeof document !== 'undefined' && document.getElementById('voice-preview-root');
+      if (target) return createPortal(ui, target);
+    } catch (e) {
+      // fall back to inline
+    }
+
+    return ui;
+  }, [hasRecording, isRecording, recordedUrl, seconds, previewPlaying, previewProgress, resetState]);
 
   useEffect(() => {
-    onRecordingState?.({ isRecording, seconds, cancelHint: cancelSwipe.active, cancelled: cancelSwipe.cancelled });
-  }, [onRecordingState, isRecording, seconds, cancelSwipe.active, cancelSwipe.cancelled]);
+    onRecordingState?.({ isRecording, seconds, cancelHint: cancelSwipe.active, cancelled: cancelSwipe.cancelled, hasRecording });
+  }, [onRecordingState, isRecording, seconds, cancelSwipe.active, cancelSwipe.cancelled, hasRecording]);
 
   useEffect(() => {
     onBindApi?.({ cancel: cancelRecording, finish: finishRecording });
   }, [onBindApi, cancelRecording, finishRecording]);
 
+  // Setup analyser for preview playback to animate waveform based on audio amplitude
+  // This effect is defensive: creating a MediaElementSource can fail if the audio element
+  // was previously connected to a different AudioContext. We reuse existing context/source
+  // when possible and defend against repeated createMediaElementSource errors.
+  const previewSourceRef = useRef<MediaElementAudioSourceNode | null>(null);
+
+  useEffect(() => {
+    const audioEl = previewAudioRef.current;
+    if (!audioEl || !recordedUrl) return;
+
+    // If there's an existing audio context and source, reuse them to avoid attempting
+    // to create a new MediaElementSource for the same HTMLMediaElement.
+    try {
+      if (!previewAudioCtxRef.current) {
+        const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+        // try to create source; this can throw if the element was previously used
+        try {
+          const source = ctx.createMediaElementSource(audioEl);
+          previewAudioCtxRef.current = ctx;
+          previewSourceRef.current = source;
+        } catch (err) {
+          // failed to create source: clean up and fallback by closing ctx
+          try { ctx.close(); } catch {}
+          console.warn("createMediaElementSource failed, skipping visualiser setup", err);
+          return;
+        }
+      } else if (!previewSourceRef.current) {
+        // audio context exists but we don't have a source stored for it — try to create once
+        try {
+          previewSourceRef.current = previewAudioCtxRef.current!.createMediaElementSource(audioEl);
+        } catch (err) {
+          // createMediaElementSource may fail if the element was already connected to another context.
+          // Fallback: use captureStream() on the audio element and create a MediaStreamSource from that.
+          try {
+            const captureStream = (audioEl as any).captureStream ? (audioEl as any).captureStream() : null;
+            if (captureStream) {
+              previewSourceRef.current = previewAudioCtxRef.current!.createMediaStreamSource(captureStream);
+            } else {
+              console.warn('createMediaElementSource failed and captureStream unavailable, skipping visualiser', err);
+              return;
+            }
+          } catch (err2) {
+            console.warn('captureStream fallback failed, skipping visualiser', err2);
+            return;
+          }
+        }
+      }
+
+      const ctx = previewAudioCtxRef.current!;
+      const source = previewSourceRef.current!;
+      const analyser = ctx.createAnalyser();
+      analyser.fftSize = 1024;
+      const dataArray = new Uint8Array(analyser.frequencyBinCount);
+
+      // connect source -> analyser (do not connect to destination to avoid double audio)
+      try {
+        source.connect(analyser);
+        // don't connect analyser to ctx.destination for preview visualiser to avoid extra routing
+      } catch (err) {
+        console.warn('Failed to connect audio nodes for preview visualiser', err);
+      }
+
+      previewAnalyserRef.current = analyser;
+      previewDataRef.current = dataArray;
+
+      const bars = previewLevels.length;
+      const tick = () => {
+        if (!previewAnalyserRef.current || !previewDataRef.current) return;
+        // Prefer frequency data for visible peaks (better for bar visualization)
+        previewAnalyserRef.current.getByteFrequencyData(previewDataRef.current);
+        const chunkSize = Math.floor(previewDataRef.current.length / bars) || 1;
+        const nextRaw = new Array(bars).fill(0).map((_, bi) => {
+          let sum = 0;
+          const start = bi * chunkSize;
+          for (let i = 0; i < chunkSize; i++) {
+            const v = previewDataRef.current![start + i];
+            sum += v;
+          }
+          const avg = sum / chunkSize; // 0..255
+          // normalize to 0..1 and apply a slight curve for visibility
+          const normalized = Math.pow(Math.min(1, avg / 255), 0.6);
+          return normalized;
+        });
+        // smooth with previous values for nicer animation and scale up for visibility
+        setPreviewLevels((prev) => {
+          const next = nextRaw.map((v, i) => {
+            const p = prev[i] ?? 0;
+            return p * 0.65 + v * 0.35;
+          });
+          return next;
+        });
+        previewRafRef.current = requestAnimationFrame(tick);
+      };
+
+      previewRafRef.current = requestAnimationFrame(tick);
+
+      return () => {
+        if (previewRafRef.current) cancelAnimationFrame(previewRafRef.current);
+        previewRafRef.current = null;
+        try { previewAnalyserRef.current?.disconnect(); } catch {}
+        // do NOT disconnect the source here — it may be shared across renders/contexts
+        try { ctx.close(); } catch {}
+        previewAnalyserRef.current = null;
+        previewAudioCtxRef.current = null;
+        previewDataRef.current = null;
+        previewSourceRef.current = null;
+      };
+    } catch (err) {
+      console.warn('Preview visualiser setup failed', err);
+      return;
+    }
+  }, [recordedUrl]);
+
   return (
-    <div className="inline-flex items-center gap-2 shrink-0">
-      {ReadyToSendUI}
-      {hasRecording ? (
-        <>
-          {sendVoiceBtn}
-          <button
-            type="button"
-            aria-label="Удалить голосовое"
-            onClick={resetState}
-            className="inline-flex items-center justify-center h-10 w-10 rounded-full bg-background/60 border border-border/60 hover:bg-background/80"
-          >
-            <Trash2 className="h-4 w-4" />
-          </button>
-        </>
-      ) : (
-        hasText ? sendTextBtn : micBtn
-      )}
+    <div className="inline-flex items-center gap-2 relative">
+      {/* ReadyToSendUI is rendered into #voice-preview-root via portal; keep component compact here */}
+      <div className="flex items-center">
+        {hasRecording ? sendVoiceBtn : (hasText ? sendTextBtn : micBtn)}
+      </div>
     </div>
   );
 };

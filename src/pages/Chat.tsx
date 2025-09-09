@@ -62,7 +62,7 @@ const Chat = () => {
       setIsConnected(true);
       toast({
         title: "Собеседник найден!",
-        description: "Вы под��лючены к анонимному чату",
+        description: "Вы подключены к анонимному чату",
       });
       playSound(CHAT_START_SOUND);
       // Добавляем приветственное сообщение от системы
@@ -143,9 +143,9 @@ const Chat = () => {
     setIsSearching(true);
     toast({
       title: "Поиск нового собеседника...",
-      description: "Подождите, мы ищем вам ново��о собеседника",
+      description: "Подождите, мы ищем вам нового собеседника",
     });
-    // Симуляц��я поиска нового собеседника
+    // Симуляция поиска нового собеседника
     setTimeout(() => {
       setIsSearching(false);
       setPartnerFound(true);
@@ -174,10 +174,8 @@ const Chat = () => {
   };
 
   const autoResize = () => {
-    const el = textareaRef.current;
-    if (!el) return;
-    el.style.height = '0px';
-    el.style.height = Math.min(el.scrollHeight, 6 * 24 + 24) + 'px';
+    // Intentionally left empty: we use a fixed textarea height with internal scrolling to prevent
+    // the input from expanding vertically when a lot of text is entered.
   };
 
   const insertAtCursor = (text: string) => {
@@ -195,7 +193,7 @@ const Chat = () => {
     });
   };
 
-  const [recState, setRecState] = useState({ isRecording: false, seconds: 0, cancelHint: false, cancelled: false });
+  const [recState, setRecState] = useState({ isRecording: false, seconds: 0, cancelHint: false, cancelled: false, hasRecording: false });
   const cancelRecRef = useRef<(() => void) | null>(null);
   const formatDur = (seconds: number) => {
     const m = Math.floor(seconds / 60).toString().padStart(2, '0');
@@ -243,9 +241,10 @@ const Chat = () => {
       {/* SVG-паттерн для фона */}
       <div className="bg-pattern" />
       <div className="relative flex flex-col w-full h-full z-10">
+          {/* Large decorative background title: centered, slightly larger and rotated */}
         {/* Header */}
         <div className="bg-transparent border-b-0 p-4 animate-fade-in">
-          <div className="max-w-3xl mx-auto">
+          <div className="max-w-3xl mx-auto relative">
             <div className="rounded-3xl border border-[rgba(120,110,255,0.18)] bg-background/70 px-3 py-2 flex items-center justify-between flex-wrap gap-2 sm:gap-3">
               <div className="flex items-center space-x-3 flex-shrink min-w-0">
                 <img src="/123.png" alt="Bezlico Logo" className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl object-contain -my-2" />
@@ -310,7 +309,7 @@ const Chat = () => {
                   onClick={handleChangePartner}
                   className="text-xs"
                 >
-                  Сменить параметры по����ска
+                  Сменить параметры поиска
                 </Button>
               </div>
             </div>
@@ -352,7 +351,7 @@ const Chat = () => {
                           const today = new Date();
                           const yesterday = new Date();
                           yesterday.setDate(today.getDate() - 1);
-                          if (d.toDateString() === today.toDateString()) return 'С��годня';
+                          if (d.toDateString() === today.toDateString()) return 'Сегодня';
                           if (d.toDateString() === yesterday.toDateString()) return 'Вчера';
                           return d.toLocaleDateString('ru-RU');
                         })();
@@ -395,66 +394,88 @@ const Chat = () => {
           <div className="bg-transparent border-t-0 p-4 pt-2 animate-slide-up mt-auto">
             <div className="flex items-end gap-3 max-w-3xl mx-auto flex-wrap">
               <div className="flex-1 min-w-[220px]">
-                <div className={`relative rounded-2xl transition-all duration-200 shadow-[0_2px_16px_0_rgba(80,80,120,0.10)] border border-[rgba(120,110,255,0.25)] bg-background/80 focus-within:border-[rgba(120,110,255,0.7)] focus-within:shadow-[0_0_0_3px_rgba(120,110,255,0.15)] ${isEnded ? 'opacity-60' : 'hover:brightness-105 hover:shadow-[0_2px_24px_0_rgba(120,110,255,0.10)]'}`}>
-                  {recState.isRecording && (
+                <div className={`relative rounded-2xl transition-all duration-200 shadow-[0_2px_16px_0_rgba(80,80,120,0.10)] border border-[rgba(120,110,255,0.25)] bg-background/80 focus-within:border-[rgba(120,110,255,0.7)] focus-within:shadow-[0_0_0_3px_rgba(120,110,255,0.15)] ${isEnded ? 'opacity-60' : 'hover:brightness-105 hover:shadow-[0_2px_24px_0_rgba(120,110,255,0.10)]'} ${recState.isRecording || recState.hasRecording ? 'pointer-events-none select-none opacity-80' : ''}`}>
+                  {/* root for voice preview portal (preview will render inside this container) */}
+                  <div id="voice-preview-root" className="absolute left-3 right-20 bottom-3 flex items-center justify-center pointer-events-auto" />
+                  {(recState.isRecording || recState.hasRecording) && (
                     <div className="pointer-events-none absolute inset-x-3 bottom-3 grid grid-cols-3 items-center">
                       <div className="flex items-center gap-2 justify-self-start">
-                        <span className="h-2 w-2 rounded-full bg-red-500 animate-pulse" />
-                        <span className="tabular-nums text-xs text-muted-foreground">{formatDur(recState.seconds)}</span>
+                        {recState.isRecording ? (
+                          <>
+                            <span className="h-2 w-2 rounded-full bg-red-500 animate-pulse" />
+                            <span className="tabular-nums text-xs text-muted-foreground">{formatDur(recState.seconds)}</span>
+                          </>
+                        ) : (
+                          // left area intentionally empty when preview available (trash moved into pill)
+                          null
+                        )}
                       </div>
-                      <button
-                        type="button"
-                        onClick={() => cancelRecRef.current?.()}
-                        className={`justify-self-center text-xs ${recState.cancelled ? 'text-red-400' : 'text-muted-foreground'} pointer-events-auto`}
-                      >
-                        Отмена
-                      </button>
+                      <div className="justify-self-center">
+                        {recState.isRecording ? (
+                          <button
+                            type="button"
+                            onClick={() => cancelRecRef.current?.()}
+                            className={`justify-self-center px-2 py-0.5 rounded-md font-medium text-sm pointer-events-auto transition-colors ${recState.cancelled ? 'text-red-400 bg-red-500/10' : 'text-primary bg-primary/10'} drop-shadow-[0_0_6px_hsl(var(--primary))]`}
+                          >
+                            Отмена
+                          </button>
+                        ) : null}
+                      </div>
+                      <div className="flex items-center justify-self-end">
+                        {/* right empty when recording; when preview available we show nothing here (preview UI is in recorder) */}
+                      </div>
                     </div>
                   )}
                   <Textarea
                     ref={textareaRef}
                     value={newMessage}
-                    onChange={(e) => { setNewMessage(e.target.value); autoResize(); }}
+                    onChange={(e) => { setNewMessage(e.target.value); }}
                     onKeyDown={handleKeyPress}
-                    placeholder={recState.isRecording ? '' : 'Напишите сообщение...'}
+                    placeholder={recState.isRecording || recState.hasRecording ? '' : 'Напишите сообщение...'}
                     disabled={isEnded || !isConnected || recState.isRecording}
-                    className={`w-full max-h-64 min-h-[120px] bg-background/80 border-transparent text-foreground placeholder:text-muted-foreground focus:bg-background transition-all rounded-2xl resize-none ${recState.isRecording ? 'pointer-events-none' : ''} disabled:opacity-70 disabled:cursor-not-allowed`}
+                    className={`w-full h-32 pr-16 bg-background/80 border-transparent text-foreground placeholder:text-muted-foreground focus:bg-background transition-all rounded-2xl resize-none overflow-y-auto hide-scrollbar ${recState.isRecording || recState.hasRecording ? 'pointer-events-none' : ''} disabled:opacity-70 disabled:cursor-not-allowed`}
                     maxLength={500}
-                    rows={3}
                   />
+
+                  {/* Icons inside input: emoji + voice recorder (aligned) */}
+                  <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-2 pointer-events-auto z-20">
+                    <Popover open={emojiOpen} onOpenChange={setEmojiOpen}>
+                      <PopoverTrigger asChild>
+                        <Button variant="outline" size="icon" className="shrink-0 h-10 w-10 bg-background/60 border-border/50" disabled={isEnded || !isConnected}>
+                          <Smile className="h-4 w-4" />
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent align="end" className="w-60 p-2">
+                        <div className="grid grid-cols-8 gap-1">
+                          {emojis.map((e) => (
+                            <button
+                              key={e}
+                              type="button"
+                              className="h-7 w-7 rounded-md hover:bg-accent"
+                              onClick={() => { insertAtCursor(e); setEmojiOpen(false); }}
+                            >
+                              {e}
+                            </button>
+                          ))}
+                        </div>
+                      </PopoverContent>
+                    </Popover>
+
+                    <div className="flex items-center">
+                      <VoiceRecorder
+                        disabled={isEnded || !isConnected}
+                        hasText={!!newMessage.trim()}
+                        onSendText={sendMessage}
+                        onRecordingState={setRecState}
+                        onBindApi={({ cancel }) => { cancelRecRef.current = cancel; }}
+                        onSend={({ url, duration }) => {
+                          addAudioMessage(url, duration, true);
+                        }}
+                      />
+                    </div>
+                  </div>
                 </div>
               </div>
-              <Popover open={emojiOpen} onOpenChange={setEmojiOpen}>
-                <PopoverTrigger asChild>
-                  <Button variant="outline" size="icon" className="shrink-0 h-10 w-10 bg-background/60 border-border/50 hover:shadow-glow" disabled={isEnded || !isConnected}>
-                    <Smile className="h-4 w-4" />
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent align="end" className="w-60 p-2">
-                  <div className="grid grid-cols-8 gap-1">
-                    {emojis.map((e) => (
-                      <button
-                        key={e}
-                        type="button"
-                        className="h-7 w-7 rounded-md hover:bg-accent"
-                        onClick={() => { insertAtCursor(e); setEmojiOpen(false); }}
-                      >
-                        {e}
-                      </button>
-                    ))}
-                  </div>
-                </PopoverContent>
-              </Popover>
-              <VoiceRecorder
-                disabled={isEnded || !isConnected}
-                hasText={!!newMessage.trim()}
-                onSendText={sendMessage}
-                onRecordingState={setRecState}
-                onBindApi={({ cancel }) => { cancelRecRef.current = cancel; }}
-                onSend={({ url, duration }) => {
-                  addAudioMessage(url, duration, true);
-                }}
-              />
             </div>
             <div className="text-xs text-muted-foreground text-center mt-2">
               {newMessage.length}/500 символов

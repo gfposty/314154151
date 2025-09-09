@@ -493,25 +493,26 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onSend, disabled, hasText
       const bars = previewLevels.length;
       const tick = () => {
         if (!previewAnalyserRef.current || !previewDataRef.current) return;
-        previewAnalyserRef.current.getByteTimeDomainData(previewDataRef.current);
-        // split data into bars and compute RMS-like amplitude per bar
+        // Prefer frequency data for visible peaks (better for bar visualization)
+        previewAnalyserRef.current.getByteFrequencyData(previewDataRef.current);
         const chunkSize = Math.floor(previewDataRef.current.length / bars) || 1;
         const nextRaw = new Array(bars).fill(0).map((_, bi) => {
           let sum = 0;
           const start = bi * chunkSize;
           for (let i = 0; i < chunkSize; i++) {
-            const v = previewDataRef.current![start + i] - 128;
-            sum += Math.abs(v);
+            const v = previewDataRef.current![start + i];
+            sum += v;
           }
-          const avg = sum / chunkSize;
-          // normalize roughly to 0..1
-          return Math.min(1, avg / 40);
+          const avg = sum / chunkSize; // 0..255
+          // normalize to 0..1 and apply a slight curve for visibility
+          const normalized = Math.pow(Math.min(1, avg / 255), 0.6);
+          return normalized;
         });
-        // smooth with previous values for nicer animation
+        // smooth with previous values for nicer animation and scale up for visibility
         setPreviewLevels((prev) => {
           const next = nextRaw.map((v, i) => {
             const p = prev[i] ?? 0;
-            return p * 0.75 + v * 0.25;
+            return p * 0.65 + v * 0.35;
           });
           return next;
         });

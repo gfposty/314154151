@@ -392,7 +392,7 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onSend, disabled, hasText
             "px-2 py-1 rounded-md text-xs",
             cancelSwipe.cancelled ? "bg-red-500/20 text-red-400 border border-red-500/30" : "text-muted-foreground"
           )}>
-            {cancelSwipe.cancelled ? "Отпустите, чтобы отменить" : "Свайп влево — отмена"}
+            {cancelSwipe.cancelled ? "Отпустите, чтобы отменить" : "Свайп вл��во — отмена"}
           </div>
         </div>
         {cancelSwipe.active && (
@@ -592,10 +592,8 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onSend, disabled, hasText
   }, [recordedUrl]);
 
   return (
-    <div className="inline-flex items-center gap-3 shrink-0 relative w-full">
-      <div className="flex-1 flex justify-center">
-        {ReadyToSendUI}
-      </div>
+    <div className="inline-flex items-center gap-2 relative">
+      {/* ReadyToSendUI is rendered into #voice-preview-root via portal; keep component compact here */}
       <div className="flex items-center">
         {hasRecording ? sendVoiceBtn : (hasText ? sendTextBtn : micBtn)}
       </div>

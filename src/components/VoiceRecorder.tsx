@@ -38,6 +38,27 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onSend, disabled, hasText
   const [previewPlaying, setPreviewPlaying] = useState(false);
   const [previewProgress, setPreviewProgress] = useState(0);
 
+
+  // Recorder
+  const mediaStreamRef = useRef<MediaStream | null>(null);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const chunksRef = useRef<Blob[]>([]);
+  const timerRef = useRef<number | null>(null);
+
+  // Visualization
+  const analyserRef = useRef<AnalyserNode | null>(null);
+  const audioCtxRef = useRef<AudioContext | null>(null);
+  const dataArrayRef = useRef<Uint8Array | null>(null);
+  const rafRef = useRef<number | null>(null);
+  const [levels, setLevels] = useState<number[]>(() => new Array(16).fill(0));
+  // Preview waveform state and analyser refs
+  const [previewLevels, setPreviewLevels] = useState<number[]>(() => new Array(48).fill(0));
+  const previewAnalyserRef = useRef<AnalyserNode | null>(null);
+  const previewAudioCtxRef = useRef<AudioContext | null>(null);
+  const previewDataRef = useRef<Uint8Array | null>(null);
+  const previewRafRef = useRef<number | null>(null);
+  const cancelledRef = useRef(false);
+
   // draw waveform to canvas when previewLevels change
   useEffect(() => {
     const canvas = previewCanvasRef.current;
@@ -68,26 +89,6 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onSend, disabled, hasText
       x += barWidth + gap;
     }
   }, [previewLevels]);
-
-  // Recorder
-  const mediaStreamRef = useRef<MediaStream | null>(null);
-  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
-  const chunksRef = useRef<Blob[]>([]);
-  const timerRef = useRef<number | null>(null);
-
-  // Visualization
-  const analyserRef = useRef<AnalyserNode | null>(null);
-  const audioCtxRef = useRef<AudioContext | null>(null);
-  const dataArrayRef = useRef<Uint8Array | null>(null);
-  const rafRef = useRef<number | null>(null);
-  const [levels, setLevels] = useState<number[]>(() => new Array(16).fill(0));
-  // Preview waveform state and analyser refs
-  const [previewLevels, setPreviewLevels] = useState<number[]>(() => new Array(48).fill(0));
-  const previewAnalyserRef = useRef<AnalyserNode | null>(null);
-  const previewAudioCtxRef = useRef<AudioContext | null>(null);
-  const previewDataRef = useRef<Uint8Array | null>(null);
-  const previewRafRef = useRef<number | null>(null);
-  const cancelledRef = useRef(false);
 
   const resetState = useCallback(() => {
     setIsRecording(false);

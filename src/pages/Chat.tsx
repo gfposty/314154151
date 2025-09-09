@@ -248,7 +248,7 @@ const Chat = () => {
   }, [messages]);
 
   const statusColor = isHidden ? 'bg-red-500' : (isInactive ? 'bg-yellow-400' : 'bg-green-500');
-  const statusText = isHidden ? 'вышел' : (isInactive ? 'отошёл' : 'в сети');
+  const statusText = isHidden ? 'вышел' : (isInactive ? 'нет на месте' : 'в сети');
 
   return (
     <div className="fixed inset-0 w-full h-full overflow-hidden overscroll-none">

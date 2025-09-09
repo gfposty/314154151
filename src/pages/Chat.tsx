@@ -137,7 +137,7 @@ const Chat = () => {
         "Интересно!",
         "А что думаешь об этом?", 
         "Согласен",
-        "Расскажи подробнее",
+        "��асскажи подробнее",
         "Понятно",
         "А у тебя как?"
       ];
@@ -277,7 +277,7 @@ const Chat = () => {
                       </div>
                     </>
                   ) : (
-                    'Не подключ��н'
+                    'Не подключен'
                   )}
                 </div>
               </div>
@@ -300,7 +300,7 @@ const Chat = () => {
                     </ConfirmDialog>
                     <ConfirmDialog
                       title="Завершить чат?"
-                      description="Вы уверены, что хотите покинуть чат и вернуться на главную страницу?"
+                      description="Вы уверены, что хотите покину��ь чат и вернуться на главную страницу?"
                       onConfirm={handleEndChat}
                       destructive
                     >
@@ -357,7 +357,7 @@ const Chat = () => {
                       </div>
                     </div>
                     <div className="mt-6 flex justify-center">
-                      <Button variant="outline" onClick={() => { setIsSearching(false); setIsConnected(false); setPartnerFound(false); navigate('/'); }}>
+                      <Button variant="outline" onClick={() => { setIsSearching(false); setIsConnected(false); setPartnerFound(false); navigate('/'); }} className="transition-colors hover:bg-destructive/80 hover:text-destructive-foreground">
                         Отменить
                       </Button>
                     </div>

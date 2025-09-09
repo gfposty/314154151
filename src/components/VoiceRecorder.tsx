@@ -381,7 +381,7 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onSend, disabled, hasText
                   {previewLevels.map((lvl, i) => (
                     <div
                       key={i}
-                      style={{ height: `${Math.max(3, Math.round(lvl * 24))}px`, width: 6 }}
+                      style={{ height: `${Math.max(6, Math.round(lvl * 34))}px`, width: 6 }}
                       className={`rounded-sm bg-gradient-to-t from-primary/90 to-primary/60 transition-all ${previewPlaying ? 'opacity-100' : 'opacity-60'}`}
                     />
                   ))}

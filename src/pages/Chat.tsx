@@ -131,14 +131,14 @@ const Chat = () => {
     }
     addMessage(newMessage, true);
     setNewMessage('');
-    // Сим��ляция ответа собеседника
+    // Симуляция ответа собеседника
     setTimeout(() => {
       const responses = [
         "Интересно!",
         "А что думаешь об этом?", 
         "Согласен",
         "Расскажи подробнее",
-        "Понят��о",
+        "Понятно",
         "А у тебя как?"
       ];
       const randomResponse = responses[Math.floor(Math.random() * responses.length)];
@@ -162,9 +162,9 @@ const Chat = () => {
     setIsSearching(true);
     toast({
       title: "Поиск нового собеседника...",
-      description: "Подождите, мы ищем вам новог�� собеседник��",
+      description: "Подождите, мы ищем вам нового собеседника",
     });
-    // Симуляция поиска ново��о собеседника
+    // Симуляция поиска нового собеседника
     setTimeout(() => {
       setIsSearching(false);
       setPartnerFound(true);
@@ -404,7 +404,7 @@ const Chat = () => {
                 <a href="#" className="text-muted-foreground text-sm underline hover:text-primary mb-5 inline-block">Пожаловаться на собеседника</a>
                 <div className="flex flex-col sm:flex-row gap-3 justify-center">
                   <Button onClick={handleChangePartner} variant="outline" className="border-primary text-primary hover:bg-primary hover:text-white">Изменить параметры</Button>
-                  <Button onClick={handleNextChat} className="bg-green-600 hover:bg-green-700 text-white">Нача��ь новый чат</Button>
+                  <Button onClick={handleNextChat} className="bg-green-600 hover:bg-green-700 text-white">Начать новый чат</Button>
                 </div>
               </div>
             </div>
@@ -468,7 +468,7 @@ const Chat = () => {
               </div>
             </div>
             <div className="text-xs text-muted-foreground text-center mt-2">
-              {newMessage.length}/500 сим��олов
+              {newMessage.length}/500 символов
             </div>
           </div>
         )}

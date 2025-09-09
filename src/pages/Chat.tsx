@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -7,7 +7,7 @@ import { ArrowLeft, Send, SkipForward, X, Users, Heart, Paperclip, Smile } from 
 import { toast } from "@/hooks/use-toast";
 import ChatBubble from "@/components/ChatBubble";
 import ConfirmDialog from "@/components/ConfirmDialog";
-import VoiceRecorder from "@/components/VoiceRecorder";
+import { useUserActivity } from "@/hooks/useUserActivity";
 
 interface Message {
   id: string;
@@ -48,6 +48,36 @@ const Chat = () => {
   const [isEnded, setIsEnded] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
+  // Activity/visibility tracking
+  const isInactive = useUserActivity(30000);
+  const [isHidden, setIsHidden] = useState(document.visibilityState === 'hidden');
+  const hideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    const onVisibility = () => {
+      const hidden = document.visibilityState === 'hidden';
+      setIsHidden(hidden);
+      if (hidden) {
+        if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
+        hideTimerRef.current = setTimeout(() => {
+          if (!isEnded && isConnected) {
+            handleEndChat();
+          }
+        }, 60000);
+      } else {
+        if (hideTimerRef.current) {
+          clearTimeout(hideTimerRef.current);
+          hideTimerRef.current = null;
+        }
+      }
+    };
+    document.addEventListener('visibilitychange', onVisibility);
+    return () => {
+      document.removeEventListener('visibilitychange', onVisibility);
+      if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
+    };
+  }, [isConnected, isEnded]);
+
   // Симуляция подключения к собеседнику
   useEffect(() => {
     if (!ageCategory || !genderPreference) {
@@ -62,7 +92,7 @@ const Chat = () => {
       setIsConnected(true);
       toast({
         title: "Собеседник найден!",
-        description: "Вы подключены к анонимному чату",
+        description: "Вы подключены к анонимному ч��ту",
       });
       playSound(CHAT_START_SOUND);
       // Добавляем приветственное сообщение от системы
@@ -84,17 +114,6 @@ const Chat = () => {
     setMessages(prev => [...prev, message]);
   };
 
-  const addAudioMessage = (url: string, duration: number, isOwn: boolean) => {
-    const message: Message = {
-      id: (Date.now() + Math.random()).toString(),
-      audioUrl: url,
-      audioDuration: duration,
-      isOwn,
-      timestamp: Date.now(),
-    };
-    setMessages((prev) => [...prev, message]);
-  };
-
   const sendMessage = () => {
     if (!newMessage.trim() || !isConnected) return;
     // Простая модерация
@@ -112,7 +131,7 @@ const Chat = () => {
     }
     addMessage(newMessage, true);
     setNewMessage('');
-    // Симуляция ответа собеседника
+    // Симуляция ответа собесе��ника
     setTimeout(() => {
       const responses = [
         "Интересно!",
@@ -193,14 +212,6 @@ const Chat = () => {
     });
   };
 
-  const [recState, setRecState] = useState({ isRecording: false, seconds: 0, cancelHint: false, cancelled: false, hasRecording: false });
-  const cancelRecRef = useRef<(() => void) | null>(null);
-  const formatDur = (seconds: number) => {
-    const m = Math.floor(seconds / 60).toString().padStart(2, '0');
-    const s = Math.floor(seconds % 60).toString().padStart(2, '0');
-    return `${m}:${s}`;
-  };
-
   // Disable page scroll while in chat; only chat area scrolls
   useEffect(() => {
     const htmlEl = document.documentElement;
@@ -236,6 +247,9 @@ const Chat = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
+  const statusColor = isHidden ? 'bg-red-500' : (isInactive ? 'bg-yellow-400' : 'bg-green-500');
+  const statusText = isHidden ? 'вышел' : (isInactive ? 'нет на месте' : 'в сети');
+
   return (
     <div className="fixed inset-0 w-full h-full overflow-hidden overscroll-none">
       {/* SVG-паттерн для фона */}
@@ -247,11 +261,9 @@ const Chat = () => {
           <div className="max-w-3xl mx-auto relative">
             <div className="rounded-3xl border border-[rgba(120,110,255,0.18)] bg-background/70 px-3 py-2 flex items-center justify-between flex-wrap gap-2 sm:gap-3">
               <div className="flex items-center space-x-3 flex-shrink min-w-0">
-                <img src="/123.png" alt="Bezlico Logo" className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl object-contain -my-2" />
+                <span className="site-brand site-brand--header pointer-events-auto mr-2">Bezlico</span>
                 <div className="flex items-center flex-wrap gap-x-3 gap-y-1 text-xs text-muted-foreground">
-                  {isEnded ? (
-                    <span>Чат завершён</span>
-                  ) : isSearching ? (
+                  {isEnded ? null : isSearching ? (
                     <span className="animate-pulse">Поиск собеседника...</span>
                   ) : partnerFound ? (
                     <>
@@ -319,6 +331,15 @@ const Chat = () => {
         <div className="flex-1 px-4 pt-2 pb-12 sm:pb-16 min-h-0">
           <div className="relative max-w-3xl mx-auto h-full">
             <div className="absolute top-0 left-0 right-0 h-6 bg-gradient-to-b from-background/80 to-transparent z-10 pointer-events-none" />
+            {/* Status badge inside chat container (stays visible while messages scroll) */}
+            {partnerFound && isConnected && !isSearching && !isEnded && (
+              <div className="absolute top-5 left-4 z-20 pointer-events-auto">
+                <div className="flex items-center space-x-2 bg-background px-3 py-1 rounded-full border border-border/50 shadow-sm">
+                  <span className={`w-2.5 h-2.5 rounded-full ${statusColor} shadow`} />
+                  <span className="text-xs text-foreground lowercase">{statusText}</span>
+                </div>
+              </div>
+            )}
             {isSearching && !isEnded ? (
               <div className="h-full flex flex-col items-center justify-center">
                 <div className="text-center py-12 animate-fade-in">
@@ -335,12 +356,17 @@ const Chat = () => {
                         <span>Пол: {getGenderText(genderPreference)}</span>
                       </div>
                     </div>
+                    <div className="mt-6 flex justify-center">
+                      <Button variant="outline" onClick={() => { setIsSearching(false); setIsConnected(false); setPartnerFound(false); navigate('/'); }} className="transition-colors hover:bg-destructive/80 hover:text-destructive-foreground">
+                        Отменить
+                      </Button>
+                    </div>
                   </div>
                 </div>
               </div>
             ) : (
               <div className="h-full flex flex-col">
-                <div className="rounded-3xl border border-[rgba(120,110,255,0.18)] bg-background/70 shadow-[0_4px_32px_0_rgba(80,80,120,0.10)] px-2 sm:px-6 py-4 min-h-[320px] flex flex-col transition-all duration-200 h-full overflow-y-auto overscroll-contain pr-2 space-y-1 custom-scrollbar" style={{ scrollbarGutter: 'stable' }}>
+                <div className="rounded-3xl border border-[rgba(120,110,255,0.18)] bg-background/70 shadow-[0_4px_32px_0_rgba(80,80,120,0.10)] px-2 sm:px-6 pl-12 py-4 min-h-[320px] flex flex-col transition-all duration-200 h-full overflow-y-auto overscroll-contain pr-2 space-y-1 custom-scrollbar" style={{ scrollbarGutter: 'stable' }}>
                   {messages.length > 0 && (
                     <>
                       {messages.map((message, index) => {
@@ -356,7 +382,7 @@ const Chat = () => {
                           return d.toLocaleDateString('ru-RU');
                         })();
                         return (
-                          <div key={message.id} className="animate-slide-up" style={{ animationDelay: `${index * 0.06}s` }}>
+                          <div key={message.id} className={`animate-slide-up ${index === 0 ? 'mt-6' : ''}`} style={{ animationDelay: `${index * 0.06}s` }}>
                             {isNewDay && (
                               <div className="py-2 text-center text-xs text-muted-foreground">
                                 <span className="px-3 py-1 rounded-full bg-background/60 border border-border/50">{dateLabel}</span>
@@ -379,7 +405,7 @@ const Chat = () => {
           <div className="flex justify-center items-end w-full mb-4">
             <div className="max-w-3xl w-full px-4">
               <div className="rounded-2xl bg-transparent px-4 py-5 text-center shadow-none border-none">
-                <div className="text-lg font-semibold text-foreground mb-1">Вы завершили чат</div>
+                <div className="text-2xl font-bold text-foreground mb-1">Чат завершён</div>
                 <a href="#" className="text-muted-foreground text-sm underline hover:text-primary mb-5 inline-block">Пожаловаться на собеседника</a>
                 <div className="flex flex-col sm:flex-row gap-3 justify-center">
                   <Button onClick={handleChangePartner} variant="outline" className="border-primary text-primary hover:bg-primary hover:text-white">Изменить параметры</Button>
@@ -394,84 +420,53 @@ const Chat = () => {
           <div className="bg-transparent border-t-0 p-4 pt-2 animate-slide-up mt-auto">
             <div className="flex items-end gap-3 max-w-3xl mx-auto flex-wrap">
               <div className="flex-1 min-w-[220px]">
-                <div className={`relative rounded-2xl transition-all duration-200 shadow-[0_2px_16px_0_rgba(80,80,120,0.10)] border border-[rgba(120,110,255,0.25)] bg-background/80 focus-within:border-[rgba(120,110,255,0.7)] focus-within:shadow-[0_0_0_3px_rgba(120,110,255,0.15)] ${isEnded ? 'opacity-60' : 'hover:brightness-105 hover:shadow-[0_2px_24px_0_rgba(120,110,255,0.10)]'} ${recState.isRecording || recState.hasRecording ? 'pointer-events-none select-none opacity-80' : ''}`}>
-                  {/* root for voice preview portal (preview will render inside this container) */}
-                  <div id="voice-preview-root" className="absolute left-3 right-20 bottom-3 flex items-center justify-center pointer-events-auto" />
-                  {(recState.isRecording || recState.hasRecording) && (
-                    <div className="pointer-events-none absolute inset-x-3 bottom-3 grid grid-cols-3 items-center">
-                      <div className="flex items-center gap-2 justify-self-start">
-                        {recState.isRecording ? (
-                          <>
-                            <span className="h-2 w-2 rounded-full bg-red-500 animate-pulse" />
-                            <span className="tabular-nums text-xs text-muted-foreground">{formatDur(recState.seconds)}</span>
-                          </>
-                        ) : (
-                          // left area intentionally empty when preview available (trash moved into pill)
-                          null
-                        )}
-                      </div>
-                      <div className="justify-self-center">
-                        {recState.isRecording ? (
-                          <button
-                            type="button"
-                            onClick={() => cancelRecRef.current?.()}
-                            className={`justify-self-center px-2 py-0.5 rounded-md font-medium text-sm pointer-events-auto transition-colors ${recState.cancelled ? 'text-red-400 bg-red-500/10' : 'text-primary bg-primary/10'} drop-shadow-[0_0_6px_hsl(var(--primary))]`}
-                          >
-                            Отмена
-                          </button>
-                        ) : null}
-                      </div>
-                      <div className="flex items-center justify-self-end">
-                        {/* right empty when recording; when preview available we show nothing here (preview UI is in recorder) */}
-                      </div>
-                    </div>
-                  )}
+                <div className={`relative rounded-2xl transition-all duration-200 shadow-[0_2px_16px_0_rgba(80,80,120,0.10)] border border-[rgba(120,110,255,0.25)] bg-background/80 focus-within:border-[rgba(120,110,255,0.7)] focus-within:shadow-[0_0_0_3px_rgba(120,110,255,0.15)] ${isEnded ? 'opacity-60' : 'hover:brightness-105 hover:shadow-[0_2px_24px_0_rgba(120,110,255,0.10)]'}`}>
                   <Textarea
                     ref={textareaRef}
                     value={newMessage}
                     onChange={(e) => { setNewMessage(e.target.value); }}
                     onKeyDown={handleKeyPress}
-                    placeholder={recState.isRecording || recState.hasRecording ? '' : 'Напишите сообщение...'}
-                    disabled={isEnded || !isConnected || recState.isRecording}
-                    className={`w-full h-32 pr-16 bg-background/80 border-transparent text-foreground placeholder:text-muted-foreground focus:bg-background transition-all rounded-2xl resize-none overflow-y-auto hide-scrollbar ${recState.isRecording || recState.hasRecording ? 'pointer-events-none' : ''} disabled:opacity-70 disabled:cursor-not-allowed`}
+                    placeholder={'Напишите сообщение...'}
+                    disabled={isEnded || !isConnected}
+                    className={`w-full h-12 py-2 pr-36 bg-background/80 border-transparent text-foreground placeholder:text-muted-foreground focus:bg-background transition-all rounded-2xl resize-none overflow-y-auto hide-scrollbar disabled:opacity-70 disabled:cursor-not-allowed`}
                     maxLength={500}
                   />
 
-                  {/* Icons inside input: emoji + voice recorder (aligned) */}
+                  {/* Icons inside input: emoji + send */}
                   <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-2 pointer-events-auto z-20">
-                    <Popover open={emojiOpen} onOpenChange={setEmojiOpen}>
-                      <PopoverTrigger asChild>
-                        <Button variant="outline" size="icon" className="shrink-0 h-10 w-10 bg-background/60 border-border/50" disabled={isEnded || !isConnected}>
-                          <Smile className="h-4 w-4" />
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent align="end" className="w-60 p-2">
-                        <div className="grid grid-cols-8 gap-1">
-                          {emojis.map((e) => (
-                            <button
-                              key={e}
-                              type="button"
-                              className="h-7 w-7 rounded-md hover:bg-accent"
-                              onClick={() => { insertAtCursor(e); setEmojiOpen(false); }}
-                            >
-                              {e}
-                            </button>
-                          ))}
-                        </div>
-                      </PopoverContent>
-                    </Popover>
+                    <div className="flex items-center justify-center w-10 h-10">
+                      <Popover open={emojiOpen} onOpenChange={setEmojiOpen}>
+                        <PopoverTrigger asChild>
+                          <Button variant="outline" size="icon" className="bg-background/60 border-border/50" disabled={isEnded || !isConnected}>
+                            <Smile className="h-4 w-4" />
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent align="end" className="w-60 p-2">
+                          <div className="grid grid-cols-8 gap-1">
+                            {emojis.map((e) => (
+                              <button
+                                key={e}
+                                type="button"
+                                className="h-7 w-7 rounded-md hover:bg-accent"
+                                onClick={() => { insertAtCursor(e); setEmojiOpen(false); }}
+                              >
+                                {e}
+                              </button>
+                            ))}
+                          </div>
+                        </PopoverContent>
+                      </Popover>
+                    </div>
 
-                    <div className="flex items-center">
-                      <VoiceRecorder
-                        disabled={isEnded || !isConnected}
-                        hasText={!!newMessage.trim()}
-                        onSendText={sendMessage}
-                        onRecordingState={setRecState}
-                        onBindApi={({ cancel }) => { cancelRecRef.current = cancel; }}
-                        onSend={({ url, duration }) => {
-                          addAudioMessage(url, duration, true);
-                        }}
-                      />
+                    <div className="flex items-center justify-center w-10 h-10">
+                      <Button
+                        onClick={sendMessage}
+                        disabled={isEnded || !isConnected || !newMessage.trim()}
+                        size="icon"
+                        className=""
+                      >
+                        <Send className="h-4 w-4" />
+                      </Button>
                     </div>
                   </div>
                 </div>

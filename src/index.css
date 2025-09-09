@@ -1,4 +1,5 @@
 @tailwind base;
+@tailwind base;
 @tailwind components;
 @tailwind utilities;
 
@@ -51,7 +52,7 @@ All colors MUST be HSL.
     --gradient-wave: linear-gradient(45deg, hsl(263, 85%, 65% / 0.1) 0%, hsl(263, 75%, 70% / 0.2) 25%, hsl(263, 85%, 65% / 0.1) 50%, hsl(263, 75%, 70% / 0.2) 75%, hsl(263, 85%, 65% / 0.1) 100%);
     
     /* Shadows & Glows */
-    --shadow-glow: 0 0 60px hsl(263 85% 65% / 0.4);
+    --shadow-glow: 0 0 24px hsl(263 85% 65% / 0.25);
     --shadow-soft: 0 0 120px hsl(263 75% 70% / 0.2);
     --shadow-particle: 0 0 20px hsl(263 85% 65% / 0.6);
 
@@ -148,5 +149,28 @@ All colors MUST be HSL.
     width: 0px;
     height: 0px;
     background: transparent;
+  }
+}
+
+@layer components {
+  .site-brand {
+    font-weight: 700;
+    font-size: 1.5rem; /* ~24px */
+    line-height: 1;
+    background-image: linear-gradient(90deg, #ffffff 0%, hsl(263 85% 65%) 100%);
+    background-size: 200% 200%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: gradient-shift 4s ease-in-out infinite;
+    transition: opacity 200ms ease;
+  }
+
+  .site-brand--header {
+    font-size: 1.75rem; /* larger in header */
+    font-weight: 700;
+    display: inline-block;
+    vertical-align: middle;
+    animation: gradient-shift 3s ease-in-out infinite;
   }
 }

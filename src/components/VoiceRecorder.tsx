@@ -255,7 +255,7 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onSend, disabled, hasText
   const sendVoiceBtn = (
     <button
       type="button"
-      aria-label="Отправить голосовое"
+      aria-label="Отправи��ь голосовое"
       onClick={sendRecording}
       className={cn(
         "inline-flex items-center justify-center h-10 w-10 rounded-full bg-gradient-primary text-white shadow-glow",
@@ -327,7 +327,7 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onSend, disabled, hasText
 
     // Minimal, transparent 'checkbox' style preview positioned above the mic button.
     const ui = (
-      <div className="absolute -bottom-full mb-2 right-0 w-[320px] flex justify-end pointer-events-auto z-20">
+      <div className="absolute -bottom-full mb-2 left-1/2 -translate-x-1/2 w-[340px] flex justify-center pointer-events-auto z-20">
         <div className="flex items-center gap-3 px-3 py-2 rounded-lg border border-[rgba(255,255,255,0.06)] bg-transparent backdrop-blur-sm shadow-sm">
           {/* Play/Pause small */}
           <button

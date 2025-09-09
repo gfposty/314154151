@@ -273,7 +273,7 @@ const Chat = () => {
                   <>
                     <ConfirmDialog
                       title="Найти нового собеседника?"
-                      description="Текущий диалог будет завер��ен, и мы найдем вам нового собеседника."
+                      description="Текущий диалог будет завершен, и мы найдем вам нового собеседника."
                       onConfirm={handleNextChat}
                     >
                       <Button

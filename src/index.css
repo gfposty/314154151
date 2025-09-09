@@ -165,4 +165,12 @@ All colors MUST be HSL.
     animation: gradient-shift 4s ease-in-out infinite;
     transition: opacity 200ms ease;
   }
+
+  .site-brand--header {
+    font-size: 1rem; /* smaller in header */
+    font-weight: 600;
+    display: inline-block;
+    vertical-align: middle;
+    animation: gradient-shift 4s ease-in-out infinite;
+  }
 }

@@ -255,7 +255,7 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onSend, disabled, hasText
   const sendVoiceBtn = (
     <button
       type="button"
-      aria-label="Отправи��ь голосовое"
+      aria-label="Отправить голосовое"
       onClick={sendRecording}
       className={cn(
         "inline-flex items-center justify-center h-10 w-10 rounded-full bg-gradient-primary text-white shadow-glow",
@@ -325,38 +325,56 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onSend, disabled, hasText
   const ReadyToSendUI = useMemo(() => {
     if (!hasRecording || isRecording || !recordedUrl) return null;
 
-    // Minimal, transparent 'checkbox' style preview positioned above the mic button.
     const ui = (
-      <div className="absolute -bottom-full mb-2 left-1/2 -translate-x-1/2 w-[340px] flex justify-center pointer-events-auto z-20">
-        <div className="flex items-center gap-3 px-3 py-2 rounded-lg border border-[rgba(255,255,255,0.06)] bg-transparent backdrop-blur-sm shadow-sm">
-          {/* Play/Pause small */}
+      <div className="w-full flex justify-center pointer-events-auto">
+        <div className="flex items-center gap-4 px-4 py-3 rounded-2xl bg-gradient-to-r from-primary/20 to-primary/40 border border-[rgba(124,58,237,0.12)] shadow-glow max-w-3xl w-full mx-auto">
+          {/* Play/Pause */}
           <button
             type="button"
             aria-label={previewPlaying ? "Пауза" : "Воспроизвести"}
             onClick={() => setPreviewPlaying((p) => !p)}
-            className="inline-flex items-center justify-center h-8 w-8 rounded-full bg-white/3 text-white/90 hover:bg-white/5 transition-colors"
+            className="inline-flex items-center justify-center h-10 w-10 rounded-full bg-white/6 text-white/90 hover:bg-white/8 transition-colors"
           >
-            {previewPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+            {previewPlaying ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5" />}
           </button>
 
-          {/* Simple dotted progress bar (no heavy fill) */}
-          <div className="flex-1 px-1">
-            <div className="h-2 w-full bg-transparent rounded overflow-hidden">
-              <div className="h-2 rounded bg-gradient-to-r from-primary to-primary/60" style={{ width: `${Math.round(previewProgress * 100)}%` }} />
+          {/* Waveform / progress */}
+          <div className="flex-1 flex flex-col">
+            <div className="relative h-3 w-full rounded-full bg-white/6 overflow-hidden">
+              <div className="absolute left-0 top-0 h-full bg-gradient-to-r from-primary to-primary/60" style={{ width: `${Math.round(previewProgress * 100)}%`, transition: 'width 120ms linear' }} />
+              <div className="relative z-10 flex items-center justify-between px-2">
+                <div className="flex items-center gap-[4px] w-full overflow-hidden">
+                  {previewLevels.map((lvl, i) => (
+                    <div
+                      key={i}
+                      style={{ height: `${Math.max(3, Math.round(lvl * 14))}px`, width: 4 }}
+                      className={`rounded-full bg-white/90/30 transition-all ${previewPlaying ? 'opacity-90' : 'opacity-60'}`}
+                    />
+                  ))}
+                </div>
+              </div>
             </div>
-            <div className="flex items-center justify-between text-xs text-white/70 mt-1">
+            <div className="flex items-center justify-between mt-2 text-xs text-white/80">
               <span className="tabular-nums">{formatDuration(seconds)}</span>
-              <button onClick={resetState} aria-label="Удалить запись" className="text-white/60 hover:text-white text-sm">Удалить</button>
+              <div className="flex items-center gap-3">
+                <button onClick={resetState} aria-label="Удалить запись" className="text-white/70 hover:text-white text-sm">Удалить</button>
+                <button onClick={sendRecording} aria-label="Отправить" className="inline-flex items-center justify-center h-8 px-3 rounded-full bg-gradient-to-br from-primary to-primary/70 text-white shadow-sm">Отправить</button>
+              </div>
             </div>
           </div>
         </div>
       </div>
     );
 
-    // Render inline (positioned absolute relative to VoiceRecorder root). This avoids
-    // using the global portal so the preview sits directly above the microphone button.
+    try {
+      const target = typeof document !== 'undefined' && document.getElementById('voice-preview-root');
+      if (target) return createPortal(ui, target);
+    } catch (e) {
+      // fall back to inline
+    }
+
     return ui;
-  }, [hasRecording, isRecording, recordedUrl, seconds, previewPlaying, previewProgress, resetState]);
+  }, [hasRecording, isRecording, recordedUrl, seconds, previewPlaying, previewProgress, resetState, sendRecording]);
 
   useEffect(() => {
     onRecordingState?.({ isRecording, seconds, cancelHint: cancelSwipe.active, cancelled: cancelSwipe.cancelled, hasRecording });

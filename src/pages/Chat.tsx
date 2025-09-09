@@ -162,7 +162,7 @@ const Chat = () => {
     setIsSearching(true);
     toast({
       title: "Поиск нового собеседника...",
-      description: "Подождите, мы ищем вам нового собеседник��",
+      description: "Подождите, мы ищем вам новог�� собеседник��",
     });
     // Симуляция поиска ново��о собеседника
     setTimeout(() => {
@@ -261,6 +261,7 @@ const Chat = () => {
           <div className="max-w-3xl mx-auto relative">
             <div className="rounded-3xl border border-[rgba(120,110,255,0.18)] bg-background/70 px-3 py-2 flex items-center justify-between flex-wrap gap-2 sm:gap-3">
               <div className="flex items-center space-x-3 flex-shrink min-w-0">
+                <span className="site-brand site-brand--header pointer-events-auto mr-2">Bezlico</span>
                 <div className="flex items-center flex-wrap gap-x-3 gap-y-1 text-xs text-muted-foreground">
                   {isEnded ? (
                     <span>Чат завершён</span>
@@ -403,7 +404,7 @@ const Chat = () => {
                 <a href="#" className="text-muted-foreground text-sm underline hover:text-primary mb-5 inline-block">Пожаловаться на собеседника</a>
                 <div className="flex flex-col sm:flex-row gap-3 justify-center">
                   <Button onClick={handleChangePartner} variant="outline" className="border-primary text-primary hover:bg-primary hover:text-white">Изменить параметры</Button>
-                  <Button onClick={handleNextChat} className="bg-green-600 hover:bg-green-700 text-white">Начать новый чат</Button>
+                  <Button onClick={handleNextChat} className="bg-green-600 hover:bg-green-700 text-white">Нача��ь новый чат</Button>
                 </div>
               </div>
             </div>

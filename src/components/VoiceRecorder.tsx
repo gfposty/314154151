@@ -395,30 +395,36 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onSend, disabled, hasText
 
     const ui = (
       <div className="w-full flex justify-center pointer-events-auto">
-        <div className="relative flex items-center gap-3 px-4 py-3 rounded-2xl bg-transparent border border-[rgba(124,58,237,0.06)] max-w-3xl w-full mx-auto">
-          {/* Trash on the far left */}
-          <button onClick={resetState} aria-label="Удалить запись" className="flex-none p-2 rounded-md bg-transparent text-white/70 hover:text-white transition-colors">
-            <Trash2 className="h-5 w-5" />
-          </button>
+        <div className="relative flex items-center gap-3 px-3 py-3 rounded-2xl bg-transparent border border-[rgba(124,58,237,0.04)] max-w-3xl w-full mx-auto">
+          {/* Left controls inside input: trash + forward (non-clickable) */}
+          <div className="flex items-center gap-2 flex-none pl-1">
+            <button onClick={resetState} aria-label="Удалить запись" className="p-2 rounded-md bg-transparent text-white/70 hover:text-white transition-colors">
+              <Trash2 className="h-5 w-5" />
+            </button>
+            <div aria-hidden className="p-2 rounded-md bg-transparent text-white/50">
+              {/* non-interactive forward/play-next icon */}
+              <Play className="h-5 w-5" />
+            </div>
+          </div>
 
-          {/* Waveform container */}
+          {/* Waveform container (smaller) */}
           <div className="flex-1 flex items-center justify-center relative">
-            <div className="w-full max-w-[820px]">
-              <div className="relative h-12 rounded-md bg-primary/6 overflow-hidden">
+            <div className="w-full max-w-[760px]">
+              <div className="relative h-8 rounded-md bg-[rgba(255,255,255,0.02)] overflow-hidden">
                 {/* progress overlay */}
                 <div className="absolute left-0 top-0 h-full bg-gradient-to-r from-primary to-primary/60" style={{ width: `${Math.round(previewProgress * 100)}%`, transition: 'width 120ms linear', opacity: 0.35 }} />
 
-                {/* canvas waveform */}
+                {/* canvas waveform centered */}
                 <div className="relative z-10 h-full flex items-center justify-center px-2">
                   <canvas ref={previewCanvasRef} style={{ width: '100%', height: '100%' }} />
                 </div>
 
-                {/* centered play button (overlay) */}
+                {/* centered play button (overlay) - slightly smaller icon */}
                 <button
                   type="button"
                   aria-label={previewPlaying ? "Пауза" : "Воспроизвести"}
                   onClick={() => setPreviewPlaying((p) => !p)}
-                  className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 inline-flex items-center justify-center h-10 w-10 rounded-full bg-white/6 text-white/90 hover:bg-white/8 transition-colors"
+                  className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 inline-flex items-center justify-center h-8 w-8 rounded-full bg-white/6 text-white/90 hover:bg-white/8 transition-colors"
                 >
                   {previewPlaying ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5" />}
                 </button>

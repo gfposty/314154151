@@ -229,7 +229,7 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onSend, disabled, hasText
     <div className="relative">
       <button
         type="button"
-        aria-label="Записать голосо��ое"
+        aria-label="Записать голосовое"
         disabled={disabled || isRecording || hasRecording}
         onClick={() => startRecording()}
         className={cn(
@@ -269,7 +269,7 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onSend, disabled, hasText
   const sendTextBtn = (
     <button
       type="button"
-      aria-label="Отп��авить"
+      aria-label="Отправить"
       onClick={() => onSendText && onSendText()}
       disabled={disabled}
       className={cn(

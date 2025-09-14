@@ -359,27 +359,27 @@ const Chat = () => {
               <div className="h-full flex flex-col items-center justify-center">
                 <div className="text-center py-12 animate-fade-in">
                   <div className="animate-pulse">
-                    <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-primary rounded-full mx-auto mb-6 animate-pulse-glow shadow-glow-subtle"></div>
-                    <p className="text-foreground text-2xl sm:text-3xl font-semibold">Поиск собеседника...</p>
-                    <div className="mt-5 space-y-3 text-base sm:text-lg text-muted-foreground">
+                    <div className="w-14 h-14 sm:w-16 sm:h-16 bg-gradient-primary rounded-full mx-auto mb-5 animate-pulse-glow shadow-glow-subtle"></div>
+                    <p className="text-foreground text-xl sm:text-2xl font-semibold">Поиск собеседника...</p>
+                    <div className="mt-4 space-y-2 text-sm sm:text-base text-muted-foreground">
                       <div className="flex items-center justify-center space-x-1">
-                        <Users className="w-5 h-5 sm:w-6 sm:h-6" />
+                        <Users className="w-4 h-4 sm:w-5 sm:h-5" />
                         <span>Возраст: {ageCategory}</span>
                       </div>
                       <div className="flex items-center justify-center space-x-1">
-                        <Heart className="w-5 h-5 sm:w-6 sm:h-6" />
+                        <Heart className="w-4 h-4 sm:w-5 sm:h-5" />
                         <span>Пол: {getGenderText(genderPreference)}</span>
                       </div>
                     </div>
                     <div className="mt-6 flex justify-center">
-                      <Button variant="outline" size="lg" onClick={() => {
-                        localStorage.removeItem("anon-partner-info"); // Очищаем данные о п��ртнёре
+                      <Button variant="outline" onClick={() => {
+                        localStorage.removeItem("anon-partner-info"); // Очищаем данные о партнёре
                         setIsSearching(false);
                         setIsConnected(false);
                         setPartnerFound(false);
                         setSearchCancelled(true); // Устанавливаем флаг отмены
                         navigate('/');
-                      }} className="h-12 px-6 text-lg rounded-xl transition-colors hover:bg-destructive/80 hover:text-destructive-foreground">
+                      }} className="h-10 px-5 text-base rounded-lg transition-colors hover:bg-destructive/80 hover:text-destructive-foreground">
                         Отменить
                       </Button>
                     </div>

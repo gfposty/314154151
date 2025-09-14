@@ -256,7 +256,7 @@ const Chat = () => {
     <div className="fixed inset-0 w-full h-full overflow-hidden overscroll-none">
       {/* SVG-паттерн для фона */}
       <div className="bg-pattern" />
-      {/* Логотип в левом верхнем углу */}
+      {/* Логотип в левом верхнем у��лу */}
       <div className="fixed top-4 left-6 z-30">
         <span className="site-brand site-brand--header logo-gradient-animated pointer-events-auto text-3xl font-bold select-none">Bezlico</span>
       </div>
@@ -359,15 +359,15 @@ const Chat = () => {
               <div className="h-full flex flex-col items-center justify-center">
                 <div className="text-center py-12 animate-fade-in">
                   <div className="animate-pulse">
-                    <div className="w-14 h-14 sm:w-16 sm:h-16 bg-gradient-primary rounded-full mx-auto mb-5 animate-pulse-glow shadow-glow-subtle"></div>
-                    <p className="text-foreground text-xl sm:text-2xl font-semibold">Поиск собеседника...</p>
-                    <div className="mt-4 space-y-2 text-sm sm:text-base text-muted-foreground">
+                    <div className="w-12 h-12 sm:w-14 sm:h-14 bg-gradient-primary rounded-full mx-auto mb-4 animate-pulse-glow shadow-glow-subtle"></div>
+                    <p className="text-foreground text-lg sm:text-xl font-semibold">Поиск собеседника...</p>
+                    <div className="mt-3 space-y-1.5 text-xs sm:text-sm text-muted-foreground">
                       <div className="flex items-center justify-center space-x-1">
-                        <Users className="w-4 h-4 sm:w-5 sm:h-5" />
+                        <Users className="w-3 h-3 sm:w-4 sm:h-4" />
                         <span>Возраст: {ageCategory}</span>
                       </div>
                       <div className="flex items-center justify-center space-x-1">
-                        <Heart className="w-4 h-4 sm:w-5 sm:h-5" />
+                        <Heart className="w-3 h-3 sm:w-4 sm:h-4" />
                         <span>Пол: {getGenderText(genderPreference)}</span>
                       </div>
                     </div>
@@ -379,7 +379,7 @@ const Chat = () => {
                         setPartnerFound(false);
                         setSearchCancelled(true); // Устанавливаем флаг отмены
                         navigate('/');
-                      }} className="h-10 px-5 text-base rounded-lg transition-colors hover:bg-destructive/80 hover:text-destructive-foreground">
+                      }} className="h-9 px-4 text-sm rounded-md transition-colors hover:bg-destructive/80 hover:text-destructive-foreground">
                         Отменить
                       </Button>
                     </div>

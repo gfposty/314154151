@@ -267,18 +267,20 @@ const Chat = () => {
             <div className="rounded-3xl border border-[rgba(120,110,255,0.18)] bg-background/70 px-3 flex items-center justify-between flex-nowrap gap-2 sm:gap-3 min-h-[44px] h-12">
               <div className="flex items-center flex-shrink min-w-0 h-full">
                 <div className="flex items-center flex-wrap gap-x-3 gap-y-1 text-xs text-muted-foreground h-full">
-                  {isEnded ? null : isSearching ? (
-                    <span className="animate-pulse">Поиск собеседника...</span>
+                  {isEnded ? (
+                    <span className="text-base font-medium text-center w-full">Чат завершён</span>
+                  ) : isSearching ? (
+                    <span className="animate-pulse text-base font-medium text-center w-full">Поиск собеседника...</span>
                   ) : partnerFound ? (
                     <div className="flex items-center gap-x-2">
                       <div className="flex items-center space-x-1">
-                        <Users className="w-3 h-3" />
-                        <span className="truncate max-w-[40vw] sm:max-w-none">{ageCategory}</span>
+                        <Users className="w-4 h-4" />
+                        <span className="truncate max-w-[40vw] sm:max-w-none text-sm font-medium">{ageCategory}</span>
                       </div>
                       <span className="mx-1 text-[10px] text-muted-foreground">•</span>
                       <div className="flex items-center space-x-1">
-                        <Heart className="w-3 h-3" />
-                        <span className="truncate max-w-[40vw] sm:max-w-none">{getGenderText(genderPreference)}</span>
+                        <Heart className="w-4 h-4" />
+                        <span className="truncate max-w-[40vw] sm:max-w-none text-sm font-medium">{getGenderText(genderPreference)}</span>
                       </div>
                     </div>
                   ) : (
@@ -320,15 +322,22 @@ const Chat = () => {
                     </ConfirmDialog>
                   </>
                 )}
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleChangePartner}
-                  className="text-sm h-9 px-4 flex items-center gap-2"
-                >
-                  <Settings className="w-4 h-4 mr-1" />
-                  Параметры поиска
-                </Button>
+                {!isSearching && !isEnded && (
+                  <ConfirmDialog
+                    title="Изменить параметры поиска?"
+                    description="Текущий диалог будет завершён, и вы вернётесь к выбору параметров поиска. Продолжить?"
+                    onConfirm={handleChangePartner}
+                  >
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="text-sm h-9 px-4 flex items-center gap-2 hover:bg-secondary/50 hover:text-foreground transition-all"
+                    >
+                      <Settings className="w-4 h-4 mr-1" />
+                      Параметры поиска
+                    </Button>
+                  </ConfirmDialog>
+                )}
               </div>
             </div>
           </div>
@@ -364,6 +373,7 @@ const Chat = () => {
                     </div>
                     <div className="mt-6 flex justify-center">
                       <Button variant="outline" onClick={() => {
+                        localStorage.removeItem("anon-partner-info"); // Очищаем данные о партнёре
                         setIsSearching(false);
                         setIsConnected(false);
                         setPartnerFound(false);

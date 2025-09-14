@@ -57,6 +57,13 @@ const Index = () => {
       if (partner && partner.gender && partner.age) {
         // Если есть — сразу в чат
         navigate(`/chat?age=${partner.age}&gender=${partner.gender}`);
+      } else {
+        // Если нет партнёра, но есть пользователь — загружаем сохранённые параметры партнёра
+        const savedPartner = getPartnerInfo();
+        if (savedPartner) {
+          setPartnerGender(savedPartner.gender || "");
+          setPartnerAge(savedPartner.age || "");
+        }
       }
     }
   }, [navigate]);
@@ -160,7 +167,6 @@ const Index = () => {
                 <SelectContent className="bg-popover border-border backdrop-blur-sm">
                   <SelectItem value="male">Мужской</SelectItem>
                   <SelectItem value="female">Женский</SelectItem>
-                  <SelectItem value="any">Любой</SelectItem>
                 </SelectContent>
               </Select>
             </div>

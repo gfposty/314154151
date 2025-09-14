@@ -172,7 +172,7 @@ const Chat = () => {
       setPartnerFound(true);
       setIsConnected(true);
       toast({
-        title: "Новый собеседник найден!",
+        title: "Новый собесед��ик найден!",
         description: "Вы подключены к новому чату",
       });
       playSound(CHAT_START_SOUND);
@@ -379,7 +379,7 @@ const Chat = () => {
                         setPartnerFound(false);
                         setSearchCancelled(true); // Устанавливаем флаг отмены
                         navigate('/');
-                      }} className="h-9 px-4 text-sm rounded-md transition-colors hover:bg-destructive/80 hover:text-destructive-foreground">
+                      }} className="h-10 px-5 text-sm rounded-lg transition-colors hover:bg-destructive/80 hover:text-destructive-foreground">
                         Отменить
                       </Button>
                     </div>

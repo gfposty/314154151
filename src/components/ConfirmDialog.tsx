@@ -47,7 +47,7 @@ const ConfirmDialog = ({
             className={
               destructive
                 ? "bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                : "bg-gradient-primary hover:shadow-glow"
+                : "bg-primary text-primary-foreground hover:bg-primary/90"
             }
           >
             Подтвердить

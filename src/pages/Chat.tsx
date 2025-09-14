@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
-import { ArrowLeft, Send, SkipForward, X, Users, Heart, Paperclip, Smile } from "lucide-react";
+import { ArrowLeft, Send, SkipForward, X, Users, Heart, Paperclip, Smile, Settings } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import ChatBubble from "@/components/ChatBubble";
 import ConfirmDialog from "@/components/ConfirmDialog";
@@ -46,6 +46,7 @@ const Chat = () => {
   const [isSearching, setIsSearching] = useState(true);
   const [partnerFound, setPartnerFound] = useState(false);
   const [isEnded, setIsEnded] = useState(false);
+  const [searchCancelled, setSearchCancelled] = useState(false); // Новый флаг
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Activity/visibility tracking
@@ -84,6 +85,7 @@ const Chat = () => {
       navigate('/');
       return;
     }
+    if (searchCancelled) return; // Если отменено, не запускать поиск
 
     // Симуляция поиска собеседника
     const searchTimer = setTimeout(() => {
@@ -92,7 +94,7 @@ const Chat = () => {
       setIsConnected(true);
       toast({
         title: "Собеседник найден!",
-        description: "Вы подключены к анонимному ч��ту",
+        description: "Вы подключены к анонимному чату",
       });
       playSound(CHAT_START_SOUND);
       // Добавляем приветственное сообщение от системы
@@ -102,7 +104,7 @@ const Chat = () => {
     }, Math.random() * 3000 + 1000); // 1-4 секунды
 
     return () => clearTimeout(searchTimer);
-  }, [ageCategory, genderPreference, navigate]);
+  }, [ageCategory, genderPreference, navigate, searchCancelled]);
 
   const addMessage = (text: string, isOwn: boolean) => {
     const message: Message = {
@@ -254,34 +256,37 @@ const Chat = () => {
     <div className="fixed inset-0 w-full h-full overflow-hidden overscroll-none">
       {/* SVG-паттерн для фона */}
       <div className="bg-pattern" />
+      {/* Логотип в левом верхнем углу */}
+      <div className="fixed top-4 left-6 z-30">
+        <span className="site-brand site-brand--header logo-gradient-animated pointer-events-auto text-3xl font-bold select-none">Bezlico</span>
+      </div>
       <div className="relative flex flex-col w-full h-full z-10">
-          {/* Large decorative background title: centered, slightly larger and rotated */}
         {/* Header */}
         <div className="bg-transparent border-b-0 p-4 animate-fade-in">
           <div className="max-w-3xl mx-auto relative">
-            <div className="rounded-3xl border border-[rgba(120,110,255,0.18)] bg-background/70 px-3 py-2 flex items-center justify-between flex-wrap gap-2 sm:gap-3">
-              <div className="flex items-center space-x-3 flex-shrink min-w-0">
-                <span className="site-brand site-brand--header pointer-events-auto mr-2">Bezlico</span>
-                <div className="flex items-center flex-wrap gap-x-3 gap-y-1 text-xs text-muted-foreground">
+            <div className="rounded-3xl border border-[rgba(120,110,255,0.18)] bg-background/70 px-3 flex items-center justify-between flex-nowrap gap-2 sm:gap-3 min-h-[44px] h-12">
+              <div className="flex items-center flex-shrink min-w-0 h-full">
+                <div className="flex items-center flex-wrap gap-x-3 gap-y-1 text-xs text-muted-foreground h-full">
                   {isEnded ? null : isSearching ? (
                     <span className="animate-pulse">Поиск собеседника...</span>
                   ) : partnerFound ? (
-                    <>
+                    <div className="flex items-center gap-x-2">
                       <div className="flex items-center space-x-1">
                         <Users className="w-3 h-3" />
                         <span className="truncate max-w-[40vw] sm:max-w-none">{ageCategory}</span>
                       </div>
+                      <span className="mx-1 text-[10px] text-muted-foreground">•</span>
                       <div className="flex items-center space-x-1">
                         <Heart className="w-3 h-3" />
                         <span className="truncate max-w-[40vw] sm:max-w-none">{getGenderText(genderPreference)}</span>
                       </div>
-                    </>
+                    </div>
                   ) : (
                     'Не подключен'
                   )}
                 </div>
               </div>
-              <div className="flex items-center gap-2 flex-wrap justify-end w-full sm:w-auto">
+              <div className="flex items-center gap-2 sm:gap-3 ml-auto h-full">
                 {isConnected && (
                   <>
                     <ConfirmDialog
@@ -292,7 +297,7 @@ const Chat = () => {
                       <Button
                         variant="outline"
                         size="sm"
-                        className="text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-all"
+                        className="text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-all h-9 px-4"
                       >
                         <SkipForward className="w-4 h-4 mr-2" />
                         Следующий чат
@@ -307,7 +312,7 @@ const Chat = () => {
                       <Button
                         variant="destructive"
                         size="sm"
-                        className="hover:bg-destructive/90 transition-all"
+                        className="hover:bg-destructive/90 transition-all h-9 px-4"
                       >
                         <X className="w-4 h-4 mr-2" />
                         Завершить
@@ -319,9 +324,10 @@ const Chat = () => {
                   variant="outline"
                   size="sm"
                   onClick={handleChangePartner}
-                  className="text-xs"
+                  className="text-sm h-9 px-4 flex items-center gap-2"
                 >
-                  Сменить параметры поиска
+                  <Settings className="w-4 h-4 mr-1" />
+                  Параметры поиска
                 </Button>
               </div>
             </div>
@@ -357,7 +363,13 @@ const Chat = () => {
                       </div>
                     </div>
                     <div className="mt-6 flex justify-center">
-                      <Button variant="outline" onClick={() => { setIsSearching(false); setIsConnected(false); setPartnerFound(false); navigate('/'); }} className="transition-colors hover:bg-destructive/80 hover:text-destructive-foreground">
+                      <Button variant="outline" onClick={() => {
+                        setIsSearching(false);
+                        setIsConnected(false);
+                        setPartnerFound(false);
+                        setSearchCancelled(true); // Устанавливаем флаг отмены
+                        navigate('/');
+                      }} className="transition-colors hover:bg-destructive/80 hover:text-destructive-foreground">
                         Отменить
                       </Button>
                     </div>
@@ -382,7 +394,7 @@ const Chat = () => {
                           return d.toLocaleDateString('ru-RU');
                         })();
                         return (
-                          <div key={message.id} className={`animate-slide-up ${index === 0 ? 'mt-6' : ''}`} style={{ animationDelay: `${index * 0.06}s` }}>
+                          <div key={message.id} className={`animate-fade-in-up${index === 0 ? ' mt-6' : ''}`}>
                             {isNewDay && (
                               <div className="py-2 text-center text-xs text-muted-foreground">
                                 <span className="px-3 py-1 rounded-full bg-background/60 border border-border/50">{dateLabel}</span>

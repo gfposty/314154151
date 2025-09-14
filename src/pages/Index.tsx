@@ -16,9 +16,8 @@ const getUserInfo = () => {
   }
 };
 
-const setUserInfo = (info: { gender: string; age: string }) => {
+const setUserInfo = (info: { gender: string; age: string }) =>
   localStorage.setItem(LOCAL_USER_KEY, JSON.stringify(info));
-};
 
 const LOCAL_PARTNER_KEY = "anon-partner-info";
 
@@ -32,13 +31,10 @@ const getPartnerInfo = () => {
   }
 };
 
-const setPartnerInfo = (info: { gender: string; age: string }) => {
+const setPartnerInfo = (info: { gender: string; age: string }) =>
   localStorage.setItem(LOCAL_PARTNER_KEY, JSON.stringify(info));
-};
 
-const clearPartnerInfo = () => {
-  localStorage.removeItem(LOCAL_PARTNER_KEY);
-};
+localStorage.removeItem(LOCAL_PARTNER_KEY);
 
 const Index = () => {
   // Step 1: выбор пола и возраста пользователя
@@ -73,31 +69,32 @@ const Index = () => {
 
   const handleStartChat = () => {
     if (!partnerAge || !partnerGender) return;
+
     setPartnerInfo({ gender: partnerGender, age: partnerAge });
     navigate(`/chat?age=${partnerAge}&gender=${partnerGender}`);
   };
 
   return (
     <div className="min-h-screen bg-gradient-bg flex flex-col items-center justify-center px-4">
-      <div className="text-center space-y-8 max-w-md mx-auto animate-fade-in">
+      <div className="text-center space-y-8 max-w-md mx-auto">
         {/* Logo */}
-        <div className="space-y-4 animate-slide-up">
+        <div className="space-y-4">
           <div className="flex items-center justify-center space-x-3">
-            <div className="p-4 rounded-3xl bg-gradient-primary shadow-glow animate-pulse-glow">
+            <div className="p-4 rounded-3xl bg-gradient-primary shadow-glow">
               <MessageCircle className="w-10 h-10 text-white" />
             </div>
             <h1 className="text-5xl font-bold bg-gradient-to-r from-foreground to-primary-glow bg-clip-text text-transparent">
               Bezlico
             </h1>
           </div>
-          <p className="text-lg text-muted-foreground animate-fade-in" style={{ animationDelay: '0.2s' }}>
+          <p className="text-lg text-muted-foreground">
             Анонимные разговоры без лица
           </p>
         </div>
 
         {/* Step 1: выбор пола и возраста пользователя */}
         {step === 1 && (
-          <div className="space-y-6 animate-slide-up" style={{ animationDelay: '0.4s' }}>
+          <div className="space-y-6">
             <div className="bg-card/50 backdrop-blur-sm rounded-2xl p-6 border border-border/50 hover:bg-card/70 transition-all duration-300">
               <div className="flex items-center space-x-3 mb-4">
                 <Heart className="w-5 h-5 text-primary" />
@@ -115,6 +112,7 @@ const Index = () => {
                 </SelectContent>
               </Select>
             </div>
+
             <div className="bg-card/50 backdrop-blur-sm rounded-2xl p-6 border border-border/50 hover:bg-card/70 transition-all duration-300">
               <div className="flex items-center space-x-3 mb-4">
                 <Users className="w-5 h-5 text-primary" />
@@ -133,6 +131,7 @@ const Index = () => {
                 </SelectContent>
               </Select>
             </div>
+
             <Button
               onClick={handleUserNext}
               disabled={!userGender || !userAge}
@@ -144,9 +143,9 @@ const Index = () => {
           </div>
         )}
 
-        {/* Step 2: выбор пола и возраста собеседника */}
+        {/* Step 2: выбор параметров собеседника */}
         {step === 2 && (
-          <div className="space-y-6 animate-slide-up" style={{ animationDelay: '0.4s' }}>
+          <div className="space-y-6">
             <div className="bg-card/50 backdrop-blur-sm rounded-2xl p-6 border border-border/50 hover:bg-card/70 transition-all duration-300">
               <div className="flex items-center space-x-3 mb-4">
                 <Heart className="w-5 h-5 text-primary" />
@@ -159,12 +158,13 @@ const Index = () => {
                   <SelectValue placeholder="Выберите пол собеседника" />
                 </SelectTrigger>
                 <SelectContent className="bg-popover border-border backdrop-blur-sm">
-                  <SelectItem value="any">Любой пол</SelectItem>
                   <SelectItem value="male">Мужской</SelectItem>
                   <SelectItem value="female">Женский</SelectItem>
+                  <SelectItem value="any">Любой</SelectItem>
                 </SelectContent>
               </Select>
             </div>
+
             <div className="bg-card/50 backdrop-blur-sm rounded-2xl p-6 border border-border/50 hover:bg-card/70 transition-all duration-300">
               <div className="flex items-center space-x-3 mb-4">
                 <Users className="w-5 h-5 text-primary" />
@@ -183,6 +183,7 @@ const Index = () => {
                 </SelectContent>
               </Select>
             </div>
+
             <Button
               onClick={handleStartChat}
               disabled={!partnerGender || !partnerAge}
@@ -195,7 +196,7 @@ const Index = () => {
         )}
 
         {/* Info */}
-        <div className="text-xs text-muted-foreground space-y-2 animate-fade-in" style={{ animationDelay: '0.8s' }}>
+        <div className="text-xs text-muted-foreground space-y-2">
           <div className="flex items-center justify-center space-x-4">
             <div className="flex items-center space-x-1">
               <div className="w-2 h-2 bg-primary rounded-full"></div>

@@ -172,7 +172,7 @@ const Chat = () => {
       setPartnerFound(true);
       setIsConnected(true);
       toast({
-        title: "Новый собесед��ик найден!",
+        title: "Новый собеседник найден!",
         description: "Вы подключены к новому чату",
       });
       playSound(CHAT_START_SOUND);
@@ -299,7 +299,7 @@ const Chat = () => {
                       <Button
                         variant="outline"
                         size="sm"
-                        className="text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-all h-9 px-4"
+                        className="text-foreground hover:text-foreground hover:bg-secondary/50 transition-all h-9 px-4 font-medium"
                       >
                         <SkipForward className="w-4 h-4 mr-2" />
                         Следующий чат

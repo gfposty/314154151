@@ -87,6 +87,16 @@ const Index = () => {
     }
   }, []);
 
+  // Apply theme class on main screen according to current selection
+  useEffect(() => {
+    const root = document.documentElement;
+    if (colorScheme === 'light') {
+      root.classList.add('light');
+    } else {
+      root.classList.remove('light');
+    }
+  }, [colorScheme]);
+
   const handleStartChat = () => {
     if (!userGender || !userAge || !partnerGender || partnerAge.length === 0 || !chatType) return;
     setUserInfo({ gender: userGender, age: userAge });

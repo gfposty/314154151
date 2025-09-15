@@ -51,10 +51,10 @@ All colors MUST be HSL.
     --gradient-romantic: radial-gradient(ellipse at center, hsl(263, 85%, 65% / 0.15) 0%, hsl(263, 75%, 70% / 0.08) 50%, transparent 100%);
     --gradient-wave: linear-gradient(45deg, hsl(263, 85%, 65% / 0.1) 0%, hsl(263, 75%, 70% / 0.2) 25%, hsl(263, 85%, 65% / 0.1) 50%, hsl(263, 75%, 70% / 0.2) 75%, hsl(263, 85%, 65% / 0.1) 100%);
     
-    /* Shadows & Glows */
-    --shadow-glow: 0 0 24px hsl(263 85% 65% / 0.25);
-    --shadow-soft: 0 0 120px hsl(263 75% 70% / 0.2);
-    --shadow-particle: 0 0 20px hsl(263 85% 65% / 0.6);
+    /* Shadows & Glows (slightly reduced for dark theme) */
+    --shadow-glow: 0 0 24px hsl(263 85% 65% / 0.18);
+    --shadow-soft: 0 0 120px hsl(263 75% 70% / 0.12);
+    --shadow-particle: 0 0 20px hsl(263 85% 65% / 0.45);
 
     --sidebar-background: 0 0% 98%;
 
@@ -109,6 +109,65 @@ All colors MUST be HSL.
     --sidebar-accent-foreground: 240 4.8% 95.9%;
     --sidebar-border: 240 3.7% 15.9%;
     --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+  
+  /* Light theme: black-white palette */
+  .light {
+    /* Base (strict black & white) */
+    --background: 0 0% 100%; /* white */
+    --foreground: 0 0% 0%;   /* black */
+
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 0%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 0%;
+
+    --primary: 0 0% 0%;      /* black */
+    --primary-foreground: 0 0% 100%; /* white */
+
+    --secondary: 0 0% 100%;  /* white surfaces */
+    --secondary-foreground: 0 0% 0%;
+
+    --muted: 0 0% 100%;
+    --muted-foreground: 0 0% 0%;
+
+    --accent: 0 0% 0%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 0% 0%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 0 0% 0%;
+    --input: 0 0% 0%;
+    --ring: 0 0% 0%;
+
+    /* Extras (grayscale only) */
+    --primary-glow: 0 0% 0%;
+    --primary-soft: 0 0% 0%;
+    --chat-bubble-own: 0 0% 0%;     /* own bubble black */
+    --chat-bubble-other: 0 0% 100%; /* other bubble white */
+
+    /* Animated Gradients (monochrome) */
+    --gradient-bg: linear-gradient(135deg, hsl(0 0% 100%) 0%, hsl(0 0% 100%) 50%, hsl(0 0% 100%) 100%);
+    --gradient-primary: linear-gradient(135deg, hsl(0 0% 0%) 0%, hsl(0 0% 0%) 50%, hsl(0 0% 0%) 100%);
+    --gradient-romantic: radial-gradient(ellipse at center, hsl(0 0% 0% / 0.08) 0%, hsl(0 0% 0% / 0.04) 50%, transparent 100%);
+    --gradient-wave: linear-gradient(45deg, hsl(0 0% 0% / 0.08) 0%, hsl(0 0% 0% / 0.12) 25%, hsl(0 0% 0% / 0.08) 50%, hsl(0 0% 0% / 0.12) 75%, hsl(0 0% 0% / 0.08) 100%);
+
+    /* Shadows (monochrome) */
+    --shadow-glow: 0 0 24px hsl(0 0% 0% / 0.25);
+    --shadow-soft: 0 0 120px hsl(0 0% 0% / 0.12);
+    --shadow-particle: 0 0 20px hsl(0 0% 0% / 0.5);
+
+    /* Sidebar (monochrome) */
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 0 0% 0%;
+    --sidebar-primary: 0 0% 0%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 0 0% 100%;
+    --sidebar-accent-foreground: 0 0% 0%;
+    --sidebar-border: 0 0% 0%;
+    --sidebar-ring: 0 0% 0%;
   }
 }
 
@@ -174,6 +233,16 @@ All colors MUST be HSL.
     animation: gradient-shift 3s ease-in-out infinite;
   }
 
+  /* Light theme brand overrides: no purple */
+  .light .site-brand,
+  .light .site-brand--header {
+    background-image: none;
+    -webkit-background-clip: initial;
+    background-clip: initial;
+    color: black;
+    animation: none;
+  }
+
   /* Cozy compact design styles */
   .cozy-container {
     background: linear-gradient(135deg, 
@@ -183,9 +252,9 @@ All colors MUST be HSL.
     backdrop-filter: blur(20px);
     border: 1px solid hsl(var(--border) / 0.3);
     box-shadow: 
-      0 8px 32px hsl(var(--primary) / 0.1),
-      0 0 0 1px hsl(var(--primary) / 0.05),
-      inset 0 1px 0 hsl(var(--primary) / 0.1);
+      0 8px 32px hsl(var(--primary) / 0.06),
+      0 0 0 1px hsl(var(--primary) / 0.03),
+      inset 0 1px 0 hsl(var(--primary) / 0.06);
   }
 
   .cozy-toggle {
@@ -208,6 +277,7 @@ All colors MUST be HSL.
     box-shadow: 
       0 2px 8px hsl(var(--primary) / 0.3),
       0 0 0 1px hsl(var(--primary) / 0.2);
+    color: hsl(var(--primary-foreground));
   }
 
   .cozy-button {
@@ -216,16 +286,16 @@ All colors MUST be HSL.
       hsl(var(--primary) / 0.9) 50%,
       hsl(var(--primary)) 100%);
     box-shadow: 
-      0 4px 16px hsl(var(--primary) / 0.3),
-      0 0 0 1px hsl(var(--primary) / 0.1);
+      0 4px 16px hsl(var(--primary) / 0.22),
+      0 0 0 1px hsl(var(--primary) / 0.08);
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   .cozy-button:hover:not(:disabled) {
     transform: translateY(-2px);
     box-shadow: 
-      0 8px 24px hsl(var(--primary) / 0.4),
-      0 0 0 1px hsl(var(--primary) / 0.2);
+      0 8px 24px hsl(var(--primary) / 0.3),
+      0 0 0 1px hsl(var(--primary) / 0.15);
   }
 
   .cozy-button:active:not(:disabled) {
@@ -236,13 +306,13 @@ All colors MUST be HSL.
   @keyframes subtle-glow {
     0%, 100% { 
       box-shadow: 
-        0 8px 32px hsl(var(--primary) / 0.1),
-        0 0 0 1px hsl(var(--primary) / 0.05);
+        0 8px 32px hsl(var(--primary) / 0.06),
+        0 0 0 1px hsl(var(--primary) / 0.03);
     }
     50% { 
       box-shadow: 
-        0 8px 32px hsl(var(--primary) / 0.15),
-        0 0 0 1px hsl(var(--primary) / 0.1);
+        0 8px 32px hsl(var(--primary) / 0.09),
+        0 0 0 1px hsl(var(--primary) / 0.06);
     }
   }
 

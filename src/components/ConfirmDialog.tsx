@@ -39,7 +39,7 @@ const ConfirmDialog = ({
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel className="bg-secondary text-secondary-foreground hover:bg-secondary/80">
+          <AlertDialogCancel className="bg-secondary text-secondary-foreground hover:bg-accent hover:text-accent-foreground">
             Отмена
           </AlertDialogCancel>
           <AlertDialogAction

@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 import { ArrowLeft, Send, SkipForward, X, Users, Heart, Paperclip, Smile, Settings, MessageSquare } from "lucide-react";
+import { io, Socket } from "socket.io-client";
 import { toast } from "@/hooks/use-toast";
 import ChatBubble from "@/components/ChatBubble";
 import ConfirmDialog from "@/components/ConfirmDialog";
@@ -35,7 +36,12 @@ const clearPartnerInfo = () => {
   localStorage.removeItem(LOCAL_PARTNER_KEY);
 };
 
-const DialogContentNoClose = React.forwardRef(
+type DialogContentNoCloseProps = React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content> & {
+  className?: string;
+  children?: React.ReactNode;
+};
+
+const DialogContentNoClose = React.forwardRef<HTMLDivElement, DialogContentNoCloseProps>(
   function DialogContentNoClose({ className, children, ...props }, ref) {
     return (
       <DialogPortal>
@@ -57,6 +63,8 @@ const DialogContentNoClose = React.forwardRef(
 const Chat = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const initialTheme = (searchParams.get('theme') || '').toLowerCase();
+  const [isLightTheme, setIsLightTheme] = useState(initialTheme === 'light');
   const ageCategory = searchParams.get('age') || '';
   const genderPreference = searchParams.get('gender') || '';
   const chatType = searchParams.get('type') || '';
@@ -69,17 +77,56 @@ const Chat = () => {
   const [isSearching, setIsSearching] = useState(true);
   const [partnerFound, setPartnerFound] = useState(false);
   const [isEnded, setIsEnded] = useState(false);
+  const socketRef = useRef<Socket | null>(null);
   const [searchCancelled, setSearchCancelled] = useState(false); // Новый флаг
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [reportOpen, setReportOpen] = useState(false);
   const [reportReason, setReportReason] = useState('');
   const [reportComment, setReportComment] = useState('');
   const [reportSent, setReportSent] = useState(false);
+  const sendTimestampsRef = useRef<number[]>([]);
 
   // Activity/visibility tracking
   const isInactive = useUserActivity(30000);
   const [isHidden, setIsHidden] = useState(document.visibilityState === 'hidden');
   const hideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    // Apply theme class based on query param or stored settings
+    const applyThemeClass = (light: boolean) => {
+      const root = document.documentElement;
+      if (light) {
+        root.classList.add('light');
+      } else {
+        root.classList.remove('light');
+      }
+    };
+
+    // If no explicit theme in URL, try localStorage settings
+    if (!initialTheme) {
+      try {
+        const raw = localStorage.getItem('anon-chat-settings');
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (parsed && parsed.colorScheme) {
+            const light = String(parsed.colorScheme).toLowerCase() === 'light';
+            setIsLightTheme(light);
+            applyThemeClass(light);
+            return;
+          }
+        }
+      } catch {}
+    }
+    applyThemeClass(initialTheme === 'light');
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    // Keep document class synced if state changes for any reason
+    const root = document.documentElement;
+    if (isLightTheme) root.classList.add('light');
+    else root.classList.remove('light');
+  }, [isLightTheme]);
 
   useEffect(() => {
     const onVisibility = () => {
@@ -106,31 +153,42 @@ const Chat = () => {
     };
   }, [isConnected, isEnded]);
 
-  // Симуляция подключения к собеседнику
+  // Подключение к серверу-посреднику Socket.IO
   useEffect(() => {
     if (!ageCategory || !genderPreference) {
       navigate('/');
       return;
     }
-    if (searchCancelled) return; // Если отменено, не запускать поиск
+    if (searchCancelled) return;
 
-    // Симуляция поиска собеседника
-    const searchTimer = setTimeout(() => {
+    const url = (import.meta as any).env?.VITE_WS_URL || "http://localhost:3001";
+    const socket = io(url, { withCredentials: false, transports: ["websocket"] });
+    socketRef.current = socket;
+
+    socket.on("connect", () => {
+      setIsConnected(true);
+      socket.emit("find_partner", { age: ageCategory, gender: genderPreference });
+    });
+
+    socket.on("matched", () => {
       setIsSearching(false);
       setPartnerFound(true);
-      setIsConnected(true);
-      toast({
-        title: "Собеседник найден!",
-        description: "Вы подключены к анонимному чату",
-      });
+      toast({ title: "Собеседник найден!", description: "Вы подключены к анонимному чату" });
       playSound(CHAT_START_SOUND);
-      // Добавляем приветственное сообщение от системы
-      setTimeout(() => {
-        addMessage("Привет! Как дела?", false);
-      }, 1000);
-    }, Math.random() * 3000 + 1000); // 1-4 секунды
+    });
 
-    return () => clearTimeout(searchTimer);
+    socket.on("message", (payload: { text: string; ts: number; }) => {
+      setMessages(prev => [...prev, { id: String(payload.ts), text: payload.text, isOwn: false, timestamp: payload.ts }]);
+    });
+
+    socket.on("end", () => {
+      handleEndChat();
+    });
+
+    return () => {
+      socket.disconnect();
+      socketRef.current = null;
+    };
   }, [ageCategory, genderPreference, navigate, searchCancelled]);
 
   const addMessage = (text: string, isOwn: boolean) => {
@@ -145,6 +203,18 @@ const Chat = () => {
 
   const sendMessage = () => {
     if (!newMessage.trim() || !isConnected) return;
+    // Rate limiting: max 5 messages per 10 seconds
+    const now = Date.now();
+    sendTimestampsRef.current = sendTimestampsRef.current.filter(t => now - t < 10000);
+    if (sendTimestampsRef.current.length >= 5) {
+      toast({
+        variant: "destructive",
+        title: "Слишком много сообщений",
+        description: "Подождите несколько секунд перед отправкой новых сообщений",
+      });
+      return;
+    }
+
     // Простая модерация
     const bannedWords = ['спам', 'реклама'];
     const hasBannedWord = bannedWords.some(word => 
@@ -158,21 +228,24 @@ const Chat = () => {
       });
       return;
     }
+    // PII/contacts moderation: emails, phones, links
+    const emailRe = /\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/i;
+    const phoneRe = /(\+?\d[\d\s\-()]{7,})/;
+    const urlRe = /(https?:\/\/|www\.)\S+/i;
+    if (emailRe.test(newMessage) || phoneRe.test(newMessage) || urlRe.test(newMessage)) {
+      toast({
+        variant: "destructive",
+        title: "Контакты запрещены",
+        description: "Не делитесь телефонами, email или ссылками в анонимном чате",
+      });
+      return;
+    }
+    sendTimestampsRef.current.push(now);
     addMessage(newMessage, true);
+    // Отправляем на сервер
+    socketRef.current?.emit("message", { text: newMessage, ts: Date.now() });
     setNewMessage('');
-    // Симуляция ответа собесе��ника
-    setTimeout(() => {
-      const responses = [
-        "Интересно!",
-        "А что думаешь об этом?", 
-        "Согласен",
-        "Расскажи подробнее",
-        "Понятно",
-        "А у тебя как?"
-      ];
-      const randomResponse = responses[Math.floor(Math.random() * responses.length)];
-      addMessage(randomResponse, false);
-    }, Math.random() * 2000 + 500);
+    // Убрана симуляция ответов: сообщения приходят только от собеседника через сервер
   };
 
   const handleEndChat = () => {
@@ -181,6 +254,7 @@ const Chat = () => {
     setIsConnected(false);
     setPartnerFound(false);
     setIsSearching(false);
+    socketRef.current?.emit("end");
   };
 
   const handleNextChat = () => {
@@ -189,6 +263,7 @@ const Chat = () => {
     setIsConnected(false);
     setPartnerFound(false);
     setIsSearching(true);
+    socketRef.current?.emit("next");
     toast({
       title: "Поиск нового собеседника...",
       description: "Подождите, мы ищем вам нового собеседника",
@@ -210,7 +285,7 @@ const Chat = () => {
   };
 
   const handleChangePartner = () => {
-    clearPartnerInfo();
+    // Сохраняем последний выбор, просто возвращаемся к параметрам
     navigate("/");
   };
 
@@ -263,16 +338,16 @@ const Chat = () => {
   // Функция для отправки жалобы
   const handleSendReport = () => {
     if (!reportReason || (reportReason === 'other' && !reportComment.trim())) return;
-    
-    // Отправляем жалобу (здесь можно добавить API вызов)
-    console.log('Жалоба отправлена:', { reason: reportReason, comment: reportComment });
-    
+    const base = (import.meta as any).env?.VITE_API_URL || (import.meta as any).env?.VITE_WS_URL || 'http://localhost:3001';
+    try {
+      fetch(`${base}/api/report`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ reason: reportReason, comment: reportComment, messages })
+      }).catch(() => {});
+    } catch {}
     setReportSent(true);
-    
-    // Автоматически закрываем диалог через 2 секунды
-    setTimeout(() => {
-      closeReportDialog();
-    }, 2000);
+    setTimeout(() => { closeReportDialog(); }, 2000);
   };
 
   // Disable page scroll while in chat; only chat area scrolls
@@ -331,10 +406,11 @@ const Chat = () => {
         <span className="site-brand site-brand--header logo-gradient-animated pointer-events-auto text-3xl font-bold select-none">Bezlico</span>
       </div>
       <div className="relative flex flex-col w-full h-full z-10">
-        {/* Header */}
+        {/* Header (hidden while searching) */}
+        {!isSearching && (
         <div className="bg-transparent border-b-0 p-4 animate-fade-in">
           <div className="max-w-3xl mx-auto relative">
-            <div className="rounded-3xl border border-[rgba(120,110,255,0.18)] bg-background/70 px-3 flex items-center justify-between flex-nowrap gap-2 sm:gap-3 min-h-[44px] h-12">
+            <div className="rounded-3xl border border-border/30 bg-background/70 px-3 flex items-center justify-between flex-nowrap gap-2 sm:gap-3 min-h-[44px] h-12 shadow-soft">
               <div className="flex items-center flex-shrink min-w-0 h-full">
                 <div className="flex items-center flex-wrap gap-x-2 sm:gap-x-3 gap-y-1 text-xs text-muted-foreground h-full">
                   {isEnded ? (
@@ -370,7 +446,7 @@ const Chat = () => {
                       <Button
                         variant="outline"
                         size="sm"
-                        className="text-foreground hover:text-foreground hover:bg-secondary/50 transition-all h-9 px-4 font-medium"
+                        className="text-foreground hover:text-foreground hover:bg-primary/10 hover:border-primary/40 hover:shadow-glow-subtle transition-all h-9 px-4 font-medium"
                       >
                         <SkipForward className="w-4 h-4 mr-2" />
                         Следующий чат
@@ -402,7 +478,7 @@ const Chat = () => {
                     <Button
                       variant="outline"
                       size="sm"
-                      className="text-sm h-9 px-4 flex items-center gap-2 hover:bg-secondary/50 hover:text-foreground transition-all"
+                      className="text-sm h-9 px-4 flex items-center gap-2 hover:bg-primary/10 hover:border-primary/40 hover:text-foreground hover:shadow-glow-subtle transition-all"
                     >
                       <Settings className="w-4 h-4 mr-1" />
                       Параметры поиска
@@ -413,10 +489,13 @@ const Chat = () => {
             </div>
           </div>
         </div>
+        )}
         {/* Messages */}
         <div className="flex-1 px-4 pt-2 pb-12 sm:pb-16 min-h-0">
-          <div className="relative max-w-3xl mx-auto h-full">
-            <div className="absolute top-0 left-0 right-0 h-6 bg-gradient-to-b from-background/80 to-transparent z-10 pointer-events-none" />
+          <div className="relative max-w-3xl mx-auto h-full rounded-3xl overflow-hidden">
+            {!isSearching && (
+              <div className="absolute top-0 left-0 right-0 h-6 bg-gradient-to-b from-background/80 to-transparent z-10 pointer-events-none rounded-t-3xl" />
+            )}
             {/* Status badge inside chat container (stays visible while messages scroll) */}
             {partnerFound && isConnected && !isSearching && !isEnded && (
               <div className="absolute top-5 left-4 z-20 pointer-events-auto">
@@ -432,6 +511,9 @@ const Chat = () => {
                   <div className="animate-pulse">
                     <div className="w-12 h-12 sm:w-14 sm:h-14 bg-gradient-primary rounded-full mx-auto mb-4 animate-pulse-glow shadow-glow-subtle"></div>
                     <p className="text-foreground text-lg sm:text-xl font-semibold">Поиск собеседника...</p>
+                    <div className="mt-3 text-xs text-muted-foreground max-w-md mx-auto">
+                      Если собеседник нарушает правила — используйте кнопку «Пожаловаться».
+                    </div>
                     <div className="mt-4 flex justify-center gap-4 flex-wrap">
                       <div className="flex items-center space-x-2 bg-primary/10 border border-primary/20 rounded-full px-4 py-2 min-w-fit">
                         <Heart className="w-3 h-3 text-primary flex-shrink-0" />
@@ -446,13 +528,12 @@ const Chat = () => {
                     </div>
                     <div className="mt-6 flex justify-center">
                       <Button variant="outline" onClick={() => {
-                        localStorage.removeItem("anon-partner-info"); // Очищаем данные о партнёре
                         setIsSearching(false);
                         setIsConnected(false);
                         setPartnerFound(false);
-                        setSearchCancelled(true); // Устанавливаем флаг отмены
+                        setSearchCancelled(true);
                         navigate('/');
-                      }} className="h-10 px-5 text-sm rounded-lg transition-colors hover:bg-destructive/80 hover:text-destructive-foreground">
+                      }} className="h-12 px-6 text-base rounded-xl transition-colors hover:bg-destructive/80 hover:text-destructive-foreground">
                         Отменить
                       </Button>
                     </div>
@@ -461,7 +542,7 @@ const Chat = () => {
               </div>
             ) : (
               <div className="h-full flex flex-col">
-                <div className="rounded-3xl border border-[rgba(120,110,255,0.18)] bg-background/70 shadow-[0_4px_32px_0_rgba(80,80,120,0.10)] px-2 sm:px-6 pl-12 py-4 min-h-[320px] flex flex-col transition-all duration-200 h-full overflow-y-auto overscroll-contain pr-2 space-y-1 custom-scrollbar" style={{ scrollbarGutter: 'stable' }}>
+                <div className="rounded-3xl border border-border/30 bg-background/70 shadow-soft px-2 sm:px-6 pl-12 py-4 min-h-[320px] flex flex-col transition-all duration-200 h-full overflow-y-auto overscroll-contain pr-2 space-y-1 custom-scrollbar" style={{ scrollbarGutter: 'stable' }}>
                   {messages.length > 0 && (
                     <>
                       {messages.map((message, index) => {
@@ -594,7 +675,7 @@ const Chat = () => {
           <div className="bg-transparent border-t-0 p-4 pt-2 animate-slide-up mt-auto">
             <div className="flex items-end gap-3 max-w-3xl mx-auto flex-wrap">
               <div className="flex-1 min-w-[220px]">
-                <div className={`relative rounded-2xl transition-all duration-200 shadow-[0_2px_16px_0_rgba(80,80,120,0.10)] border border-[rgba(120,110,255,0.25)] bg-background/80 focus-within:border-[rgba(120,110,255,0.7)] focus-within:shadow-[0_0_0_3px_rgba(120,110,255,0.15)] ${isEnded ? 'opacity-60' : 'hover:brightness-105 hover:shadow-[0_2px_24px_0_rgba(120,110,255,0.10)]'}`}>
+                <div className={`relative rounded-2xl transition-all duration-200 shadow-soft border border-border/40 bg-background/80 focus-within:ring-2 focus-within:ring-primary/70 focus-within:ring-offset-0 ${isEnded ? 'opacity-60' : 'hover:brightness-[1.03] hover:shadow-none'}`}>
                   <Textarea
                     ref={textareaRef}
                     value={newMessage}
@@ -611,7 +692,7 @@ const Chat = () => {
                     <div className="flex items-center justify-center w-10 h-10">
                       <Popover open={emojiOpen} onOpenChange={setEmojiOpen}>
                         <PopoverTrigger asChild>
-                          <Button variant="outline" size="icon" className="bg-background/60 border-border/50" disabled={isEnded || !isConnected}>
+                          <Button variant="outline" size="icon" className="bg-background/60 border-border/50 hover:bg-primary/10 hover:border-primary/30" disabled={isEnded || !isConnected}>
                             <Smile className="h-4 w-4" />
                           </Button>
                         </PopoverTrigger>
@@ -637,7 +718,7 @@ const Chat = () => {
                         onClick={sendMessage}
                         disabled={isEnded || !isConnected || !newMessage.trim()}
                         size="icon"
-                        className=""
+                        className="bg-primary/90 hover:bg-primary text-primary-foreground"
                       >
                         <Send className="h-4 w-4" />
                       </Button>

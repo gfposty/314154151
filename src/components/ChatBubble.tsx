@@ -66,7 +66,7 @@ const ChatBubble = ({ message, audioUrl, audioDuration, isOwn, timestamp }: Chat
   return (
     <div className={cn("flex w-full mb-4", isOwn ? "justify-end" : "justify-start")}>
       <div className="flex items-center gap-2">
-        {isOwn && <span className="text-xs text-white/70">{formatTime(timestamp)}</span>}
+        {isOwn && <span className="text-xs text-muted-foreground">{formatTime(timestamp)}</span>}
         <div
           className={cn(
             "max-w-xs lg:max-w-md px-3 py-2 rounded-2xl relative group transition-all duration-200 hover:scale-[1.02]",
@@ -119,7 +119,7 @@ const ChatBubble = ({ message, audioUrl, audioDuration, isOwn, timestamp }: Chat
           )}
         </div>
         {!isOwn && <span className="text-xs text-muted-foreground">{formatTime(timestamp)}</span>}
-        {isOwn && <span className="text-[10px] leading-none px-2 py-1 rounded-full border border-white/40 text-white/80 bg-white/5">Вы</span>}
+        {isOwn && <span className="text-[10px] leading-none px-2 py-1 rounded-full border border-primary text-primary-foreground bg-primary">Вы</span>}
       </div>
     </div>
   );

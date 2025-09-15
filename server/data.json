@@ -1,0 +1,35 @@
+{
+  "reports": [
+    {
+      "id": "1757962471552",
+      "createdAt": 1757962471552,
+      "ip": "::1",
+      "reason": "nsfw",
+      "comment": "",
+      "messages": []
+    },
+    {
+      "id": "1757962485938",
+      "createdAt": 1757962485938,
+      "ip": "::1",
+      "reason": "abuse",
+      "comment": "",
+      "messages": []
+    }
+  ],
+  "sanctions": [
+    {
+      "history": [
+        {
+          "at": 1757962490093,
+          "type": "15m",
+          "until": 1757963390093
+        }
+      ],
+      "ip": "::1",
+      "status": "mute",
+      "banType": "15m",
+      "expiresAt": 1757963390093
+    }
+  ]
+}

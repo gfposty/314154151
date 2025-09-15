@@ -18,3 +18,13 @@ export interface UserActivity {
   lastActive: number;
   isInactive: boolean;
 }
+
+// Temporary declaration to satisfy TypeScript before packages are installed
+// (socket.io-client includes its own types; this avoids editor error until install)
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+declare module 'socket.io-client' {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  export const io: any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  export type Socket = any;
+}

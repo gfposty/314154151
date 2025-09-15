@@ -7,7 +7,7 @@ const fs = require('fs');
 const path = require('path');
 
 const app = express();
-app.use(cors({ origin: '*', methods: ['GET','POST','OPTIONS'], allowedHeaders: ['Content-Type','x-admin-key'] }));
+app.use(cors({ origin: '*', methods: ['GET','POST','HEAD','OPTIONS'], allowedHeaders: ['Content-Type','x-admin-key'] }));
 app.use(express.json());
 
 const server = http.createServer(app);
@@ -222,6 +222,10 @@ app.get('/api/sanction/me', (req, res) => {
   if (!isSanctionActive(s)) return res.json({ active: false });
   return res.json({ active: true, status: s.status, banType: s.banType, expiresAt: s.expiresAt });
 });
+
+// Health & root
+app.get('/healthz', (_req, res) => res.status(200).send('ok'));
+app.get('/', (_req, res) => res.status(200).send('OK'));
 
 const PORT = process.env.PORT || 3001;
 server.listen(PORT, () => {

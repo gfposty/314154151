@@ -3,11 +3,14 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
-import { ArrowLeft, Send, SkipForward, X, Users, Heart, Paperclip, Smile, Settings } from "lucide-react";
+import { ArrowLeft, Send, SkipForward, X, Users, Heart, Paperclip, Smile, Settings, MessageSquare } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import ChatBubble from "@/components/ChatBubble";
 import ConfirmDialog from "@/components/ConfirmDialog";
 import { useUserActivity } from "@/hooks/useUserActivity";
+import { Dialog, DialogPortal, DialogOverlay, DialogTrigger, DialogHeader, DialogFooter, DialogTitle } from "@/components/ui/dialog";
+import * as DialogPrimitive from "@radix-ui/react-dialog";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 interface Message {
   id: string;
@@ -32,11 +35,31 @@ const clearPartnerInfo = () => {
   localStorage.removeItem(LOCAL_PARTNER_KEY);
 };
 
+const DialogContentNoClose = React.forwardRef(
+  function DialogContentNoClose({ className, children, ...props }, ref) {
+    return (
+      <DialogPortal>
+        <DialogOverlay />
+        <DialogPrimitive.Content
+          ref={ref}
+          className={
+            "fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background p-6 shadow-lg duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%] sm:rounded-lg " + (className || "")
+          }
+          {...props}
+        >
+          {children}
+        </DialogPrimitive.Content>
+      </DialogPortal>
+    );
+  }
+);
+
 const Chat = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const ageCategory = searchParams.get('age') || '';
   const genderPreference = searchParams.get('gender') || '';
+  const chatType = searchParams.get('type') || '';
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
@@ -48,6 +71,10 @@ const Chat = () => {
   const [isEnded, setIsEnded] = useState(false);
   const [searchCancelled, setSearchCancelled] = useState(false); // Новый флаг
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [reportOpen, setReportOpen] = useState(false);
+  const [reportReason, setReportReason] = useState('');
+  const [reportComment, setReportComment] = useState('');
+  const [reportSent, setReportSent] = useState(false);
 
   // Activity/visibility tracking
   const isInactive = useUserActivity(30000);
@@ -214,6 +241,40 @@ const Chat = () => {
     });
   };
 
+  // Функция для открытия диалога жалобы
+  const openReportDialog = () => {
+    setReportSent(false);
+    setReportReason('');
+    setReportComment('');
+    setReportOpen(true);
+  };
+
+  // Функция для закрытия диалога жалобы
+  const closeReportDialog = () => {
+    setReportOpen(false);
+    // Сбрасываем состояние после закрытия диалога
+    setTimeout(() => {
+      setReportSent(false);
+      setReportReason('');
+      setReportComment('');
+    }, 300);
+  };
+
+  // Функция для отправки жалобы
+  const handleSendReport = () => {
+    if (!reportReason || (reportReason === 'other' && !reportComment.trim())) return;
+    
+    // Отправляем жалобу (здесь можно добавить API вызов)
+    console.log('Жалоба отправлена:', { reason: reportReason, comment: reportComment });
+    
+    setReportSent(true);
+    
+    // Автоматически закрываем диалог через 2 секунды
+    setTimeout(() => {
+      closeReportDialog();
+    }, 2000);
+  };
+
   // Disable page scroll while in chat; only chat area scrolls
   useEffect(() => {
     const htmlEl = document.documentElement;
@@ -245,6 +306,15 @@ const Chat = () => {
     }
   };
 
+  const getChatTypeText = (type: string) => {
+    switch (type) {
+      case 'chat': return 'Общение';
+      case 'flirt': return 'Флирт 18+';
+      case 'roleplay': return 'Ролка';
+      default: return type;
+    }
+  };
+
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
@@ -266,22 +336,23 @@ const Chat = () => {
           <div className="max-w-3xl mx-auto relative">
             <div className="rounded-3xl border border-[rgba(120,110,255,0.18)] bg-background/70 px-3 flex items-center justify-between flex-nowrap gap-2 sm:gap-3 min-h-[44px] h-12">
               <div className="flex items-center flex-shrink min-w-0 h-full">
-                <div className="flex items-center flex-wrap gap-x-3 gap-y-1 text-xs text-muted-foreground h-full">
+                <div className="flex items-center flex-wrap gap-x-2 sm:gap-x-3 gap-y-1 text-xs text-muted-foreground h-full">
                   {isEnded ? (
                     <span className="text-base font-medium text-center w-full">Чат завершён</span>
                   ) : isSearching ? (
                     <span className="animate-pulse text-base font-medium text-center w-full">Поиск собеседника...</span>
                   ) : partnerFound ? (
-                    <div className="flex items-center gap-x-2">
-                      <div className="flex items-center space-x-1">
-                        <Users className="w-4 h-4" />
-                        <span className="truncate max-w-[40vw] sm:max-w-none text-sm font-medium">{ageCategory}</span>
+                    <div className="flex items-center gap-x-1">
+                      <div className="flex items-center space-x-1 bg-primary/10 border border-primary/20 rounded-full px-2 py-1 min-w-fit">
+                        <Heart className="w-3 h-3 text-primary flex-shrink-0" />
+                        <span className="text-xs font-medium text-foreground whitespace-nowrap">{getGenderText(genderPreference)}</span>
                       </div>
-                      <span className="mx-1 text-[10px] text-muted-foreground">•</span>
-                      <div className="flex items-center space-x-1">
-                        <Heart className="w-4 h-4" />
-                        <span className="truncate max-w-[40vw] sm:max-w-none text-sm font-medium">{getGenderText(genderPreference)}</span>
-                      </div>
+                      {chatType && (
+                        <div className="flex items-center space-x-1 bg-accent/10 border border-accent/20 rounded-full px-2 py-1 min-w-fit">
+                          <MessageSquare className="w-3 h-3 text-accent flex-shrink-0" />
+                          <span className="text-xs font-medium text-foreground whitespace-nowrap">{getChatTypeText(chatType)}</span>
+                        </div>
+                      )}
                     </div>
                   ) : (
                     'Не подключен'
@@ -289,7 +360,7 @@ const Chat = () => {
                 </div>
               </div>
               <div className="flex items-center gap-2 sm:gap-3 ml-auto h-full">
-                {isConnected && (
+                {!isEnded && isConnected && (
                   <>
                     <ConfirmDialog
                       title="Найти нового собеседника?"
@@ -361,15 +432,17 @@ const Chat = () => {
                   <div className="animate-pulse">
                     <div className="w-12 h-12 sm:w-14 sm:h-14 bg-gradient-primary rounded-full mx-auto mb-4 animate-pulse-glow shadow-glow-subtle"></div>
                     <p className="text-foreground text-lg sm:text-xl font-semibold">Поиск собеседника...</p>
-                    <div className="mt-3 space-y-1.5 text-xs sm:text-sm text-muted-foreground">
-                      <div className="flex items-center justify-center space-x-1">
-                        <Users className="w-3 h-3 sm:w-4 sm:h-4" />
-                        <span>Возраст: {ageCategory}</span>
+                    <div className="mt-4 flex justify-center gap-4 flex-wrap">
+                      <div className="flex items-center space-x-2 bg-primary/10 border border-primary/20 rounded-full px-4 py-2 min-w-fit">
+                        <Heart className="w-3 h-3 text-primary flex-shrink-0" />
+                        <span className="text-sm font-medium text-foreground whitespace-nowrap">{getGenderText(genderPreference)}</span>
                       </div>
-                      <div className="flex items-center justify-center space-x-1">
-                        <Heart className="w-3 h-3 sm:w-4 sm:h-4" />
-                        <span>Пол: {getGenderText(genderPreference)}</span>
-                      </div>
+                      {chatType && (
+                        <div className="flex items-center space-x-2 bg-accent/10 border border-accent/20 rounded-full px-4 py-2 min-w-fit">
+                          <MessageSquare className="w-3 h-3 text-accent flex-shrink-0" />
+                          <span className="text-sm font-medium text-foreground whitespace-nowrap">{getChatTypeText(chatType)}</span>
+                        </div>
+                      )}
                     </div>
                     <div className="mt-6 flex justify-center">
                       <Button variant="outline" onClick={() => {
@@ -428,7 +501,86 @@ const Chat = () => {
             <div className="max-w-3xl w-full px-4">
               <div className="rounded-2xl bg-transparent px-4 py-5 text-center shadow-none border-none">
                 <div className="text-2xl font-bold text-foreground mb-1">Чат завершён</div>
-                <a href="#" className="text-muted-foreground text-sm underline hover:text-primary mb-5 inline-block">Пожаловаться на собеседника</a>
+        <Dialog open={reportOpen} onOpenChange={(open) => {
+          if (!open) {
+            closeReportDialog();
+          }
+        }}>
+                  <DialogTrigger asChild>
+                    <a
+                      href="#"
+                      className="text-muted-foreground text-sm underline hover:text-primary mb-5 inline-block"
+                      onClick={e => {
+                        e.preventDefault();
+                        openReportDialog();
+                      }}
+                    >
+                      Пожаловаться на собеседника
+                    </a>
+                  </DialogTrigger>
+                  <DialogContentNoClose className="max-w-md">
+                    {reportSent ? (
+                      <div className="py-8 text-center">
+                        <div className="text-lg font-semibold mb-2">Спасибо!</div>
+                        <div className="text-sm text-muted-foreground">Ваша жалоба отправлена на модерацию.</div>
+                      </div>
+                    ) : (
+                      <>
+                        <button 
+                          type="button" 
+                          className="absolute right-4 top-4 opacity-70 hover:opacity-100 focus:outline-none disabled:pointer-events-none" 
+                          onClick={closeReportDialog}
+                        >
+                          <span className="sr-only">Close</span>
+                          <svg className="h-4 w-4" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 4L4 12M4 4l8 8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                        </button>
+                        <DialogHeader>
+                          <DialogTitle>Пожаловаться на собеседника</DialogTitle>
+                        </DialogHeader>
+                        <div className="mt-2 mb-4 text-sm">Пожалуйста, выберите причину жалобы:</div>
+                        <RadioGroup value={reportReason} onValueChange={setReportReason} className="space-y-2">
+                          <div className="flex items-center space-x-2">
+                            <RadioGroupItem value="abuse" id="abuse" />
+                            <label htmlFor="abuse" className="text-sm">Оскорбления/грубость</label>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <RadioGroupItem value="spam" id="spam" />
+                            <label htmlFor="spam" className="text-sm">Спам или реклама</label>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <RadioGroupItem value="nsfw" id="nsfw" />
+                            <label htmlFor="nsfw" className="text-sm">Непристойные материалы</label>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <RadioGroupItem value="harassment" id="harassment" />
+                            <label htmlFor="harassment" className="text-sm">Домогательства</label>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <RadioGroupItem value="other" id="other" />
+                            <label htmlFor="other" className="text-sm">Другое</label>
+                          </div>
+                        </RadioGroup>
+                        {reportReason === 'other' && (
+                          <div className="mt-3">
+                            <textarea
+                              className="w-full rounded-md border border-border/50 bg-background px-3 py-2 text-sm resize-none overflow-y-auto hide-scrollbar h-20 focus:outline-none focus:ring-2 focus:ring-primary"
+                              maxLength={300}
+                              placeholder="Опишите проблему..."
+                              value={reportComment}
+                              onChange={e => setReportComment(e.target.value)}
+                            />
+                            <div className="text-xs text-muted-foreground text-right mt-1">{reportComment.length}/300</div>
+                          </div>
+                        )}
+                        <DialogFooter className="mt-4">
+                          <Button onClick={handleSendReport} disabled={!reportReason || (reportReason === 'other' && !reportComment.trim())}>
+                            Отправить жалобу
+                          </Button>
+                        </DialogFooter>
+                      </>
+                    )}
+                  </DialogContentNoClose>
+                </Dialog>
                 <div className="flex flex-col sm:flex-row gap-3 justify-center">
                   <Button onClick={handleChangePartner} variant="outline" className="border-primary text-primary hover:bg-primary hover:text-white">Изменить параметры</Button>
                   <Button onClick={handleNextChat} className="bg-green-600 hover:bg-green-700 text-white">Начать новый чат</Button>

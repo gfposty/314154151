@@ -173,4 +173,97 @@ All colors MUST be HSL.
     vertical-align: middle;
     animation: gradient-shift 3s ease-in-out infinite;
   }
+
+  /* Cozy compact design styles */
+  .cozy-container {
+    background: linear-gradient(135deg, 
+      hsl(var(--card) / 0.8) 0%, 
+      hsl(var(--card) / 0.6) 50%, 
+      hsl(var(--card) / 0.8) 100%);
+    backdrop-filter: blur(20px);
+    border: 1px solid hsl(var(--border) / 0.3);
+    box-shadow: 
+      0 8px 32px hsl(var(--primary) / 0.1),
+      0 0 0 1px hsl(var(--primary) / 0.05),
+      inset 0 1px 0 hsl(var(--primary) / 0.1);
+  }
+
+  .cozy-toggle {
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 1px solid hsl(var(--border) / 0.4);
+    background: hsl(var(--card) / 0.3);
+  }
+
+  .cozy-toggle:hover {
+    background: hsl(var(--primary) / 0.1);
+    border-color: hsl(var(--primary) / 0.3);
+    transform: translateY(-1px);
+  }
+
+  .cozy-toggle[data-state="on"] {
+    background: linear-gradient(135deg, 
+      hsl(var(--primary)) 0%, 
+      hsl(var(--primary) / 0.9) 100%);
+    border-color: hsl(var(--primary));
+    box-shadow: 
+      0 2px 8px hsl(var(--primary) / 0.3),
+      0 0 0 1px hsl(var(--primary) / 0.2);
+  }
+
+  .cozy-button {
+    background: linear-gradient(135deg, 
+      hsl(var(--primary)) 0%, 
+      hsl(var(--primary) / 0.9) 50%,
+      hsl(var(--primary)) 100%);
+    box-shadow: 
+      0 4px 16px hsl(var(--primary) / 0.3),
+      0 0 0 1px hsl(var(--primary) / 0.1);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .cozy-button:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 
+      0 8px 24px hsl(var(--primary) / 0.4),
+      0 0 0 1px hsl(var(--primary) / 0.2);
+  }
+
+  .cozy-button:active:not(:disabled) {
+    transform: translateY(0);
+  }
+
+  /* Subtle glow animation */
+  @keyframes subtle-glow {
+    0%, 100% { 
+      box-shadow: 
+        0 8px 32px hsl(var(--primary) / 0.1),
+        0 0 0 1px hsl(var(--primary) / 0.05);
+    }
+    50% { 
+      box-shadow: 
+        0 8px 32px hsl(var(--primary) / 0.15),
+        0 0 0 1px hsl(var(--primary) / 0.1);
+    }
+  }
+
+  .cozy-container {
+    animation: subtle-glow 6s ease-in-out infinite;
+  }
+
+  /* Mobile optimizations */
+  @media (max-width: 640px) {
+    .cozy-container {
+      margin: 0 0.5rem;
+      padding: 1rem;
+    }
+    
+    .cozy-toggle {
+      min-height: 2rem;
+      font-size: 0.75rem;
+    }
+    
+    .cozy-button {
+      min-height: 3rem;
+    }
+  }
 }
